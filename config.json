@@ -1,0 +1,11 @@
+{
+  "database": {
+    "default": {
+      "host": "localhost",
+      "port": 16622,
+      "name": "mongoui",
+      "username": "",
+      "password": ""
+    }
+  }
+}

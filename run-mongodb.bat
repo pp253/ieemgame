@@ -1,0 +1,1 @@
+mongod --dbpath "./database" --port 16622
