@@ -1,3 +1,5 @@
-exports.game = require('./game')
-exports.deliver = require('./deliver')
-exports.order = require('./order')
+exports.Game = require('./game')
+exports.Deliver = require('./deliver')
+exports.Order = require('./order')
+exports.Event = require('./event')
+exports.Storage = require('./storage')

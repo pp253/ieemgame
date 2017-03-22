@@ -2,29 +2,30 @@ require('../index')
 
 const mongoose = require('mongoose')
 
-const OrderSchema = new mongoose.Schema(
+const EventSchema = new mongoose.Schema(
   {
     time: { type: Date, default: Date.now },
-    game_id: { type: String, require: true },
-    product: { type: String, require: true },
-    quantity: { type: Number, require: true },
-    unit_price: { type: Number, require: true },
-    buyer: { type: String, require: true },
-    seller: { type: String, require: true },
-    delivered: { type: Boolean, default: false }
+    game_id: { type: String },
+    name: { type: String, require: true },
+    trigger: { type: String }
   }
 )
 
-OrderSchema.statics = {
-  findByBuyer: function (buyer) {
-    return this.find({buyer: buyer})
+EventSchema.statics = {
+  newEvent: function (name, trigger, gameId) {
+    this.insertOne({
+      gameId: gameId,
+      name: name,
+      trigger: trigger
+    })
+    this.save()
   },
-  findBySeller: function (seller) {
-    return this.find({seller: seller})
+  findByTrigger: function (trigger) {
+    return this.find({trigger: trigger})
   },
-  findByBuyerAndSeller: function (buyer, seller) {
-    return this.find({buyer: buyer}).find({seller: seller})
+  findByGameId: function (gameId) {
+    return this.find({gameId: gameId})
   }
 }
 
-module.exports = mongoose.model('deliver', OrderSchema)
+module.exports = mongoose.model('Event', EventSchema)

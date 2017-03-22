@@ -27,4 +27,4 @@ GameSchema.statics = {
   }
 }
 
-module.exports = mongoose.model('game', GameSchema)
+module.exports = mongoose.model('Game', GameSchema)
