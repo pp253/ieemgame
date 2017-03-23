@@ -17,7 +17,7 @@ AccountSchema.statics = {
   findByGameId: function (gameId) {
     return this.find({game_id: gameId})
   },
-  findByTeam: function (gameId, team) {
+  findByGameIdAndTeam: function (gameId, team) {
     return this.find({gameId: gameId, team: team})
   },
   getMoney: function (gameId, team) {
@@ -25,13 +25,13 @@ AccountSchema.statics = {
       .sort({_id: 1}).limit(1).exec()
   },
   newRecord: function (props) {
-    this.insertOne({
+    let newRecord = new AccountSchema({
       game_id: props.gameId,
       cause: props.cause,
       team: props.team,
       money: props.money
     })
-    this.save((err) => {
+    newRecord.save((err) => {
       if (err) {
         debug.error(err)
       }
