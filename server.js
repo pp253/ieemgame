@@ -2,10 +2,9 @@ const express = require('express')
 const session = require('express-session')
 const helmet = require('helmet')
 const bodyParser = require('body-parser')
-const moment = require('moment')
-
 const game = require('./src/game')
 const debug = require('./src/lib/debug')
+const routes = require('./routes')
 
 debug.log('Server initialing ...')
 
@@ -35,7 +34,6 @@ app.set('title', '2017 工工營 啤酒遊戲')
 
 // Static
 app.use('/', express.static('public'))
-app.use('/test/', express.static('test'))
 
 // Route
 app.use(function (req, res, next) {
@@ -43,51 +41,13 @@ app.use(function (req, res, next) {
   next()
 })
 
-app.post('/gameapi/:method', function (req, res, next) {
+app.post('/gameapi/:method', routes.gameApiResponser)
 
-})
+app.get('/', routes.gameHome)
 
-// this should be removed after released.
-app.get('/text/:testing', function (req, res, next) {
-  switch (req.params.testing) {
-    case 'user':
-      res.render('test/user')
-      break
-    case 'init':
-      
-      break
-    default:
-      res.end('test')
-      break
-  }
-})
+app.post('/user/:method', routes.gameUser)
 
-app.get('/', function (req, res, next) {
-  res.end('Home')
-})
-
-app.post('/user/:method', function (req, res, next) {
-  switch (req.params.method) {
-    case 'login':
-      if (!req.body.username || !req.body.userpasswd) {
-        req.send(game.user.loginfailed())
-        return
-      }
-      game.login()
-  }
-})
-
-app.post('/game/:groupid', function (req, res, next) {
-  res.end('Game: ' + req.params.groupid + req.params.job)
-})
-
-app.post('/game/:groupid/:job', function (req, res, next) {
-  res.end('Game: ' + req.params.groupid + req.params.job)
-})
-
-app.post('/admin', function (req, res, next) {
-  res.end('Admin')
-})
+app.post('/admin', routes.gameAdmin)
 
 app.get('*', function (req, res, next) {
   res.status(404)

@@ -1,4 +1,5 @@
 const db = require('./db')
+/*
 const Deliver = require('./db/schema/deliver')
 
 let newDeliver = new Deliver()
@@ -12,3 +13,8 @@ Object.assign(newDeliver, {
   seller: 'xxx'
 })
 newDeliver.save()
+*/
+
+const account = require('./db/model/account')
+
+console.log(account.getMoney())

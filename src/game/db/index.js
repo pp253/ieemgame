@@ -16,3 +16,6 @@ new Promise((resolve, reject) => {
   debug.error('Failed to connect to MongoDB at ', `mongodb://${config.database.default.host}:${config.database.default.port}/ieemgame`)
   debug.error(err)
 })
+
+// http://mongoosejs.com/docs/promises.html
+mongoose.Promise = global.Promise
