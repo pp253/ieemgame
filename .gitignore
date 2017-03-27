@@ -2,6 +2,7 @@ database
 *.bat
 *.key
 *.csr
+config.json
 
 # Logs
 logs
