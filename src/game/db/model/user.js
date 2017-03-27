@@ -9,7 +9,8 @@ const UserSchema = new mongoose.Schema(
     session_uuid: { type: String, require: true },
     group: { type: String, require: true },
     team: { type: Number, default: -1 },
-    job: { type: String }
+    job: { type: String },
+    name: { type: String }
   }
 )
 

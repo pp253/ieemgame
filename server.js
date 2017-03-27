@@ -2,9 +2,12 @@ const express = require('express')
 const session = require('express-session')
 const helmet = require('helmet')
 const bodyParser = require('body-parser')
-const game = require('./src/game')
+const https = require('https')
+const fs = require('fs')
 const debug = require('./src/lib/debug')
 const routes = require('./routes')
+
+const game = require('./src/game')
 
 debug.log('Server initialing ...')
 
@@ -29,7 +32,7 @@ app.use(session({
 app.use(helmet())
 
 // Setting
-app.set('port', process.env.PORT || 80)
+app.set('port', process.env.PORT || 443)
 app.set('title', '2017 工工營 啤酒遊戲')
 
 // Static
@@ -55,7 +58,12 @@ app.get('*', function (req, res, next) {
 })
 
 // Listening
-app.listen(app.get('port'), function () {
+const options = {
+  key: fs.readFileSync('./server.key'),
+  cert: fs.readFileSync('./server.crt')
+}
+
+https.createServer(options, app).listen(app.get('port'), function () {
   debug.log('Stating listening ...')
 })
 
