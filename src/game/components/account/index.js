@@ -1,4 +1,4 @@
-.const AccountModel = require('../../db/model/account')
+const AccountModel = require('../../db/model/account')
 const SpecialIncomeOutcomeModel = require('../../db/model/specialincomeoutcome')
 const DeliverModel = require('../../db/model/deliver')
 const OrderModel = require('../../db/model/order')
@@ -45,4 +45,3 @@ class Account {
 }
 
 module.exports = Account
-

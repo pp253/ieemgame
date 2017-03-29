@@ -1,6 +1,7 @@
 require('../index')
 
 const mongoose = require('mongoose')
+const Position = require('./position')
 
 const StorageSchema = new mongoose.Schema(
   {
@@ -9,8 +10,8 @@ const StorageSchema = new mongoose.Schema(
     product: { type: String, require: true },
     quantity: { type: Number, require: true },
     cost: { type: Number, require: true },
-    buyer: { type: String, require: true },
-    seller: { type: String, require: true }
+    buyer: Position,
+    seller: Position
   }
 )
 

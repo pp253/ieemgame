@@ -1,6 +1,7 @@
 require('../index')
 
 const mongoose = require('mongoose')
+const Position = require('./position')
 
 const DeliverSchema = new mongoose.Schema(
   {
@@ -10,8 +11,8 @@ const DeliverSchema = new mongoose.Schema(
     product: { type: String, require: true },
     quantity: { type: Number, require: true },
     cost: { type: Number, require: true },
-    buyer: { type: String, require: true },
-    seller: { type: String, require: true }
+    buyer: Position,
+    seller: Position
   }
 )
 
@@ -27,4 +28,4 @@ DeliverSchema.statics = {
   }
 }
 
-module.exports = mongoose.model('DeliverModel', DeliverSchema)
+module.exports = mongoose.model('Deliver', DeliverSchema)

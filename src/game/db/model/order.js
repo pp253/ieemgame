@@ -1,16 +1,17 @@
 require('../index')
 
 const mongoose = require('mongoose')
+const Position = require('./position')
 
 const OrderSchema = new mongoose.Schema(
   {
-    time: { type: Date, default: Date.now },
+    time: { type: Date, default: Date.now, require: true },
     game_id: { type: String, require: true },
     product: { type: String, require: true },
     quantity: { type: Number, require: true },
     unit_price: { type: Number, require: true },
-    buyer: { type: String, require: true },
-    seller: { type: String, require: true },
+    buyer: Position,
+    seller: Position,
     delivered: { type: Boolean, default: false }
   }
 )
@@ -30,7 +31,23 @@ OrderSchema.statics = {
   },
   findByDelivered: function () {
     return this.find({delivered: true})
+  },
+  getCorrespondenceOrder: function (gameId, deliverInfo) {
+    return this.find({
+      game_id: gameId,
+      product: deliverInfo.product,
+      buyer: deliverInfo.buyer,
+      seller: deliverInfo.seller,
+      delivered: false
+    }).sort({time: 1}).limit(1).exec()
+  },
+  getOrderByBuyer: function (gameId, buyer, afterTime) {
+    return this.find({
+      game_id: gameId,
+      buyer: buyer
+    }).where('time').gt(new Date(afterTime))
+      .sort({time: 1}).exec()
   }
 }
 
-module.exports = mongoose.model('OrderModel', OrderSchema)
+module.exports = mongoose.model('Order', OrderSchema)

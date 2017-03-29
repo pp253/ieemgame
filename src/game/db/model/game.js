@@ -1,17 +1,11 @@
 require('../index')
 
 const mongoose = require('mongoose')
-const uuid = require('uuid-1345')
 
 const GameSchema = new mongoose.Schema(
   {
     time: { type: Date, require: true, default: Date.now },
-    end_time: { type: Date },
-    game_id: { type: String,
-      require: true,
-      unique: true,
-      default: uuid.v4
-    }
+    end_time: { type: Date }
   }
 )
 
