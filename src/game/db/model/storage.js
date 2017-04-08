@@ -33,4 +33,4 @@ StorageSchema.statics = {
   }
 }
 
-module.exports = mongoose.model('StorageModel', StorageSchema)
+module.exports = mongoose.model('storage', StorageSchema)

@@ -28,4 +28,4 @@ EventSchema.statics = {
   }
 }
 
-module.exports = mongoose.model('EventModel', EventSchema)
+module.exports = mongoose.model('Event', EventSchema)

@@ -1,20 +1,21 @@
 const db = require('./db')
-/*
-const Deliver = require('./db/schema/deliver')
+const game = require('./game')
 
-let newDeliver = new Deliver()
-Object.assign(newDeliver, {
-  game_id: 'xxx',
-  order: 'xxx',
-  product: 'xxx',
-  quantity: 123,
-  cost: 456456,
-  buyer: 'xxx',
-  seller: 'xxx'
+/*
+const OrderModel = require('./db/model/order')
+OrderModel.getNotDeliveredOrders('58e8f1ec26e4482ef8557b17', {
+  product: 0,
+  buyer: {
+    team: 5,
+    job: 4
+  },
+  seller: {
+    team: 5,
+    job: 3
+  }
+}).then(doc => {
+  console.log(doc)
 })
-newDeliver.save()
 */
 
-const account = require('./db/model/account')
-
-console.log(account.getMoney())
+module.exports = game

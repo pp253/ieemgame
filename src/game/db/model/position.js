@@ -1,4 +1,4 @@
 module.exports = {
-  team: { type: Number, require: true, default: -1 },
-  job: { type: String, require: true }
+  team: { type: Number, require: true },
+  job: { type: Number, require: true }
 }

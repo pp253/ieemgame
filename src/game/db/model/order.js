@@ -7,12 +7,12 @@ const OrderSchema = new mongoose.Schema(
   {
     time: { type: Date, default: Date.now, require: true },
     game_id: { type: String, require: true },
-    product: { type: String, require: true },
+    product: { type: Number, require: true },
     quantity: { type: Number, require: true },
     unit_price: { type: Number, require: true },
     buyer: Position,
     seller: Position,
-    delivered: { type: Boolean, default: false }
+    delivered: { type: Number, default: 0 }
   }
 )
 
@@ -26,20 +26,20 @@ OrderSchema.statics = {
   findByBuyerAndSeller: function (buyer, seller) {
     return this.find({buyer: buyer}).find({seller: seller})
   },
-  findByNotDelivered: function () {
-    return this.find({delivered: false})
-  },
-  findByDelivered: function () {
-    return this.find({delivered: true})
-  },
-  getCorrespondenceOrder: function (gameId, deliverInfo) {
+  getNotDeliveredOrders: function (gameId, deliverInfo) {
     return this.find({
       game_id: gameId,
       product: deliverInfo.product,
       buyer: deliverInfo.buyer,
       seller: deliverInfo.seller,
-      delivered: false
-    }).sort({time: 1}).limit(1).exec()
+      $where: 'this.delivered < this.quantity'
+    }).sort({time: 1}).exec()
+  },
+  getOrder: function (gameId, afterTime) {
+    return this.find({
+      game_id: gameId
+    }).where('time').gt(new Date(afterTime))
+      .sort({time: 1}).exec()
   },
   getOrderByBuyer: function (gameId, buyer, afterTime) {
     return this.find({
@@ -47,7 +47,14 @@ OrderSchema.statics = {
       buyer: buyer
     }).where('time').gt(new Date(afterTime))
       .sort({time: 1}).exec()
+  },
+  getOrderBySeller: function (gameId, seller, afterTime) {
+    return this.find({
+      game_id: gameId,
+      seller: seller
+    }).where('time').gt(new Date(afterTime))
+      .sort({time: 1}).exec()
   }
 }
 
-module.exports = mongoose.model('Order', OrderSchema)
+module.exports = mongoose.model('order', OrderSchema)
