@@ -1,11 +1,12 @@
 require('../index')
 
 const mongoose = require('mongoose')
+const constant = require('./constant')
 
 const GameSchema = new mongoose.Schema(
   {
-    time: { type: Date, require: true, default: Date.now },
-    end_time: { type: Date }
+    time: { type: constant.Time, require: true, default: Date.now },
+    end_time: { type: constant.EndTime }
   }
 )
 

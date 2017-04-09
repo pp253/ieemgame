@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Vuetify Components Test</title>
+  
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+  
+  <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet" type="text/css">
+  <link href="https://unpkg.com/vuetify/dist/vuetify.min.css" rel="stylesheet" type="text/css">
+  <link href="./style.css" rel="stylesheet" type="text/css">
+  <script src="https://unpkg.com/vue/dist/vue.js"></script>
+  <script src="https://unpkg.com/vuetify/dist/vuetify.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <v-toolbar class="orange">
+      <v-toolbar-title>首頁</v-toolbar-title>
+    </v-toolbar>
+    <main>
+      <v-stepper v-model="e6" vertical style="width: 100%;">
+        <v-stepper-step step="1" v-bind:complete="e6 > 1">
+          選擇組別
+          <small>各小隊隊輔也請選擇你的組別</small>
+        </v-stepper-step>
+        <v-stepper-content step="1">
+          <v-row class="stepper-content-row">
+            <v-select></v-select>
+          </v-row>
+          <v-row class="stepper-content-row">
+            <v-btn primary @click.native="e6 = 2">下一步</v-btn>
+          </v-row>
+        </v-stepper-content>
+        <v-stepper-step step="2" v-bind:complete="e6 > 2">
+          選擇工作
+          <small>請各小隊隊輔協助分配工作</small>
+        </v-stepper-step>
+        <v-stepper-content step="2" class="stepper-content">
+          <v-row class="stepper-content-row">
+            <v-select></v-select>
+          </v-row>
+          <v-row class="stepper-content-row">
+            <v-btn primary @click.native="e6 = 3">下一步</v-btn>
+            <v-btn flat @click.native="e6 = 1">上一步</v-btn>
+          </v-row>
+        </v-stepper-content>
+        <v-stepper-step step="3" v-bind:complete="e6 > 3">
+          準備進入
+        </v-stepper-step>
+        <v-stepper-content step="3" class="stepper-content">
+          <v-row class="stepper-content-row">
+            <p>歡迎來到工工營~</p>
+          </v-row>
+          <v-row class="stepper-content-row">
+            <v-btn primary @click.native="e6 = 4">進入</v-btn>
+            <v-btn flat @click.native="e6 = 2">上一步</v-btn>
+          </v-row>
+        </v-stepper-content>
+      </v-stepper>
+    </main>
+  </div>
+  <script type="text/javascript">
+    var app = new Vue({
+      el: '#app',
+      data: {
+        days: 1,
+        readableTime: '1:22',
+        times: 22,
+        money: 300,
+        headers: [
+         {text: '訂貨者', left: true, value: 'buyer'},
+         {text: '產品', value: 'product'},
+         {text: '數量', value: 'quantity'},
+         {text: '已送達', value: 'delivered'},
+        ],
+        items: [
+         {
+           buyer: {
+             team: 2,
+             job: 2
+           },
+           product: 0,
+           quantity: 0,
+           delivered: 0
+         },
+         {
+           buyer: {
+             team: 2,
+             job: 2
+           },
+           product: 0,
+           quantity: 0,
+           delivered: 0
+         }
+        ],
+        modal: false,
+        orderQuantity: 0,
+        e6: 0
+      }
+    })
+  </script>
+</body>
+</html>

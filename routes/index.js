@@ -1,6 +1,12 @@
 const game = require('../src/game')
 const debug = require('../src/lib/debug')
 
+const ResponceJSON = (obj) => {
+  return Object.assign({
+    error: 0
+  }, obj)
+}
+
 function gameApiResponser (req, res, next) {
   const methodList = {
     'get_updates': function (req, res, next) {
@@ -10,17 +16,16 @@ function gameApiResponser (req, res, next) {
           msg: 'No game is in progressing.'
         })
       }
-      res.json({
+      res.json(ResponceJSON({
         team: 0,
         jobs: '',
-        error: 0,
         news: 'some article ...',
         order: [],
         deliver: [],
         money: 0,
         time: req.session.game.state.time,
         day: req.session.game.state.day
-      })
+      }))
     },
     'order': function (req, res, next) {
       if (!game.getNowGame()) {
@@ -38,7 +43,7 @@ function gameApiResponser (req, res, next) {
       game.getNowGame()
         .order(orderRequest)
         .then((doc) => {
-          res.json(doc)
+          res.json(ResponceJSON(doc))
         })
         .catch((err) => {
           throw err
@@ -54,7 +59,7 @@ function gameApiResponser (req, res, next) {
 
       game.getNowGame().getOrder(req.body.aftertime)
         .then((list) => {
-          res.json(list)
+          res.json(ResponceJSON(list))
         })
         .catch((err) => {
           throw err
@@ -79,7 +84,7 @@ function gameApiResponser (req, res, next) {
 
       game.getNowGame().getOrderByBuyer(req.session.position, req.body.aftertime)
         .then((list) => {
-          res.json(list)
+          res.json(ResponceJSON(list))
         })
         .catch((err) => {
           throw err
@@ -100,7 +105,7 @@ function gameApiResponser (req, res, next) {
 
       game.getNowGame().getOrderBySeller(req.session.position, req.body.aftertime)
         .then((list) => {
-          res.json(list)
+          res.json(ResponceJSON(list))
         })
         .catch((err) => {
           throw new debug.Exception({
@@ -124,10 +129,9 @@ function gameApiResponser (req, res, next) {
       game.getNowGame()
       .deliver(deliverRequest)
       .then((doc) => {
-        res.json({
-          error: 0,
+        res.json(ResponceJSON({
           result: doc
-        })
+        }))
       })
       .catch((err) => {
         res.json(err) // this should be a temperately measures
@@ -137,9 +141,9 @@ function gameApiResponser (req, res, next) {
     'new_game': function (req, res, next) {
       game.newGame()
         .then((newGame) => {
-          res.json({
+          res.json(ResponceJSON({
             game_id: newGame.gameId
-          })
+          }))
         })
         .catch((err) => {
           throw err
@@ -160,39 +164,60 @@ function gameApiResponser (req, res, next) {
             job: req.body.job
           }
 
-          res.json({
+          res.json(ResponceJSON({
             game_id: enrolledGame.gameId,
             team: req.body.team,
             job: req.body.job
-          })
+          }))
         })
     },
     'next_stage': function (req, res, next) {
-      if (!game.getNowGame()/* || !req.session.position*/ /* || req.session.position.team !== game.TEAM.STAFF*/) {
+      if (!game.getNowGame()) {
         throw new debug.Exception({
           id: 1,
           msg: 'No game is in progressing.'
         })
       }
 
-      res.json({
+      res.json(ResponceJSON({
         stage: game.getNowGame().nextStage()
-      })
+      }))
     },
     'get_status': function (req, res, next) {
       if (!game.getNowGame()) {
         throw new debug.Exception({
-          error: 1,
+          id: 1,
           msg: 'No game is in progressing.'
         })
       }
-      res.json({
+      res.json(ResponceJSON({
         stage: game.getNowGame().stage,
         team: game.getNowGame().state.team,
         day: game.getNowGame().state.day,
         time: game.getNowGame().state.time,
         users: game.getNowGame().users
-      })
+      }))
+    },
+    'get_money': function (req, res, next) {
+    },
+    'get_self_money': function (req, res, next) {
+      if (!game.getNowGame()) {
+        throw new debug.Exception({
+          id: 1,
+          msg: 'No game is in progressing.'
+        })
+      } else if (!req.session.position) {
+        throw new debug.Exception({
+          id: 1
+        })
+      }
+      game.getNowGame().getMoneyByTeam(req.session.position.team)
+        .then((money) => {
+          res.json(ResponceJSON({
+            team: req.session.position.team,
+            money: money
+          }))
+        })
     }
   }
 

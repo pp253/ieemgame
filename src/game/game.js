@@ -32,11 +32,11 @@ const PRICE = {
 
 const JOBS = {
   UNKNOWN: -1,
-  STAFF_EXleft: 0,
-  STAFF_MARKET: 1,
-  TEAM_FACTORY: 2,
-  TEAM_WHOLESELLER: 3,
-  TEAM_RETAILER: 4,
+  STAFF_EXCHANGE: 0,
+  TEAM_FACTORY: 1,
+  TEAM_WHOLESELLER: 2,
+  TEAM_RETAILER: 3,
+  STAFF_MARKET: 4,
   TEAM_LEADER: 5
 }
 
@@ -89,7 +89,7 @@ class Game {
       day: 0,
       time: 0,
       timer: null,
-      teams: 0,
+      teams: 12,
       users: 0
     }
     this.team = {}
@@ -112,6 +112,17 @@ class Game {
           }
 
           this.gameId = doc._id
+
+          for (let team = 1; team <= this.state.teams; team++) {
+            let initAccount = new AccountModel({
+              game_id: this.gameId,
+              cause: 'initial',
+              team: team,
+              money: 10000
+            })
+            initAccount.save()
+          }
+
           this.stage = STAGE.WAITING_LOGIN
           resolve(this)
         })
@@ -189,25 +200,36 @@ class Game {
     }, 1000)
   }
 
+  account (team, money) {
+    return new Promise((resolve, reject) => {
+      let newWithdraw = new AccountModel({
+        game_id: this.gameId,
+        team: team,
+        money: money
+      })
+      newWithdraw.save()
+        .then((doc) => {
+          resolve(doc)
+        })
+        .catch((err) => {
+          reject(err)
+        })
+    })
+  }
+
   getMoneyByTeam (team) {
     return new Promise((resolve, reject) => {
-      resolve(100000) // dummy
-      /*
-      AccountModel.aggregate(
-        { $match: { game_id: this.gameId, team: team } },
-        { $group: { _id: null, total: {$sum: '$money'} } }
-      )
-      .exec()
-      .then((result) => {
-        if (result.length < 1) {
-          resolve(0)
-        }
-        resolve(result[0].total)
-      })
-      .catch((err) => {
-        reject(err)
-      })
-      */
+      AccountModel.getByTeam(this.gameId, team)
+        .then((docs) => {
+          let sum = 0
+          for (let account of docs) {
+            sum += account.money
+          }
+          resolve(sum)
+        })
+        .catch((err) => {
+          reject(err)
+        })
     })
   }
 
@@ -234,7 +256,7 @@ class Game {
 
   /**
    * 使orderInfo加上gameId，再丟到OrderModel後儲存
-   * @param {*} orderInfo
+   * @param {orderInfo} orderInfo
    * @return {Promise}
    */
   _order (orderInfo) {
@@ -243,7 +265,10 @@ class Game {
         game_id: this.gameId
       }, orderInfo)
       let newOrder = new OrderModel(orderInfo)
-      resolve(newOrder.save())
+      newOrder.save()
+        .then((doc) => {
+          resolve(doc._doc)
+        })
     })
   }
 
@@ -253,53 +278,65 @@ class Game {
         id: 1
       })
     }
-    let cost = parseInt((deliverRequest.product + 3) /
-      config.game.default.deliver.products_per_truck) * PRICE.DELIVER_COST_PER_TRUCK
-
-    if (deliverRequest.buyer.team !== deliverRequest.seller.team) {
-      cost = 0
-    }
-    let deliverInfo = Object.assign(deliverRequest, {
-      cost: cost
+    return new Promise((resolve, reject) => {
+      this._deliver(deliverRequest)
+        .then((doc) => {
+          if (doc.cost > 0) {
+            this.account(doc.seller.team, -1 * doc.cost)
+          }
+          resolve(doc)
+        })
+        .catch((err) => {
+          reject(err)
+        })
     })
-    return this._deliver(deliverInfo)
   }
 
-  _deliver (deliverInfo) {
+  _deliver (deliverRequest) {
     return new Promise((resolve, reject) => {
-      OrderModel.getNotDeliveredOrders(this.gameId, deliverInfo)
+      OrderModel.getNotDeliveredOrders(this.gameId, deliverRequest)
         .then((ordersResult) => {
-          let left = deliverInfo.quantity
+          let left = deliverRequest.quantity
           for (let {_doc: order} of ordersResult) {
             let used = order.quantity - order.delivered > left
               ? left : order.quantity - order.delivered
             if (used === 0) {
               break
             }
-            OrderModel.update({ _id: order._id }, { $set: { delivered: order.delivered + used } }, () => {
-            })
+            OrderModel.update({ _id: order._id }, { $set: { delivered: order.delivered + used } })
+              .then((doc) => {
+                if (doc.unit_price > 0) {
+                  this.account(doc.buyer.team, -1 * doc.quantity * doc.unit_price)
+                  this.account(doc.seller.team, doc.quantity * doc.unit_price)
+                }
+              })
             left = left - used
           }
 
-          let newQuantity = deliverInfo.quantity - left
+          let newQuantity = deliverRequest.quantity - left
           if (newQuantity === 0) {
-            throw new debug.Exception({
+            reject(new debug.Exception({
               id: 1
-            })
+            }))
+            return
           }
 
-          let newDeliverInfo = Object.assign(deliverInfo, {
+          let cost = parseInt((newQuantity + 3) /
+            config.game.default.deliver.products_per_truck) * PRICE.DELIVER_COST_PER_TRUCK
+          if (deliverRequest.buyer.team !== deliverRequest.seller.team) {
+            cost = 0
+          }
+
+          let deliverInfo = Object.assign(deliverRequest, {
             game_id: this.gameId,
-            quantity: deliverInfo.quantity - left
+            quantity: newQuantity,
+            cost: cost
           })
-          let newDeliver = new DeliverModel(newDeliverInfo)
+          let newDeliver = new DeliverModel(deliverInfo)
           return newDeliver.save()
         })
         .then((doc) => {
           resolve(doc)
-        })
-        .catch((err) => {
-          reject(err)
         })
     })
   }

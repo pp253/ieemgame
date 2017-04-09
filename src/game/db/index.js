@@ -2,6 +2,9 @@ const mongoose = require('mongoose')
 const config = require('../../../config')
 const debug = require('../../lib/debug')
 
+// http://mongoosejs.com/docs/promises.html
+mongoose.Promise = global.Promise
+
 new Promise((resolve, reject) => {
   mongoose.connect(`mongodb://${config.database.default.host}:${config.database.default.port}/ieemgame`, (err) => {
     if (err) {
@@ -16,6 +19,3 @@ new Promise((resolve, reject) => {
   debug.error('Failed to connect to MongoDB at ', `mongodb://${config.database.default.host}:${config.database.default.port}/ieemgame`)
   debug.error(err)
 })
-
-// http://mongoosejs.com/docs/promises.html
-mongoose.Promise = global.Promise

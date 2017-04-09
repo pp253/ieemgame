@@ -3,20 +3,113 @@
 <head>
   <meta charset="utf-8" />
   <title>Vuetify Components Test</title>
+  
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+  
   <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet" type="text/css">
   <link href="https://unpkg.com/vuetify/dist/vuetify.min.css" rel="stylesheet" type="text/css">
+  <link href="./style.css" rel="stylesheet" type="text/css">
   <script src="https://unpkg.com/vue/dist/vue.js"></script>
   <script src="https://unpkg.com/vuetify/dist/vuetify.min.js"></script>
 </head>
 <body>
   <div id="app">
-    <!-- You can add some components here to test. -->
+    <v-toolbar class="orange">
+      <v-toolbar-title>中盤商</v-toolbar-title>
+      <span>第 {{ days }} 天 {{ readableTime }}，$ {{ money }}</span>
+    </v-toolbar>
+    <main>
+      <v-content>
+        <v-expansion-panel expand>
+          <v-expansion-panel-content>
+            <div slot="header">收到的訂單</div>
+            <v-card>
+              <v-data-table
+                v-bind:headers="headers"
+                v-model="items"
+                hide-actions
+              >
+                <template slot="items" scope="props">
+                  <td>{{ props.item.buyer }}</td>
+                  <td class="text-xs-right">{{ props.item.product }}</td>
+                  <td class="text-xs-right">{{ props.item.quantity }}</td>
+                  <td class="text-xs-right">{{ props.item.delivered }}</td>
+                </template>
+              </v-data-table>
+            </v-card>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+
+        <v-modal v-model="modal">
+          <v-btn slot="activator" primary floating="floating" class="floating-right-bottom">
+            <v-icon>add</v-icon>
+          </v-btn>
+          <v-card>
+            <v-card-text>
+              <h2 class="title">你要訂購多少呢？</h2>
+            </v-card-text>
+            <v-card-text class="subheading grey--text">
+              <v-row>
+                <v-btn light default>+5</v-btn>
+              </v-row>
+              <v-row>
+                <v-btn light default>+1</v-btn>
+              </v-row>
+              <span>{{ orderQuantity }}</span>
+              <v-row>
+                <v-btn light default>-1</v-btn>
+              </v-row>
+              <v-row>
+                <v-btn light default>-5</v-btn>
+              </v-row>
+            </v-card-text>
+            <v-card-row actions>
+              <v-spacer></v-spacer>
+              <v-btn flat v-on:click.native="modal = false" class="primary--text">Cancel</v-btn>
+              <v-btn flat v-on:click.native="modal = false" class="primary--text">Submit</v-btn>
+            </v-card-row>
+          </v-card>
+        </v-modal>
+      </v-content>
+    </main>
   </div>
   <script type="text/javascript">
-    let app = new Vue({
+    var app = new Vue({
       el: '#app',
       data: {
-        // add some property here
+        days: 1,
+        readableTime: '1:22',
+        times: 22,
+        money: 300,
+        headers: [
+         {text: '訂貨者', left: true, value: 'buyer'},
+         {text: '產品', value: 'product'},
+         {text: '數量', value: 'quantity'},
+         {text: '已送達', value: 'delivered'},
+        ],
+        items: [
+         {
+           buyer: {
+             team: 2,
+             job: 2
+           },
+           product: 0,
+           quantity: 0,
+           delivered: 0
+         },
+         {
+           buyer: {
+             team: 2,
+             job: 2
+           },
+           product: 0,
+           quantity: 0,
+           delivered: 0
+         }
+        ],
+        modal: false,
+        orderQuantity: 0
       }
     })
   </script>

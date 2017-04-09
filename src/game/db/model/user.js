@@ -1,14 +1,14 @@
 require('../index')
 
 const mongoose = require('mongoose')
-const Position = require('./position')
+const constant = require('./constant')
 
 const UserSchema = new mongoose.Schema(
   {
-    time: { type: Date, default: Date.now },
-    game_id: { type: String, require: true },
+    time: { type: constant.Time, default: Date.now },
+    game_id: { type: constant.GameId, require: true },
     session_uuid: { type: String, require: true },
-    position: Position
+    position: constant.Position
   }
 )
 

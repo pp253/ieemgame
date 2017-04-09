@@ -1,18 +1,18 @@
 require('../index')
 
 const mongoose = require('mongoose')
-const Position = require('./position')
+const constant = require('./constant')
 
 const OrderSchema = new mongoose.Schema(
   {
-    time: { type: Date, default: Date.now, require: true },
-    game_id: { type: String, require: true },
-    product: { type: Number, require: true },
-    quantity: { type: Number, require: true },
-    unit_price: { type: Number, require: true },
-    buyer: Position,
-    seller: Position,
-    delivered: { type: Number, default: 0 }
+    time: { type: constant.Time, default: Date.now, require: true },
+    game_id: { type: constant.GameId, require: true },
+    product: { type: constant.Product, require: true },
+    quantity: { type: constant.Quantity, require: true },
+    unit_price: { type: constant.UnitPrice, require: true },
+    buyer: constant.Position,
+    seller: constant.Position,
+    delivered: { type: constant.Delivered, default: 0 }
   }
 )
 

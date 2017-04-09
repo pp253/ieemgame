@@ -1,0 +1,16 @@
+@import url(//fonts.googleapis.com/earlyaccess/notosanstc.css);
+
+* {
+  font-family: '微軟正黑體', 'Helvetica', 'Noto Sans TC';
+  font-weight: 400;
+}
+
+.floating-right-bottom {
+  position: fixed;
+  right: 10px;
+  bottom: 10px;
+}
+
+.stepper-content-row {
+  padding: 0 0 15px 15px !important;
+}

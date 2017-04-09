@@ -39,7 +39,7 @@ app.set('title', '2017 工工營 產銷遊戲')
 
 // Static
 app.use('/', express.static('public'))
-app.use('/', express.static('test')) // this should be removed in PRODUCTION ENV
+app.use('/test', express.static('test')) // this should be removed in PRODUCTION ENV
 
 // Route
 app.use(function (req, res, next) {

@@ -1,14 +1,15 @@
 require('../index')
 
 const mongoose = require('mongoose')
+const constant = require('./constant')
 
 const AccountSchema = new mongoose.Schema(
   {
-    time: { type: Date, default: Date.now },
-    game_id: { type: String, require: true }, // mongoose.Schema.Types.ObjectId
-    cause: { type: String, require: false },
-    team: { type: Number, require: true },
-    money: { type: Number, require: true, default: 0 }
+    time: { type: constant.Time, default: Date.now },
+    game_id: { type: constant.GameId, require: true }, // mongoose.Schema.Types.ObjectId
+    cause: { type: constant.Cause, require: false },
+    team: { type: constant.Team, require: true },
+    money: { type: constant.Money, require: true, default: 0 }
   }
 )
 
@@ -19,9 +20,11 @@ AccountSchema.statics = {
   findByGameIdAndTeam: function (gameId, team) {
     return this.find({gameId: gameId, team: team})
   },
-  getMoney: function (gameId, team) {
-    return this.find({gameId: gameId, team: team})
-      .sort({_id: 1}).limit(1).exec()
+  getByTeam: function (gameId, team) {
+    return this.find({
+      game_id: gameId,
+      team: team
+    }).sort({time: 1}).exec()
   }
 }
 
