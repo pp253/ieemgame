@@ -1,5 +1,5 @@
 
-var POSITION = {
+const POSITION = {
   team: 5,
   job: 4 // TEAM_RETIALER
 }
