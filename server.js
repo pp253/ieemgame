@@ -23,8 +23,8 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 // Templates
-app.set('view engine', 'pug')
-app.set('views', './views')
+// app.set('view engine', 'pug')
+// app.set('views', './views')
 
 // Session
 app.use(session({
@@ -39,6 +39,7 @@ app.set('title', '2017 工工營 產銷遊戲')
 
 // Static
 app.use('/', express.static('public'))
+app.use('/', express.static('views'))
 app.use('/test', express.static('test')) // this should be removed in PRODUCTION ENV
 
 // Route

@@ -6,6 +6,11 @@ exports.Position = {
   job: { type: Number, require: true }
 }
 exports.Time = Date
+exports.Days = Number
+exports.GameTime = {
+  days: { type: exports.Days, require: true },
+  times: { type: Number, require: true }
+}
 exports.EndTime = Date
 exports.GameId = mongoose.Schema.ObjectId
 exports.Product = Number

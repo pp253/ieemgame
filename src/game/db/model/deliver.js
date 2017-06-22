@@ -6,6 +6,7 @@ const constant = require('./constant')
 const DeliverSchema = new mongoose.Schema(
   {
     time: { type: constant.Time, default: Date.now },
+    game_time: { type: constant.GameTime },
     game_id: { type: constant.GameId, require: true },
     product: { type: constant.Product, require: true },
     quantity: { type: constant.Quantity, require: true },
