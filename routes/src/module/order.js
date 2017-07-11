@@ -12,7 +12,7 @@ export function getReceivedOrders (req, res, next) {
 
   req.getValidationResult().then(function (result) {
     if (!result.isEmpty()) {
-      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result))
+      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result.array()))
       return
     }
 
@@ -29,26 +29,47 @@ export function getReceivedOrders (req, res, next) {
 export function setOrder (req, res, next) {
   req.check({
     gameId: validation.gameId,
-    stage: validation.stage
+    teamIndex: validation.teamIndex,
+    job: validation.job,
+    product: validation.product,
+    amount: validation.amount
   })
 
   req.getValidationResult().then(function (result) {
     if (!result.isEmpty()) {
-      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result))
+      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result.array()))
       return
     }
 
     let gameId = req.body.gameId
-    let stage = req.body.stage
-    GameEngine.selectGame(gameId).setGameStage(stage)
+    let teamIndex = req.body.teamIndex
+    let job = req.body.job
+    let product = req.body.product
+    let amount = req.body.amount
+
+    let mapping = { 'RETAILER': 'WHOLESALER', 'WHOLESALER': 'FACTORY' }
+    let game = GameEngine.selectGame(gameId)
+
+    GameEngine.selectGame(gameId).selectTeam(teamIndex).selectJob(job).order.add(constant.ProductItem({
+      day: game.getDay(),
+      time: game.getTime(),
+      product: product,
+      amount: amount
+    }))
     res.json(response.ResponseSuccessJSON({
       gameId: gameId,
-      stage: stage
+      teamIndex: teamIndex,
+      job: job,
+      day: game.getDay(),
+      time: game.getTime(),
+      product: product,
+      amount: amount
     }))
   })
 }
 
 export default {
   'get_receiver_orders': getReceivedOrders,
+  'get_history': getHistory,
   'set_order': setOrder
 }

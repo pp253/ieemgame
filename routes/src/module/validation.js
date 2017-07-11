@@ -67,6 +67,11 @@ export default {
     notEmpty: true,
     isInt: true,
     errorMessage: 'Invalid Team'
+  },
+  'product': {
+    in: 'body',
+    notEmpty: true,
+    errorMessage: 'Invalid ProductItem'
   }
 }
 
