@@ -53,6 +53,30 @@ export const ResponseErrorMsg = {
       id: 30,
       msg: `GameId='${gameId}'遊戲還在工作階段，無法執行NextDay`
     })
+  },
+  StorageNotEnough (gameId, teamIndex, job) {
+    return ResponseErrorJSON({
+      id: 31,
+      msg: `GameId='${gameId}'的第${teamIndex}組的${job}庫存不足`
+    })
+  },
+  AccountNotEnough (gameId, teamIndex) {
+    return ResponseErrorJSON({
+      id: 32,
+      msg: `GameId='${gameId}'的第${teamIndex}組帳戶餘額不足`
+    })
+  },
+  OrderNotEnough (gameId, teamIndex, job) {
+    return ResponseErrorJSON({
+      id: 33,
+      msg: `此次行動超出GameId='${gameId}'的第${teamIndex}組的${job}收到的訂單`
+    })
+  },
+  MarketNotEnough (gameId) {
+    return ResponseErrorJSON({
+      id: 34,
+      msg: `此次行動超出GameId='${gameId}'的市場需求量`
+    })
   }
 }
 

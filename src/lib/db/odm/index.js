@@ -4,6 +4,7 @@ import Accounts from './accounts'
 import Storages from './storages'
 import Orders from './orders'
 import Deliver from './deliver'
+import News from './news'
 
 export default {
   Games: Games,
@@ -11,5 +12,5 @@ export default {
   Accounts: Accounts,
   Storages: Storages,
   Orders: Orders,
-  Deliver: Deliver
+  News: News
 }

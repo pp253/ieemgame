@@ -19,9 +19,17 @@ export function getHistory (req, res, next) {
     let gameId = req.body.gameId
     let teamIndex = req.body.teamIndex
     let job = req.body.job
+
+    let game = GameEngine.selectGame(gameId)
+    let team = game.selectTeam(teamIndex)
+
     res.json(response.ResponseSuccessJSON({
       gameId: gameId,
-      stage: GameEngine.selectGame(gameId).selectTeam(teamIndex).selectJob(job).order.getOrderList()
+      teamIndex: teamIndex,
+      job: job,
+      day: game.getDay(),
+      time: game.getTime(),
+      list: team.selectJob(job).deliver.getHistory()
     }))
   })
 }
@@ -45,7 +53,7 @@ export function setDeliver (req, res, next) {
     let teamIndex = req.body.teamIndex
     let job = req.body.job
     let product = req.body.product
-    let amount = req.body.amount
+    let amount = parseInt(req.body.amount)
 
     let game = GameEngine.selectGame(gameId)
     let team = game.selectTeam(teamIndex)
@@ -53,13 +61,45 @@ export function setDeliver (req, res, next) {
     // check storage
     if (team.selectJob(job).storage.getStorage(product) < amount) {
       // storage is not enough for this deliver
+      res.status(400).json(response.ResponseErrorMsg.StorageNotEnough(gameId, teamIndex, job))
       return
     }
 
     // check order
-    if (team.selectJob(job).order.getOrder(product) < team.selectJob(job).deliver.getDeliver(product) + amount) {
+    if (job !== 'RETAILER' && team.selectJob(job).order.getOrder(product) < team.selectJob(job).deliver.getDeliver(product) + amount) {
       // deliver amount is more than order's
+      res.status(400).json(response.ResponseErrorMsg.OrderNotEnough(gameId, teamIndex, job))
       return
+    } else if (job === 'RETAILER' && game.getMarket().orderAmount - game.getMarket().storageAmount < amount) {
+      // deliver amount is more than market's
+      res.status(400).json(response.ResponseErrorMsg.MarketNotEnough(gameId))
+      return
+    }
+
+    if (job !== 'RETAILER') {
+      // check account for costing
+      let transportCost = game.getConfig().cost.transport.cost
+      let transportPatchSize = game.getConfig().cost.transport.patchSize
+      let cost = Math.ceil(amount / transportPatchSize) * transportCost
+      if (team.getAccount().getBalance() < cost) {
+        // team account is not enough for delivering costing
+        res.status(400).json(response.ResponseErrorMsg.AccountNotEnough(gameId, teamIndex))
+        return
+      }
+
+      // take from account
+      team.getAccount().take(constant.AccountItem({
+        day: game.getDay(),
+        time: game.getTime(),
+        balance: cost
+      }))
+    } else {
+      // add to account
+      team.getAccount().give(constant.AccountItem({
+        day: game.getDay(),
+        time: game.getTime(),
+        balance: amount * game.getMarket().price
+      }))
     }
 
     // storage moving
@@ -71,12 +111,16 @@ export function setDeliver (req, res, next) {
     })
     team.selectJob(job).storage.remove(productItem)
     
-    let mapping = { 'WHOLESALER': 'RETAILER', 'FACTORY': 'WHOLESALER' }
-    team.selectJob(mapping[job]).storage.add(productItem)
+    if (job === 'RETAILER') {
+      game.getMarket().storageAmount += amount
+    } else {
+      let mapping = { 'WHOLESALER': 'RETAILER', 'FACTORY': 'WHOLESALER' }
+      team.selectJob(mapping[job]).storage.add(productItem)
+    }
 
-    // add to deliver history
+    // add to deliver
     team.selectJob(job).deliver.add(productItem)
-
+    
     res.json(response.ResponseSuccessJSON({
       gameId: gameId,
       teamIndex: teamIndex,
@@ -84,13 +128,13 @@ export function setDeliver (req, res, next) {
       day: game.getDay(),
       time: game.getTime(),
       product: product,
-      amount: amount
+      amount: amount,
+      cost: cost
     }))
   })
 }
 
 export default {
   'get_history': getHistory,
-  'get_received': getReceived,
   'set_deliver': setDeliver
 }

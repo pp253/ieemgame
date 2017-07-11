@@ -3,7 +3,7 @@ import GameEngine from '../../../src/gameengine'
 import constant from '../../../src/lib/constant'
 import validation from './validation'
 
-export function getReceivedOrders (req, res, next) {
+export function getReceived (req, res, next) {
   req.check({
     gameId: validation.gameId,
     teamIndex: validation.teamIndex,
@@ -19,9 +19,49 @@ export function getReceivedOrders (req, res, next) {
     let gameId = req.body.gameId
     let teamIndex = req.body.teamIndex
     let job = req.body.job
+
+    let game = GameEngine.selectGame(gameId)
+    let team = game.selectTeam(teamIndex)
+
     res.json(response.ResponseSuccessJSON({
       gameId: gameId,
-      stage: GameEngine.selectGame(gameId).selectTeam(teamIndex).selectJob(job).order.getOrderList()
+      teamIndex: teamIndex,
+      job: job,
+      day: game.getDay(),
+      time: game.getTime(),
+      list: team.selectJob(job).order.getHistory()
+    }))
+  })
+}
+
+export function getHistory (req, res, next) {
+  req.check({
+    gameId: validation.gameId,
+    teamIndex: validation.teamIndex,
+    job: validation.job
+  })
+
+  req.getValidationResult().then(function (result) {
+    if (!result.isEmpty()) {
+      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result.array()))
+      return
+    }
+
+    let gameId = req.body.gameId
+    let teamIndex = req.body.teamIndex
+    let job = req.body.job
+
+    let game = GameEngine.selectGame(gameId)
+    let team = game.selectTeam(teamIndex)
+
+    let mapping = { 'RETAILER': 'WHOLESALER', 'WHOLESALER': 'FACTORY' }
+    res.json(response.ResponseSuccessJSON({
+      gameId: gameId,
+      teamIndex: teamIndex,
+      job: job,
+      day: game.getDay(),
+      time: game.getTime(),
+      list: team.selectJob(mapping[job]).order.getHistory()
     }))
   })
 }
@@ -45,17 +85,19 @@ export function setOrder (req, res, next) {
     let teamIndex = req.body.teamIndex
     let job = req.body.job
     let product = req.body.product
-    let amount = req.body.amount
+    let amount = parseInt(req.body.amount)
+
+    let game = GameEngine.selectGame(gameId)
+    let team = game.selectTeam(teamIndex)
 
     let mapping = { 'RETAILER': 'WHOLESALER', 'WHOLESALER': 'FACTORY' }
-    let game = GameEngine.selectGame(gameId)
-
-    GameEngine.selectGame(gameId).selectTeam(teamIndex).selectJob(job).order.add(constant.ProductItem({
+    team.selectJob(mapping[job]).order.add(constant.ProductItem({
       day: game.getDay(),
       time: game.getTime(),
       product: product,
       amount: amount
     }))
+
     res.json(response.ResponseSuccessJSON({
       gameId: gameId,
       teamIndex: teamIndex,
@@ -69,7 +111,7 @@ export function setOrder (req, res, next) {
 }
 
 export default {
-  'get_receiver_orders': getReceivedOrders,
   'get_history': getHistory,
+  'get_received': getReceived,
   'set_order': setOrder
 }

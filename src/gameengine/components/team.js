@@ -3,7 +3,7 @@ import odm from '../../lib/db/odm'
 import constant from '../../lib/constant'
 import debug from '../../lib/debug'
 import Account from './account'
-import Order from './account'
+import Order from './order'
 import Deliver from './deliver'
 import Storage from './storage'
 
@@ -61,7 +61,7 @@ export default class Team {
   }
 
   selectJob (job) {
-    if (_.values(constant.JOBS).find(job) !== -1) {
+    if (_.values(constant.JOBS).indexOf(job) !== -1) {
       return this[job]
     }
   }

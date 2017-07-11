@@ -11,7 +11,7 @@ export function getGameStage (req, res, next) {
 
   req.getValidationResult().then(function (result) {
     if (!result.isEmpty()) {
-      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result))
+      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result.array()))
       return
     }
 
@@ -31,7 +31,7 @@ export function setGameStage (req, res, next) {
 
   req.getValidationResult().then(function (result) {
     if (!result.isEmpty()) {
-      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result))
+      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result.array()))
       return
     }
 
@@ -52,7 +52,7 @@ export function nextGameStage (req, res, next) {
 
   req.getValidationResult().then(function (result) {
     if (!result.isEmpty()) {
-      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result))
+      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result.array()))
       return
     }
 
@@ -73,7 +73,7 @@ export function setGameNextDay (req, res, next) {
 
   req.getValidationResult().then(function (result) {
     if (!result.isEmpty()) {
-      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result))
+      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result.array()))
       return
     }
 
@@ -98,7 +98,7 @@ export function getGameTime (req, res, next) {
 
   req.getValidationResult().then(function (result) {
     if (!result.isEmpty()) {
-      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result))
+      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result.array()))
       return
     }
 

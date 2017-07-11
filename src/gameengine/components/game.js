@@ -35,7 +35,18 @@ export const DEFAULT_CONFIG = {
     },
     wage: 100
   },
-  updateInterval: 1000
+  updateInterval: 1000,
+  news: [
+    {
+      day: 1,
+      time: 0,
+      title: 'ASD',
+      content: 'ASD',
+      picture: '',
+      demanded: 30,
+      price: 3000
+    }
+  ]
 }
 
 // To load a exist game,
@@ -51,6 +62,11 @@ export default class Game {
     // dayStartTime in msec
     this.dayStartTime = constant.UNKNOWN_TIME
 
+    this.market = {
+      orderAmount: 0,
+      storageAmount: 0,
+      price: 3000
+    }
     this.games = null
     this.news = null
     this.teamList = []
@@ -93,6 +109,10 @@ export default class Game {
     }
   }
 
+  save () {
+
+  }
+
   setGameStage (stage) {
     this.stage = stage
 
@@ -117,10 +137,11 @@ export default class Game {
       'END'
     ]
 
-    if (this.getGameStage() == 'END') {
+    if (this.getGameStage() === 'END') {
       return this
     }
     this.setGameStage(list[list.indexOf(this.getGameStage()) + 1])
+    this._update()
     debug.log(`GameId='${this.getGameId()}': Stage has benn set to ${this.getGameStage()}`)
     return this
   }
@@ -130,6 +151,7 @@ export default class Game {
       this.day += 1
       this.dayStartTime = Date.now()
     }
+    this.settle()
     return this
   }
 
@@ -182,7 +204,7 @@ export default class Game {
 
       case constant.GAME_STAGE.START:
         // working -> off work
-        // and into FINAL stage
+        // and get into FINAL stage
         if (this.getTime() > this.getConfig().dayLong * 1000) {
           this.dayStartTime = constant.UNKNOWN_TIME
           if (this.day === this.gameConfig.days) {
@@ -214,6 +236,10 @@ export default class Game {
     return this.gameConfig
   }
 
+  getMarket () {
+    return this.market
+  }
+
   getTeamNumber () {
     return this.getConfig().teamNumber
   }
@@ -224,5 +250,32 @@ export default class Game {
 
   selectTeam (teamIndex) {
     return this.getTeamList()[teamIndex]
+  }
+
+  settle () {
+    if (!this.isOffWork()) {
+      return false
+    }
+    
+    for (let team of this.getTeamList()) {
+      let cost = 0
+      
+      // wage
+      cost += this.getConfig().cost.wage * team.getConfig().teammembers
+
+      // storage
+      let storageCost = this.getConfig().cost.storage
+      for (let job of storageCost) {
+        for (let productItem in team.selectJob(job).storage.getStorageList()) {
+          cost += storageCost[job][productItem.product] * productItem.amount
+        }
+      }
+
+      team.getAccount().take(constant.AccountItem({
+        day: this.getDay(),
+        time: this.getTime(),
+        balance: cost
+      }))
+    }
   }
 }

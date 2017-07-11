@@ -43,6 +43,9 @@ export default class Order {
   }
 
   setOrder (productItem, trigger) {
+    productItem = _.cloneDeep(productItem)
+    productItem.amount = parseInt(productItem.amount)
+    
     let orderOdm = new odm.Orders({
       gameId: this.gameId,
       teamId: this.teamId,
@@ -64,7 +67,7 @@ export default class Order {
       this.getHistory().push(_.cloneDeep(productItem))
 
       let done = false
-      for (let item in this.getOrderList()) {
+      for (let item of this.getOrderList()) {
         if (item.product === order.product) {
           item.amount = order.amount
           done = true
@@ -79,6 +82,8 @@ export default class Order {
   }
 
   add (productItem, trigger) {
+    productItem = _.cloneDeep(productItem)
+    productItem.amount = parseInt(productItem.amount)
     productItem.amount = this.getOrder(productItem.product) + productItem.amount
     this.setOrder(productItem, trigger)
     return this
@@ -86,6 +91,8 @@ export default class Order {
 
   // this method should not be used
   remove (productItem, trigger) {
+    productItem = _.cloneDeep(productItem)
+    productItem.amount = parseInt(productItem.amount)
     if (this.getOrder(productItem.product) < productItem.amount) {
       throw new debug.Exception(`Product='${product}' 貨物數量不夠了`)
     }

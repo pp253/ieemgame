@@ -1,9 +1,14 @@
+import mongoose from 'mongoose'
 import _ from 'lodash'
 import constant from '../../../src/lib/constant'
 import GameEngine from '../../../src/gameengine'
 
 export function gameIsExist (gameId) {
   return GameEngine.gameIsExist(gameId)
+}
+
+export function isObjectId (value) {
+  return mongoose.Types.ObjectId.isValid(value)
 }
 
 export default {
@@ -57,9 +62,7 @@ export default {
   'job': {
     in: 'body',
     notEmpty: true,
-    matches: {
-      options: _.concat(_.values(constant.JOBS), _.values(constant.STAFF_JOBS))
-    },
+    matches: _.concat(_.values(constant.JOBS), _.values(constant.STAFF_JOBS)),
     errorMessage: 'Invalid Job'
   },
   'team': {

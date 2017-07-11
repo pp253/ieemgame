@@ -6,7 +6,6 @@ import helmet from 'helmet'
 import bodyParser from 'body-parser'
 import expressValidator from 'express-validator'
 import compression from 'compression'
-import mongoose from 'mongoose'
 
 import debug from './src/lib/debug'
 import routes from './routes'
@@ -27,9 +26,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(expressValidator({
   customValidators: {
-    isObjectId (value) {
-      return mongoose.Types.ObjectId.isValid(value)
-    },
+    isObjectId: validation.isObjectId,
     gameIsExist: validation.gameIsExist
   }
 }))

@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import odm from '../../lib/db/odm'
 import constant from '../../lib/constant'
 import debug from '../../lib/debug'
@@ -17,6 +18,7 @@ export default class Storage {
     this.gameId = gameId
     this.teamId = teamId
     this.job = job
+    this.history = []
     this.storageItemList = []
 
     // load(this.gameId, this.teamId)
@@ -28,6 +30,10 @@ export default class Storage {
       this.teamId = teamId
       this.job = job
     }
+  }
+  
+  getHistory () {
+    return this.history
   }
 
   getStorageList () {
@@ -43,17 +49,20 @@ export default class Storage {
     return constant.STORAGE_EMPTY
   }
 
-  setStorage (day, time, product, amount, triggerCollection, triggerId) {
-    let storageOdm = new odm.Storage({
+  setStorage (productItem, trigger) {
+    productItem = _.cloneDeep(productItem)
+    productItem.amount = parseInt(productItem.amount)
+    
+    let storageOdm = new odm.Storages({
       gameId: this.gameId,
       teamId: this.teamId,
       job: this.job,
-      triggerCollection: triggerCollection,
-      triggerId: triggerId,
-      product: product,
-      amount: amount,
-      day: day,
-      time: time
+      triggerCollection: trigger && trigger.collection,
+      triggerId: trigger && trigger.id,
+      product: productItem.product,
+      amount: productItem.amount,
+      day: productItem.day,
+      time: productItem.time
     })
 
     storageOdm.save((function (err, storage) {
@@ -62,31 +71,41 @@ export default class Storage {
         return
       }
       
+      this.getHistory().push(_.cloneDeep(productItem))
+
       let done = false
-      for (let item in this.getStorageList()) {
+      for (let item of this.getStorageList()) {
         if (item.product === storage.product) {
           item.amount = storage.amount
           done = true
         }
       }
       if (!done) {
-        this.getStorageList().push(StorageItem(storage.product, storage.amount))
+        this.getStorageList().push(_.cloneDeep(productItem))
       }
     }).bind(this))
 
     return this
   }
 
-  give (day, time, product, amount, triggerCollection, triggerId) {
-    this.setStorage(day, time, product, this.getStorage(product) + amount, triggerCollection, triggerId)
+  add (productItem, trigger) {
+    productItem = _.cloneDeep(productItem)
+    productItem.amount = parseInt(productItem.amount)
+
+    productItem.amount = this.getStorage(productItem.product) + productItem.amount
+    this.setStorage(productItem, trigger)
     return this
   }
 
-  take (day, time, product, amount, triggerCollection, triggerId) {
-    if (this.getStorage(product) < amount) {
-      throw new debug.Exception(`Product='${product}' 貨物數量不夠了`)
+  remove (productItem, trigger) {
+    productItem = _.cloneDeep(productItem)
+    productItem.amount = parseInt(productItem.amount)
+    
+    if (this.getStorage(productItem.product) < productItem.amount) {
+      throw new debug.Exception(`Product='${productItem.product}' 貨物數量不夠了`)
     }
-    this.setStorage(day, time, product, this.getStorage(product) - amount, triggerCollection, triggerId)
+    productItem.amount = this.getStorage(productItem.product) - productItem.amount
+    this.setStorage(productItem, trigger)
     return this
   }
 }
