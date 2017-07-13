@@ -1,16 +1,26 @@
-const moment = require('moment')
+import moment from 'moment'
 
-exports.time = () => moment().format('MM-DD HH:mm:ss')
+export function time () {
+  return moment().format('MM-DD HH:mm:ss')
+}
 
-exports.log = (...msg) => console.log(exports.time() + ' ' + msg.shift(), ...msg)
+export function log (...msg) {
+  console.log(time() + ' ' + msg.shift(), ...msg)
+}
 
-exports.error = (...msg) => console.error(exports.time() + ' ' + msg.shift(), ...msg)
+export function error (...msg) {
+  console.error(time() + ' ' + msg.shift(), ...msg)
+}
 
-exports.info = (...msg) => console.info(exports.time() + ' ' + msg.shift(), ...msg)
+export function info (...msg) {
+  console.info(time() + ' ' + msg.shift(), ...msg)
+}
 
-exports.debug = (...msg) => console.debug(exports.time() + ' ' + msg.shift(), ...msg)
+export function debug (...msg) {
+  console.debug(time() + ' ' + msg.shift(), ...msg)
+}
 
-exports.Exception = class {
+export class Exception {
   constructor (id, msg, syserr) {
     this.error = 1
     switch (typeof id) {
@@ -34,4 +44,13 @@ exports.Exception = class {
       msg: this.msg
     })
   }
+}
+
+export default {
+  time: time,
+  log: log,
+  error: error,
+  info: info,
+  debug: debug,
+  Exception: Exception
 }

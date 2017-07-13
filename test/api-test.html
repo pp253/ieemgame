@@ -92,6 +92,13 @@
       })
     }
 
+    function getMoneyByTeam () {
+      axios.post('/gameapi/get_self_money')
+      .then((doc) => {
+        console.log(doc.data)
+      })
+    }
+
   </script>
 </head>
 <body>
@@ -103,5 +110,6 @@
   <input type="button" value="getStatus" onclick="javascript:getStatus()"></input>
   <input type="button" value="getOrders" onclick="javascript:getOrders()"></input>
   <input type="button" value="getUpdates" onclick="javascript:getUpdates()"></input>
+  <input type="button" value="getMoneyByTeam" onclick="javascript:getMoneyByTeam()"></input>
 </body>
 </html>

@@ -1,12 +1,15 @@
-const express = require('express')
-const session = require('express-session')
-const helmet = require('helmet')
-const bodyParser = require('body-parser')
-const compression = require('compression')
-const https = require('https')
-const fs = require('fs')
-const debug = require('./src/lib/debug')
-const routes = require('./routes')
+// import https from 'https'
+// import fs from 'fs'
+import express from 'express'
+import session from 'express-session'
+import helmet from 'helmet'
+import bodyParser from 'body-parser'
+import expressValidator from 'express-validator'
+import compression from 'compression'
+
+import debug from './src/lib/debug'
+import routes from './routes'
+import * as validation from './src/api/validation'
 
 debug.log('Server initializing ...')
 
@@ -18,11 +21,17 @@ app.use(helmet())
 // Compression
 app.use(compression())
 
-// Body parser
+// Body parser and Validator
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
+app.use(expressValidator({
+  customValidators: {
+    isObjectId: validation.isObjectId,
+    gameIsExist: validation.gameIsExist
+  }
+}))
 
-// Templates
+// Views
 app.set('view engine', 'pug')
 app.set('views', './views')
 
@@ -39,26 +48,19 @@ app.set('title', '2017 工工營 產銷遊戲')
 
 // Static
 app.use('/', express.static('public'))
-app.use('/', express.static('test')) // this should be removed in PRODUCTION ENV
+app.use('/', express.static('views'))
+
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/test', express.static('test'))
+
+  app.use(function (req, res, next) {
+    //debug.log(req.connection.remoteAddress, req.method, req.path)
+    next()
+  })
+}
 
 // Route
-app.use(function (req, res, next) {
-  debug.log(req.connection.remoteAddress, req.method, req.path)
-  next()
-})
-
-app.post('/gameapi/:method', routes.gameApiResponser)
-
-app.get('/', routes.gameHome)
-
-app.post('/user/:method', routes.gameUser)
-
-app.post('/admin', routes.gameAdmin)
-
-app.get('*', function (req, res, next) {
-  res.status(404)
-  res.render('error/error404')
-})
+routes(app)
 
 // Listening
 /*

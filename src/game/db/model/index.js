@@ -1,7 +1,0 @@
-exports.DeliverModel = require('./deliver')
-exports.OrderModel = require('./order')
-exports.EventModel = require('./event')
-exports.StorageModel = require('./storage')
-exports.UserModel = require('./user')
-exports.AccountModel = require('./account')
-exports.GameModel = require('./game')
