@@ -204,15 +204,17 @@ export default class Game {
   }
 
   getTime () {
-    if (this.getDayStartTime() === constant.UNKNOWN_TIME) {
+    if (this.getGameStage() !== constant.GAME_STAGE.START) {
       return constant.UNKNOWN_TIME
+    } else if (this.getDayStartTime() === constant.UNKNOWN_TIME) {
+      return this.getConfig().dayLong * 1000
     } else {
       return Date.now() - this.getDayStartTime()
     }
   }
 
   isWorking () {
-    return (this.getDayStartTime() !== constant.UNKNOWN_TIME) && (this.getDayStartTime() < this.getConfig().dayLong * 1000)
+    return (this.getGameStage() === constant.GAME_STAGE.START) && (this.getDayStartTime() !== constant.UNKNOWN_TIME)
   }
 
   isOffWork () {
@@ -246,7 +248,7 @@ export default class Game {
         // working -> off work
         // and get into FINAL stage
         if (this.getTime() >= this.getConfig().dayLong * 1000) {
-          this.dayStartTime = this.getConfig().dayLong * 1000
+          this.dayStartTime = constant.UNKNOWN_TIME
           if (this.day === this.gameConfig.days) {
             this.stage = constant.GAME_STAGE.FINAL
 

@@ -17,7 +17,7 @@ let app = express()
 
 // Security
 app.use(helmet())
-
+ 
 // Compression
 app.use(compression())
 
@@ -46,10 +46,6 @@ app.use(session({
 app.set('port', process.env.PORT || 80)
 app.set('title', '2017 工工營 產銷遊戲')
 
-// Static
-app.use('/', express.static('public'))
-app.use('/', express.static('views'))
-
 if (process.env.NODE_ENV !== 'production') {
   app.use('/test', express.static('test'))
 
@@ -58,6 +54,9 @@ if (process.env.NODE_ENV !== 'production') {
     next()
   })
 }
+
+// Static
+app.use('/', express.static('public'))
 
 // Route
 routes(app)

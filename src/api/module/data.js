@@ -75,23 +75,23 @@ export function getUpdate (req, res, next) {
               msg.balance = team.getAccount().getBalance()
               msg.storage = team.selectJob(job).storage.getStorageList()
               msg.deliverHistory = team.selectJob(job).deliver.getHistory()
-              msg.receivedOrder = team.selectJob(job).order.getOrderList()
+              msg.receivedOrder = team.selectJob(job).order.getHistory()
               break
 
             case constant.JOBS.WHOLESALER:
               msg.balance = team.getAccount().getBalance()
               msg.storage = team.selectJob(job).storage.getStorageList()
               msg.deliverHistory = team.selectJob(job).deliver.getHistory()
-              msg.receivedOrder = team.selectJob(job).order.getOrderList()
-              msg.orderHistory = team.selectJob(constant.JOBS.FACTORY).order.getOrderList()
+              msg.receivedOrder = team.selectJob(job).order.getHistory()
+              msg.orderHistory = team.selectJob(constant.JOBS.FACTORY).order.getHistory()
               break
 
             case constant.JOBS.RETAILER:
               msg.balance = team.getAccount().getBalance()
               msg.storage = team.selectJob(job).storage.getStorageList()
               msg.deliverHistory = team.selectJob(job).deliver.getHistory()
-              msg.receivedOrder = team.selectJob(job).order.getOrderList()
-              msg.orderHistory = team.selectJob(constant.JOBS.WHOLESALER).order.getOrderList()
+              msg.receivedOrder = team.selectJob(job).order.getHistory()
+              msg.orderHistory = team.selectJob(constant.JOBS.WHOLESALER).order.getHistory()
               msg.news = game.getNews().getAvailableNewsList()
               break
           }

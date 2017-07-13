@@ -9,7 +9,7 @@ export function enroll (req, res, next) {
 }
 
 export function newGame (req, res, next) {
-  let config = req.body.config ? JSON.parse(req.body.config) : {}
+  let config = req.body.gameConfig || {}
   GameEngine.newGame(config)
     .then((result) => {
       res.json(response.ResponseSuccessJSON({
