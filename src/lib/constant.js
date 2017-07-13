@@ -23,6 +23,19 @@ export const AccountItem = (obj) => {
   }
 }
 
+export const NewsItem = (obj) => {
+  return {
+    day: obj.day || ZERO_DAYTIME.DAY,
+    time: obj.time || 0,
+    title: obj.title || '',
+    content: obj.content || '',
+    picture: obj.picture || '',
+    product: obj.product || PRODUCTS.CAR,
+    demanded: obj.demanded || 0,
+    price: obj.price || 0
+  }
+}
+
 export const TriggerItem = (obj) => {
   return {
     collection: obj.collection,
@@ -169,5 +182,6 @@ export default {
   READABLE_JOBS: READABLE_JOBS,
   TimeType: TimeType,
   ProductItem: ProductItem,
-  AccountItem: AccountItem
+  AccountItem: AccountItem,
+  NewsItem: NewsItem
 }

@@ -3,9 +3,10 @@ import odm from '../../lib/db/odm'
 import constant from '../../lib/constant'
 import debug from '../../lib/debug'
 import Team from './team'
+import News from './news'
 
 export const DEFAULT_CONFIG = {
-  title: 'REDRO',
+  title: '試玩場 REDRO',
   describe: '2017 工工營 產銷遊戲',
   teamNumber: 4,
   teammembers: [12, 12, 13, 14],
@@ -21,10 +22,10 @@ export const DEFAULT_CONFIG = {
         [constant.PRODUCTS.ENGINE]: 200
       },
       [constant.JOBS.WHOLESALER]: {
-        [constant.PRODUCTS.CAR]: 3000
+        [constant.PRODUCTS.CAR]: 6000
       },
       [constant.JOBS.RETAILER]: {
-        [constant.PRODUCTS.CAR]: 3000
+        [constant.PRODUCTS.CAR]: 9000
       },
       patchSize: 10,
       permanent: true
@@ -40,11 +41,29 @@ export const DEFAULT_CONFIG = {
     {
       day: 1,
       time: 0,
-      title: 'ASD',
-      content: 'ASD',
-      picture: '',
+      title: '高田廠牌所製造的安全氣囊有瑕疵',
+      content: '近幾個月各大車廠紛紛主動召回部分型號的車輛，主因是高田廠牌所製造的安全氣囊有瑕疵，當氣囊爆開，可能造成碎片、零件噴出，導致車內人員傷害。此一負面新聞發布後，使部分消費者打消買車的念頭，車市狀況慘淡。',
+      picture: 'image/news/day1_rehearsal.jpg',
+      demanded: 20,
+      price: 3500
+    },
+    {
+      day: 2,
+      time: 0,
+      title: '高田廠牌所製造的安全氣囊有瑕疵',
+      content: '豐田汽車進一步表示，新的電池技術很有可能會讓旗下所有電動汽車性能都得到改進。電池技術研究人員指出，對於電動汽車來說，鋰離子電池是一項關鍵技術， 預估能讓每次充電行駛里程提高 10% 到 15% 的效能。全球汽車產業分析師評估這次的車用電池再進化會帶來50%的需求成長。',
+      picture: 'image/news/day2_rehearsal.jpg',
       demanded: 30,
-      price: 3000
+      price: 3500
+    },
+    {
+      day: 3,
+      time: 0,
+      title: '高田廠牌所製造的安全氣囊有瑕疵',
+      content: '3月11日發生在日本東北部的強烈地震及隨之引起的海嘯，重創日本各地並造成嚴重的人員傷亡和財物損失。而日本多家車廠亦在此次天災中受到影響。包含Toyota、Mitsubishi、Nissan等多家日本車廠皆已宣佈暫時停止生產，導致自用小客車的價格提高，民眾降低購買意願。',
+      picture: 'image/news/day3_rehearsal.jpg',
+      demanded: 20,
+      price: 3500
     }
   ]
 }
@@ -70,43 +89,61 @@ export default class Game {
     this.games = null
     this.news = null
     this.teamList = []
-
-    this.load(this.gameId)
     this.timer = setInterval(this._update.bind(this), this.getConfig().updateInterval)
 
     this.state = {
-      hasGaveDefaultBalance: false
+      hasGivenDefaultBalance: false
     }
+
+    return this.load(this.gameId)
   }
 
   load (gameId) {
-    if (gameId === constant.GAMES.UNKNOWN) {
-      // create a new game
-      this.games = new odm.Games({
-        config: this.getConfig()
-      })
+    return new Promise((function (resolve, reject) {
+      if (gameId === constant.GAMES.UNKNOWN) {
+        // create a new game
+        this.games = new odm.Games({
+          config: this.getConfig()
+        })
 
-      this.games.save((function (err, game) {
-        if (err) {
-          debug.error(err)
-          return
-        }
-        this.gameId = game._id
+        this.games.save((function (err, game) {
+          if (err) {
+            debug.error(err)
+            return
+          }
+          this.gameId = game._id
 
-        for (let i = 1; i <= this.getConfig().teamNumber; i++) {
-          let newTeam = new Team(this.getGameId(), {
-            teamIndex: i,
-            teammembers: this.getConfig().teammembers[i - 1]
+          // load teams
+          for (let i = 1; i <= this.getConfig().teamNumber; i++) {
+            let newTeam = new Team(this.getGameId(), {
+              teamIndex: i,
+              teammembers: this.getConfig().teammembers[i - 1]
+            })
+            this.getTeamList().push(newTeam)
+          }
+
+          // load news
+          this.news = new News(this.getGameId())
+          for (let news of this.getConfig().news) {
+            this.news.setNews(constant.NewsItem(news))
+          }
+
+          // set stage
+          this.stage = constant.GAME_STAGE.PREPARE
+
+          debug.log(`GameId='${this.gameId}' has been created.`)
+
+          resolve({
+            gameId: this.getGameId(),
+            gameConfig: this.getConfig(),
+            this: this
           })
-          this.getTeamList().push(newTeam)
-        }
-
-        this.stage = constant.GAME_STAGE.PREPARE
-        debug.log(`GameId=${this.gameId} has been created.`)
-      }).bind(this))
-    } else {
-      // load the exist game
-    }
+        }).bind(this))
+      } else {
+        // load the exist game
+      }
+    }).bind(this))
+    .catch((err) => { reject(err) })
   }
 
   save () {
@@ -142,16 +179,19 @@ export default class Game {
     }
     this.setGameStage(list[list.indexOf(this.getGameStage()) + 1])
     this._update()
-    debug.log(`GameId='${this.getGameId()}': Stage has benn set to ${this.getGameStage()}`)
+
+    debug.log(`GameId='${this.getGameId()}' Stage has benn set to ${this.getGameStage()}`)
     return this
   }
 
   nextDay () {
     if (this.isOffWork()) {
+      this.settle()
       this.day += 1
       this.dayStartTime = Date.now()
+
+      debug.log(`GameId='${this.getGameId()}' day has benn set to ${this.getDay()}`)
     }
-    this.settle()
     return this
   }
 
@@ -172,7 +212,7 @@ export default class Game {
   }
 
   isWorking () {
-    return this.getDayStartTime() !== constant.UNKNOWN_TIME
+    return (this.getDayStartTime() !== constant.UNKNOWN_TIME) && (this.getDayStartTime() < this.getConfig().dayLong * 1000)
   }
 
   isOffWork () {
@@ -189,7 +229,7 @@ export default class Game {
 
       case constant.GAME_STAGE.READY:
         // add default balance
-        if (!this.state.hasGaveDefaultBalance) {
+        if (!this.state.hasGivenDefaultBalance) {
           let productItem = constant.AccountItem({
             day: this.getDay(),
             time: this.getTime(),
@@ -198,15 +238,15 @@ export default class Game {
           for (let team of this.getTeamList()) {
             team.getAccount().setBalance(productItem)
           }
-          this.state.hasGaveDefaultBalance = true
+          this.state.hasGivenDefaultBalance = true
         }
         break
 
       case constant.GAME_STAGE.START:
         // working -> off work
         // and get into FINAL stage
-        if (this.getTime() > this.getConfig().dayLong * 1000) {
-          this.dayStartTime = constant.UNKNOWN_TIME
+        if (this.getTime() >= this.getConfig().dayLong * 1000) {
+          this.dayStartTime = this.getConfig().dayLong * 1000
           if (this.day === this.gameConfig.days) {
             this.stage = constant.GAME_STAGE.FINAL
 
@@ -214,6 +254,10 @@ export default class Game {
             clearInterval(this.timer)
           }
         }
+
+        // check news
+        this.getMarket().orderAmount = this.getNews().getDemanded(this.getDay(), this.getTime())
+        this.getMarket().price = this.getNews().getPrice(this.getDay(), this.getTime())
         break
 
       case constant.GAME_STAGE.FINAL:
@@ -248,8 +292,12 @@ export default class Game {
     return this.teamList
   }
 
+  getNews () {
+    return this.news
+  }
+
   selectTeam (teamIndex) {
-    return this.getTeamList()[teamIndex]
+    return this.getTeamList()[teamIndex - 1]
   }
 
   settle () {
@@ -265,8 +313,11 @@ export default class Game {
 
       // storage
       let storageCost = this.getConfig().cost.storage
-      for (let job of storageCost) {
-        for (let productItem in team.selectJob(job).storage.getStorageList()) {
+      for (let job of _.values(constant.JOBS)) {
+        if (job === 'UNKNOWN') {
+          continue
+        }
+        for (let productItem of team.selectJob(job).storage.getStorageList()) {
           cost += storageCost[job][productItem.product] * productItem.amount
         }
       }

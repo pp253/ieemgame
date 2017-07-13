@@ -12,5 +12,6 @@ export default {
   Accounts: Accounts,
   Storages: Storages,
   Orders: Orders,
+  Deliver: Deliver,
   News: News
 }

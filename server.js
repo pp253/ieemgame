@@ -9,7 +9,7 @@ import compression from 'compression'
 
 import debug from './src/lib/debug'
 import routes from './routes'
-import * as validation from './routes/src/module/validation'
+import * as validation from './src/api/validation'
 
 debug.log('Server initializing ...')
 
@@ -54,7 +54,7 @@ if (process.env.NODE_ENV !== 'production') {
   app.use('/test', express.static('test'))
 
   app.use(function (req, res, next) {
-    debug.log(req.connection.remoteAddress, req.method, req.path)
+    //debug.log(req.connection.remoteAddress, req.method, req.path)
     next()
   })
 }

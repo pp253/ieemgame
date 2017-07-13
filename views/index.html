@@ -16,9 +16,13 @@
   <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
   <script src="https://unpkg.com/vuetify/dist/vuetify.min.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <script type="text/javascript">
+    google.charts.load('current', { 'packages': ['corechart'] })
+  </script>
 </head>
 <body>
-  <v-app id="main-frame" style="height: 100%;">
+  <v-app id="main-frame">
     <router-view></router-view>
   </v-app>
   <script src="./dist/build.js"></script>

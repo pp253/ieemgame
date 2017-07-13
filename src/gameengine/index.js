@@ -1,9 +1,6 @@
-import '../lib/db'
-import odm from '../lib/db/odm'
 import constant from '../lib/constant'
-import Game from './components/game'
-import response from '../../routes/src/response'
 import debug from '../lib/debug'
+import Game from './components/game'
 
 export class GameEngine {
   constructor () {
@@ -16,7 +13,17 @@ export class GameEngine {
 
   // config {Object}
   newGame (config) {
-    this.gameList.push(new Game(config))
+    return new Promise((function (resolve, reject) {
+      (new Game(config))
+        .then((function (res) {
+          this.gameList.push(res.this)
+          resolve({
+            gameId: res.gameId,
+            gameConfig: res.gameConfig
+          })
+        }).bind(this))
+        .catch((err) => { reject(err) })
+    }).bind(this))
   }
 
   getGameList () {

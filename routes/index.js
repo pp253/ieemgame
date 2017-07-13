@@ -1,9 +1,9 @@
 //import game from '../src/game'
 import debug from '../src/lib/debug'
-import routesApi from './routes-api'
+import apiRoutes from '../src/api'
 
 export default function initialize (app) {
-  app.post('/api/:module/:method', routesApi)
+  app.post('/api/:module/:method', apiRoutes)
 
   app.get('/echo', function (req, res, next) {
     res.render('echo')
