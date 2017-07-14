@@ -28,7 +28,7 @@ export default class News {
   _update (day, time) {
     for (; this.latestNewsIndex < this.getNewsList().length; this.latestNewsIndex++) {
       let news = this.getNewsList()[this.latestNewsIndex]
-      if (news.day < day || (news.day === day && news.time <= time)) {
+      if (news.day < day || (news.day === day && news.time * 1000 <= time)) {
         this.avaliableNewsList.push(_.cloneDeep(news))
         this.demanded += news.demanded
         this.price = news.price
@@ -86,7 +86,14 @@ export default class News {
         return
       }
       
-      this.getNewsList().push(_.cloneDeep(newsItem))
+      let i = 0
+      for (; i < this.getNewsList().length; i++) {
+        let cur = this.getNewsList()[i]
+        if (cur.day > news.day || (cur.day === news.day && cur.time > news.time)) {
+          break
+        }
+      }
+      this.getNewsList().splice(i, 0, _.cloneDeep(newsItem))
     }).bind(this))
 
     return this
