@@ -1,9 +1,9 @@
-db/*
-database
+db/
+database/
 *.bat
 *.key
 *.csr
-config.json
+#config.json
 
 # Logs
 logs
