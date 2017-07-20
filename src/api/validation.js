@@ -59,6 +59,12 @@ export default {
     isInt: true,
     errorMessage: 'Invalid Amount'
   },
+  'balance': {
+    in: 'body',
+    notEmpty: true,
+    isInt: true,
+    errorMessage: 'Invalid Balance'
+  },
   'job': {
     in: 'body',
     notEmpty: true,
@@ -75,6 +81,15 @@ export default {
     in: 'body',
     notEmpty: true,
     errorMessage: 'Invalid ProductItem'
+  },
+  'nickname': {
+    in: 'body',
+    notEmpty: true,
+    isLength: {
+      options: [{ min: 2, max: 10 }],
+      errorMessage: '名字長度應介於2至10字'
+    },
+    errorMessage: 'Invalid Nickname'
   }
 }
 

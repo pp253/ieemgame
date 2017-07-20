@@ -2,6 +2,8 @@ import _ from 'lodash'
 import mongoose from 'mongoose'
 import * as constant from '../../constant'
 
+export const Code = Number
+export const Nickname = String
 export const Id = mongoose.Schema.ObjectId
 export const GameId = Id
 export const TeamId = Id

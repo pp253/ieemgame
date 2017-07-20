@@ -4872,7 +4872,7 @@ function applyToTag (styleElement, obj) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["b"] = toReadableDay;
-/* harmony export (immutable) */ __webpack_exports__["k"] = toReadableTime;
+/* harmony export (immutable) */ __webpack_exports__["l"] = toReadableTime;
 /* harmony export (immutable) */ __webpack_exports__["d"] = toReadableGameTime;
 /* harmony export (immutable) */ __webpack_exports__["e"] = toReadableTeam;
 /* harmony export (immutable) */ __webpack_exports__["f"] = toReadableDollar;
@@ -4882,11 +4882,11 @@ function applyToTag (styleElement, obj) {
 /* harmony export (immutable) */ __webpack_exports__["g"] = readableStaffJobList;
 /* harmony export (immutable) */ __webpack_exports__["c"] = toReadableJob;
 /* unused harmony export toReadablePosition */
-/* harmony export (immutable) */ __webpack_exports__["m"] = toReadableStorageList;
+/* harmony export (immutable) */ __webpack_exports__["k"] = toReadableStorageList;
 /* unused harmony export toReadableProduct */
 /* harmony export (immutable) */ __webpack_exports__["n"] = toReadableDeliverList;
 /* harmony export (immutable) */ __webpack_exports__["j"] = readableProductList;
-/* harmony export (immutable) */ __webpack_exports__["l"] = toReadableOrderList;
+/* harmony export (immutable) */ __webpack_exports__["m"] = toReadableOrderList;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(6);
 
 
@@ -4898,9 +4898,10 @@ function toReadableDay(day) {
 }
 
 function toReadableTime(time) {
-  var showWorking = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+  var isWorking = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+  var showWorking = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 
-  if (time > 36000000 || time === __WEBPACK_IMPORTED_MODULE_0__constant__["c" /* UNKNOWN_TIME */]) {
+  if (!isWorking || time === __WEBPACK_IMPORTED_MODULE_0__constant__["c" /* UNKNOWN_TIME */]) {
     return __WEBPACK_IMPORTED_MODULE_0__constant__["d" /* READABLE_GAME_WORK */].OFF_WORK;
   }
   var t = parseInt(time / 1000);
@@ -4926,7 +4927,7 @@ function toReadableGameTime(dayTime) {
       break;
     case __WEBPACK_IMPORTED_MODULE_0__constant__["e" /* GAME_STAGE */].START:
     default:
-      return toReadableDay(dayTime.day) + ' ' + toReadableTime(dayTime.time, showWorking);
+      return toReadableDay(dayTime.day) + ' ' + toReadableTime(dayTime.time, dayTime.isWorking, showWorking);
       break;
   }
 }
@@ -5134,10 +5135,10 @@ function toReadableOrderList(list) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return nowUser; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__game__ = __webpack_require__(39);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__account__ = __webpack_require__(228);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__account__ = __webpack_require__(60);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__deliver__ = __webpack_require__(229);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__order__ = __webpack_require__(231);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__storage__ = __webpack_require__(59);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__storage__ = __webpack_require__(40);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__news__ = __webpack_require__(560);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__data__ = __webpack_require__(559);
 
@@ -5434,7 +5435,7 @@ var User = function () {
       if (this.getGameStage() !== __WEBPACK_IMPORTED_MODULE_0__constant__["e" /* GAME_STAGE */].START) {
         return __WEBPACK_IMPORTED_MODULE_0__constant__["c" /* UNKNOWN_TIME */];
       } else if (this.getDayStartTime() === __WEBPACK_IMPORTED_MODULE_0__constant__["c" /* UNKNOWN_TIME */]) {
-        return this.getConfig().dayLong * 1000;
+        return this.getGameConfig().dayLong * 1000;
       } else {
         return Date.now() - this.getDayStartTime();
       }
@@ -5511,6 +5512,23 @@ var User = function () {
         }
       }.bind(this));
     }
+  }, {
+    key: 'test',
+    value: function test() {
+      this.setTeam(1);
+      this.setJob(__WEBPACK_IMPORTED_MODULE_0__constant__["a" /* JOBS */].RETAILER);
+      var interval = 10;
+      var times = 1000;
+      var t = 0;
+      var a = setInterval(function () {
+        console.log('test', t);
+        this._update();
+        if (t++ === times) {
+          console.log('done');
+          clearInterval(a);
+        }
+      }.bind(this), interval);
+    }
   }]);
 
   return User;
@@ -5537,17 +5555,6 @@ var nowUser = new User();
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return JOBS; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return STAFF_JOBS; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return READABLE_JOBS; });
-/* unused harmony export TimeType */
-/* unused harmony export Storages */
-/* unused harmony export Account */
-/* unused harmony export Order */
-/* unused harmony export Orders */
-/* unused harmony export Team */
-/* unused harmony export Game */
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
 var UNKNOWN_TIME = -1;
 
 var ZERO_DAYTIME = {
@@ -5652,181 +5659,7 @@ var READABLE_JOBS = {
   GUERRILLA: '游擊者、工人',
   CONFIRMER: '資料確認者',
   CONSOLER: '後臺控制者'
-  /*
-  export const READABLE_JOBS = {
-    [JOBS.UNKNOWN]: '未知',
-    [JOBS.FACTORY]: '工廠',
-    [JOBS.WHOLESALER]: '批發商',
-    [JOBS.RETAILER]: '零售商',
-    [STAFF_JOBS.UNKNOWN_STAFF]: '未知工作人員',
-    [STAFF_JOBS.KEEPER]: '關主',
-    [STAFF_JOBS.EXCHANGER]: '交換處',
-    [STAFF_JOBS.TRANSPORTER]: '運輸者',
-    [STAFF_JOBS.MARKET]: '市場代表者',
-    [STAFF_JOBS.GUERRILLA]: '游擊者',
-    [STAFF_JOBS.CONFIRMER]: '資料確認者',
-    [STAFF_JOBS.CONSOLER]: '後臺控制者'
-  }
-  */
-};var TimeType = function () {
-  function TimeType(day, time) {
-    _classCallCheck(this, TimeType);
-
-    this.day = day || ZERO_DAYTIME.DAY;
-    this.time = time || ZERO_DAYTIME.TIME;
-  }
-
-  _createClass(TimeType, [{
-    key: 'setDay',
-    value: function setDay(day) {
-      this.day = day;
-      return this;
-    }
-  }, {
-    key: 'setTime',
-    value: function setTime(time) {
-      this.time = time;
-      return this;
-    }
-  }, {
-    key: 'getDay',
-    value: function getDay() {
-      return this.day;
-    }
-  }, {
-    key: 'getTime',
-    value: function getTime() {
-      return this.time;
-    }
-  }, {
-    key: 'isWorking',
-    value: function isWorking() {
-      return this.time > 0;
-    }
-  }]);
-
-  return TimeType;
-}();
-
-var Storages = function () {
-  function Storages() {
-    var gameId = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : GAMES.UNKNOWN;
-    var teamIndex = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : TEAMS.UNKNOWN;
-    var job = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : JOBS.UNKNOWN;
-
-    _classCallCheck(this, Storages);
-  }
-
-  _createClass(Storages, [{
-    key: 'load',
-    value: function load() {}
-  }, {
-    key: 'save',
-    value: function save() {}
-  }, {
-    key: 'update',
-    value: function update() {}
-  }]);
-
-  return Storages;
-}();
-
-var Account = function () {
-  function Account(gameId, teamIndex) {
-    _classCallCheck(this, Account);
-  }
-
-  _createClass(Account, [{
-    key: 'load',
-    value: function load() {}
-  }, {
-    key: 'save',
-    value: function save() {}
-  }, {
-    key: 'update',
-    value: function update() {}
-  }, {
-    key: 'insert',
-    value: function insert() {}
-  }, {
-    key: 'getBalance',
-    value: function getBalance() {}
-  }]);
-
-  return Account;
-}();
-
-var Order = function Order() {
-  var gameId = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : GAMES.UNKNOWN;
-  var teamIndex = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : TEAMS.UNKNOWN;
-
-  _classCallCheck(this, Order);
-
-  this.gameId = gameId;
-  this.teamIndex = teamIndex;
 };
-
-var Orders = function Orders() {
-  _classCallCheck(this, Orders);
-};
-
-var Team = function () {
-  function Team(gameId, teamIndex) {
-    _classCallCheck(this, Team);
-
-    this.gameId = gameId;
-    this.teamIndex = teamIndex;
-
-    this.account = new Account(this.gameId, this.teamIndex);
-    this.balance = this.account.getBalance();
-
-    this.storage = new Storages(this.gameId, this.teamIndex);
-
-    this.orders = new Orders(this.gameId, this.teamIndex);
-  }
-
-  _createClass(Team, [{
-    key: 'load',
-    value: function load() {}
-  }, {
-    key: 'save',
-    value: function save() {}
-  }, {
-    key: 'update',
-    value: function update() {}
-  }, {
-    key: 'getReceivedOrders',
-    value: function getReceivedOrders() {
-      var fromTime = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : ZERO_DAYTIME;
-
-      this.orders; // ...
-    }
-  }, {
-    key: 'setOrder',
-    value: function setOrder(order) {}
-  }]);
-
-  return Team;
-}();
-
-var Game = function () {
-  function Game() {
-    _classCallCheck(this, Game);
-  }
-
-  _createClass(Game, [{
-    key: 'load',
-    value: function load() {}
-  }, {
-    key: 'save',
-    value: function save() {}
-  }, {
-    key: 'update',
-    value: function update() {}
-  }]);
-
-  return Game;
-}();
 
 /***/ }),
 /* 7 */
@@ -5893,7 +5726,7 @@ var router = new VueRouter({
 /* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var freeGlobal = __webpack_require__(90);
+var freeGlobal = __webpack_require__(91);
 
 /** Detect free variable `self`. */
 var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
@@ -13208,7 +13041,7 @@ setTimeout(function () {
 
 /* harmony default export */ __webpack_exports__["default"] = (Vue$3);
 
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(238), __webpack_require__(64)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(238), __webpack_require__(65)))
 
 /***/ }),
 /* 14 */
@@ -13344,8 +13177,8 @@ module.exports = copyArray;
 /* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var assignValue = __webpack_require__(73),
-    baseAssignValue = __webpack_require__(47);
+var assignValue = __webpack_require__(74),
+    baseAssignValue = __webpack_require__(48);
 
 /**
  * Copies properties of `source` to `object`.
@@ -13834,7 +13667,7 @@ module.exports = isArguments;
 /***/ (function(module, exports, __webpack_require__) {
 
 var isFunction = __webpack_require__(36),
-    isLength = __webpack_require__(57);
+    isLength = __webpack_require__(58);
 
 /**
  * Checks if `value` is array-like. A value is considered array-like if it's
@@ -13960,8 +13793,8 @@ module.exports = isFunction;
 /* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayLikeKeys = __webpack_require__(69),
-    baseKeys = __webpack_require__(79),
+var arrayLikeKeys = __webpack_require__(70),
+    baseKeys = __webpack_require__(80),
     isArrayLike = __webpack_require__(34);
 
 /**
@@ -14003,7 +13836,7 @@ module.exports = keys;
 /* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayLikeKeys = __webpack_require__(69),
+var arrayLikeKeys = __webpack_require__(70),
     baseKeysIn = __webpack_require__(334),
     isArrayLike = __webpack_require__(34);
 
@@ -14108,17 +13941,78 @@ function nextDay(gameId) {
 
 /***/ }),
 /* 40 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["c"] = setStorage;
+/* harmony export (immutable) */ __webpack_exports__["b"] = getStorage;
+/* harmony export (immutable) */ __webpack_exports__["a"] = getHistory;
+function setStorage(gameId, teamIndex, job, product, amount) {
+  return new Promise(function (resolve, reject) {
+    axios.post('/api/storage/set_storage', {
+      gameId: gameId,
+      teamIndex: teamIndex,
+      job: job,
+      product: product,
+      amount: amount
+    }).then(function (res) {
+      if (res.data.err) {
+        reject(res);
+      }
+      resolve(res);
+    }).catch(function (err) {
+      reject(err);
+    });
+  });
+}
+
+function getStorage(gameId, teamIndex, job) {
+  return new Promise(function (resolve, reject) {
+    axios.post('/api/storage/get_storage', {
+      gameId: gameId,
+      teamIndex: teamIndex,
+      job: job
+    }).then(function (res) {
+      if (res.data.err) {
+        reject(res);
+      }
+      resolve(res);
+    }).catch(function (err) {
+      reject(err);
+    });
+  });
+}
+
+function getHistory(gameId, teamIndex, job) {
+  return new Promise(function (resolve, reject) {
+    axios.post('/api/storage/get_history', {
+      gameId: gameId,
+      teamIndex: teamIndex,
+      job: job
+    }).then(function (res) {
+      if (res.data.err) {
+        reject(res);
+      }
+      resolve(res);
+    }).catch(function (err) {
+      reject(err);
+    });
+  });
+}
+
+/***/ }),
+/* 41 */
 /***/ (function(module, exports) {
 
 var core = module.exports = {version: '2.4.0'};
 if(typeof __e == 'number')__e = core; // eslint-disable-line no-undef
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseCreate = __webpack_require__(27),
-    baseLodash = __webpack_require__(48);
+    baseLodash = __webpack_require__(49);
 
 /** Used as references for the maximum length and index of an array. */
 var MAX_ARRAY_LENGTH = 4294967295;
@@ -14148,7 +14042,7 @@ module.exports = LazyWrapper;
 
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var getNative = __webpack_require__(15),
@@ -14161,7 +14055,7 @@ module.exports = Map;
 
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var mapCacheClear = __webpack_require__(389),
@@ -14199,7 +14093,7 @@ module.exports = MapCache;
 
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, exports) {
 
 /**
@@ -14226,7 +14120,7 @@ module.exports = apply;
 
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ (function(module, exports) {
 
 /**
@@ -14254,7 +14148,7 @@ module.exports = arrayEach;
 
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ (function(module, exports) {
 
 /**
@@ -14280,10 +14174,10 @@ module.exports = arrayPush;
 
 
 /***/ }),
-/* 47 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var defineProperty = __webpack_require__(88);
+var defineProperty = __webpack_require__(89);
 
 /**
  * The base implementation of `assignValue` and `assignMergeValue` without
@@ -14311,7 +14205,7 @@ module.exports = baseAssignValue;
 
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ (function(module, exports) {
 
 /**
@@ -14327,10 +14221,10 @@ module.exports = baseLodash;
 
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Uint8Array = __webpack_require__(67);
+var Uint8Array = __webpack_require__(68);
 
 /**
  * Creates a clone of `arrayBuffer`.
@@ -14349,19 +14243,19 @@ module.exports = cloneArrayBuffer;
 
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseSetData = __webpack_require__(80),
+var baseSetData = __webpack_require__(81),
     createBind = __webpack_require__(358),
     createCurry = __webpack_require__(359),
-    createHybrid = __webpack_require__(86),
+    createHybrid = __webpack_require__(87),
     createPartial = __webpack_require__(360),
-    getData = __webpack_require__(92),
+    getData = __webpack_require__(93),
     mergeData = __webpack_require__(395),
-    setData = __webpack_require__(103),
-    setWrapToString = __webpack_require__(105),
-    toInteger = __webpack_require__(111);
+    setData = __webpack_require__(104),
+    setWrapToString = __webpack_require__(106),
+    toInteger = __webpack_require__(112);
 
 /** Error message constants. */
 var FUNC_ERROR_TEXT = 'Expected a function';
@@ -14461,10 +14355,10 @@ module.exports = createWrap;
 
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var overArg = __webpack_require__(101);
+var overArg = __webpack_require__(102);
 
 /** Built-in value references. */
 var getPrototype = overArg(Object.getPrototypeOf, Object);
@@ -14473,11 +14367,11 @@ module.exports = getPrototype;
 
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var arrayFilter = __webpack_require__(318),
-    stubArray = __webpack_require__(110);
+    stubArray = __webpack_require__(111);
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
@@ -14509,7 +14403,7 @@ module.exports = getSymbols;
 
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isArray = __webpack_require__(9),
@@ -14544,7 +14438,7 @@ module.exports = isKey;
 
 
 /***/ }),
-/* 54 */
+/* 55 */
 /***/ (function(module, exports) {
 
 /** Used for built-in method references. */
@@ -14568,7 +14462,7 @@ module.exports = isPrototype;
 
 
 /***/ }),
-/* 55 */
+/* 56 */
 /***/ (function(module, exports) {
 
 /** Used as the internal argument placeholder. */
@@ -14603,11 +14497,11 @@ module.exports = replaceHolders;
 
 
 /***/ }),
-/* 56 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseSetToString = __webpack_require__(342),
-    shortOut = __webpack_require__(106);
+    shortOut = __webpack_require__(107);
 
 /**
  * Sets the `toString` method of `func` to return `string`.
@@ -14623,7 +14517,7 @@ module.exports = setToString;
 
 
 /***/ }),
-/* 57 */
+/* 58 */
 /***/ (function(module, exports) {
 
 /** Used as references for various `Number` constants. */
@@ -14664,7 +14558,7 @@ module.exports = isLength;
 
 
 /***/ }),
-/* 58 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseIsTypedArray = __webpack_require__(332),
@@ -14697,60 +14591,62 @@ module.exports = isTypedArray;
 
 
 /***/ }),
-/* 59 */
+/* 60 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (immutable) */ __webpack_exports__["c"] = setStorage;
-/* harmony export (immutable) */ __webpack_exports__["b"] = getStorage;
+/* harmony export (immutable) */ __webpack_exports__["b"] = getBalance;
 /* harmony export (immutable) */ __webpack_exports__["a"] = getHistory;
-function setStorage(gameId, teamIndex, job, product, amount) {
+/* harmony export (immutable) */ __webpack_exports__["d"] = give;
+/* harmony export (immutable) */ __webpack_exports__["c"] = take;
+function getBalance(gameId, teamIndex) {
   return new Promise(function (resolve, reject) {
-    axios.post('/api/storage/set_storage', {
+    axios.post('/api/account/get_balance', {
       gameId: gameId,
-      teamIndex: teamIndex,
-      job: job,
-      product: product,
-      amount: amount
+      teamIndex: teamIndex
     }).then(function (res) {
-      if (res.data.err) {
-        reject(res);
-      }
-      resolve(res);
+      res.data.err ? reject(res) : resolve(res);
     }).catch(function (err) {
       reject(err);
     });
   });
 }
 
-function getStorage(gameId, teamIndex, job) {
+function getHistory(gameId, teamIndex) {
   return new Promise(function (resolve, reject) {
-    axios.post('/api/storage/get_storage', {
+    axios.post('/api/account/get_history', {
       gameId: gameId,
-      teamIndex: teamIndex,
-      job: job
+      teamIndex: teamIndex
     }).then(function (res) {
-      if (res.data.err) {
-        reject(res);
-      }
-      resolve(res);
+      res.data.err ? reject(res) : resolve(res);
     }).catch(function (err) {
       reject(err);
     });
   });
 }
 
-function getHistory(gameId, teamIndex, job) {
+function give(gameId, teamIndex, balance) {
   return new Promise(function (resolve, reject) {
-    axios.post('/api/storage/get_history', {
+    axios.post('/api/account/give', {
       gameId: gameId,
       teamIndex: teamIndex,
-      job: job
+      balance: balance
     }).then(function (res) {
-      if (res.data.err) {
-        reject(res);
-      }
-      resolve(res);
+      res.data.err ? reject(res) : resolve(res);
+    }).catch(function (err) {
+      reject(err);
+    });
+  });
+}
+
+function take(gameId, teamIndex, balance) {
+  return new Promise(function (resolve, reject) {
+    axios.post('/api/account/take', {
+      gameId: gameId,
+      teamIndex: teamIndex,
+      balance: balance
+    }).then(function (res) {
+      res.data.err ? reject(res) : resolve(res);
     }).catch(function (err) {
       reject(err);
     });
@@ -14758,16 +14654,16 @@ function getHistory(gameId, teamIndex, job) {
 }
 
 /***/ }),
-/* 60 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Thank's IE8 for his funny defineProperty
-module.exports = !__webpack_require__(61)(function(){
+module.exports = !__webpack_require__(62)(function(){
   return Object.defineProperty({}, 'a', {get: function(){ return 7; }}).a != 7;
 });
 
 /***/ }),
-/* 61 */
+/* 62 */
 /***/ (function(module, exports) {
 
 module.exports = function(exec){
@@ -14779,7 +14675,7 @@ module.exports = function(exec){
 };
 
 /***/ }),
-/* 62 */
+/* 63 */
 /***/ (function(module, exports) {
 
 // https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
@@ -14788,7 +14684,7 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
 if(typeof __g == 'number')__g = global; // eslint-disable-line no-undef
 
 /***/ }),
-/* 63 */
+/* 64 */
 /***/ (function(module, exports) {
 
 module.exports = function(it){
@@ -14796,7 +14692,7 @@ module.exports = function(it){
 };
 
 /***/ }),
-/* 64 */
+/* 65 */
 /***/ (function(module, exports) {
 
 var g;
@@ -14823,7 +14719,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 65 */
+/* 66 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* MIT license */
@@ -15314,11 +15210,11 @@ module.exports = Color;
 
 
 /***/ }),
-/* 66 */
+/* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseCreate = __webpack_require__(27),
-    baseLodash = __webpack_require__(48);
+    baseLodash = __webpack_require__(49);
 
 /**
  * The base constructor for creating `lodash` wrapper objects.
@@ -15342,7 +15238,7 @@ module.exports = LodashWrapper;
 
 
 /***/ }),
-/* 67 */
+/* 68 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var root = __webpack_require__(8);
@@ -15354,7 +15250,7 @@ module.exports = Uint8Array;
 
 
 /***/ }),
-/* 68 */
+/* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var getNative = __webpack_require__(15),
@@ -15367,7 +15263,7 @@ module.exports = WeakMap;
 
 
 /***/ }),
-/* 69 */
+/* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseTimes = __webpack_require__(343),
@@ -15375,7 +15271,7 @@ var baseTimes = __webpack_require__(343),
     isArray = __webpack_require__(9),
     isBuffer = __webpack_require__(35),
     isIndex = __webpack_require__(30),
-    isTypedArray = __webpack_require__(58);
+    isTypedArray = __webpack_require__(59);
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
@@ -15422,7 +15318,7 @@ module.exports = arrayLikeKeys;
 
 
 /***/ }),
-/* 70 */
+/* 71 */
 /***/ (function(module, exports) {
 
 /**
@@ -15449,7 +15345,7 @@ module.exports = arrayMap;
 
 
 /***/ }),
-/* 71 */
+/* 72 */
 /***/ (function(module, exports) {
 
 /**
@@ -15481,10 +15377,10 @@ module.exports = arrayReduce;
 
 
 /***/ }),
-/* 72 */
+/* 73 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseAssignValue = __webpack_require__(47),
+var baseAssignValue = __webpack_require__(48),
     eq = __webpack_require__(21);
 
 /**
@@ -15507,10 +15403,10 @@ module.exports = assignMergeValue;
 
 
 /***/ }),
-/* 73 */
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseAssignValue = __webpack_require__(47),
+var baseAssignValue = __webpack_require__(48),
     eq = __webpack_require__(21);
 
 /** Used for built-in method references. */
@@ -15541,7 +15437,7 @@ module.exports = assignValue;
 
 
 /***/ }),
-/* 74 */
+/* 75 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var copyObject = __webpack_require__(19),
@@ -15564,24 +15460,24 @@ module.exports = baseAssign;
 
 
 /***/ }),
-/* 75 */
+/* 76 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var Stack = __webpack_require__(25),
-    arrayEach = __webpack_require__(45),
-    assignValue = __webpack_require__(73),
-    baseAssign = __webpack_require__(74),
+    arrayEach = __webpack_require__(46),
+    assignValue = __webpack_require__(74),
+    baseAssign = __webpack_require__(75),
     baseAssignIn = __webpack_require__(321),
-    cloneBuffer = __webpack_require__(82),
+    cloneBuffer = __webpack_require__(83),
     copyArray = __webpack_require__(18),
     copySymbols = __webpack_require__(352),
     copySymbolsIn = __webpack_require__(353),
-    getAllKeys = __webpack_require__(91),
+    getAllKeys = __webpack_require__(92),
     getAllKeysIn = __webpack_require__(364),
-    getTag = __webpack_require__(95),
+    getTag = __webpack_require__(96),
     initCloneArray = __webpack_require__(376),
     initCloneByTag = __webpack_require__(377),
-    initCloneObject = __webpack_require__(96),
+    initCloneObject = __webpack_require__(97),
     isArray = __webpack_require__(9),
     isBuffer = __webpack_require__(35),
     isObject = __webpack_require__(10),
@@ -15723,10 +15619,10 @@ module.exports = baseClone;
 
 
 /***/ }),
-/* 76 */
+/* 77 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var castPath = __webpack_require__(81),
+var castPath = __webpack_require__(82),
     toKey = __webpack_require__(20);
 
 /**
@@ -15753,10 +15649,10 @@ module.exports = baseGet;
 
 
 /***/ }),
-/* 77 */
+/* 78 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayPush = __webpack_require__(46),
+var arrayPush = __webpack_require__(47),
     isArray = __webpack_require__(9);
 
 /**
@@ -15779,7 +15675,7 @@ module.exports = baseGetAllKeys;
 
 
 /***/ }),
-/* 78 */
+/* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseIsEqualDeep = __webpack_require__(328),
@@ -15813,10 +15709,10 @@ module.exports = baseIsEqual;
 
 
 /***/ }),
-/* 79 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var isPrototype = __webpack_require__(54),
+var isPrototype = __webpack_require__(55),
     nativeKeys = __webpack_require__(396);
 
 /** Used for built-in method references. */
@@ -15849,11 +15745,11 @@ module.exports = baseKeys;
 
 
 /***/ }),
-/* 80 */
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var identity = __webpack_require__(32),
-    metaMap = __webpack_require__(100);
+    metaMap = __webpack_require__(101);
 
 /**
  * The base implementation of `setData` without support for hot loop shorting.
@@ -15872,13 +15768,13 @@ module.exports = baseSetData;
 
 
 /***/ }),
-/* 81 */
+/* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isArray = __webpack_require__(9),
-    isKey = __webpack_require__(53),
-    stringToPath = __webpack_require__(107),
-    toString = __webpack_require__(112);
+    isKey = __webpack_require__(54),
+    stringToPath = __webpack_require__(108),
+    toString = __webpack_require__(113);
 
 /**
  * Casts `value` to a path array if it's not one.
@@ -15899,7 +15795,7 @@ module.exports = castPath;
 
 
 /***/ }),
-/* 82 */
+/* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module) {var root = __webpack_require__(8);
@@ -15941,10 +15837,10 @@ module.exports = cloneBuffer;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(23)(module)))
 
 /***/ }),
-/* 83 */
+/* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var cloneArrayBuffer = __webpack_require__(49);
+var cloneArrayBuffer = __webpack_require__(50);
 
 /**
  * Creates a clone of `typedArray`.
@@ -15963,7 +15859,7 @@ module.exports = cloneTypedArray;
 
 
 /***/ }),
-/* 84 */
+/* 85 */
 /***/ (function(module, exports) {
 
 /* Built-in method references for those with the same name as other `lodash` methods. */
@@ -16008,7 +15904,7 @@ module.exports = composeArgs;
 
 
 /***/ }),
-/* 85 */
+/* 86 */
 /***/ (function(module, exports) {
 
 /* Built-in method references for those with the same name as other `lodash` methods. */
@@ -16055,17 +15951,17 @@ module.exports = composeArgsRight;
 
 
 /***/ }),
-/* 86 */
+/* 87 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var composeArgs = __webpack_require__(84),
-    composeArgsRight = __webpack_require__(85),
+var composeArgs = __webpack_require__(85),
+    composeArgsRight = __webpack_require__(86),
     countHolders = __webpack_require__(355),
     createCtor = __webpack_require__(28),
-    createRecurry = __webpack_require__(87),
-    getHolder = __webpack_require__(93),
+    createRecurry = __webpack_require__(88),
+    getHolder = __webpack_require__(94),
     reorder = __webpack_require__(401),
-    replaceHolders = __webpack_require__(55),
+    replaceHolders = __webpack_require__(56),
     root = __webpack_require__(8);
 
 /** Used to compose bitmasks for function metadata. */
@@ -16153,12 +16049,12 @@ module.exports = createHybrid;
 
 
 /***/ }),
-/* 87 */
+/* 88 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isLaziable = __webpack_require__(382),
-    setData = __webpack_require__(103),
-    setWrapToString = __webpack_require__(105);
+    setData = __webpack_require__(104),
+    setWrapToString = __webpack_require__(106);
 
 /** Used to compose bitmasks for function metadata. */
 var WRAP_BIND_FLAG = 1,
@@ -16215,7 +16111,7 @@ module.exports = createRecurry;
 
 
 /***/ }),
-/* 88 */
+/* 89 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var getNative = __webpack_require__(15);
@@ -16232,7 +16128,7 @@ module.exports = defineProperty;
 
 
 /***/ }),
-/* 89 */
+/* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var SetCache = __webpack_require__(315),
@@ -16321,7 +16217,7 @@ module.exports = equalArrays;
 
 
 /***/ }),
-/* 90 */
+/* 91 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/** Detect free variable `global` from Node.js. */
@@ -16329,14 +16225,14 @@ var freeGlobal = typeof global == 'object' && global && global.Object === Object
 
 module.exports = freeGlobal;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(64)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(65)))
 
 /***/ }),
-/* 91 */
+/* 92 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseGetAllKeys = __webpack_require__(77),
-    getSymbols = __webpack_require__(52),
+var baseGetAllKeys = __webpack_require__(78),
+    getSymbols = __webpack_require__(53),
     keys = __webpack_require__(37);
 
 /**
@@ -16354,10 +16250,10 @@ module.exports = getAllKeys;
 
 
 /***/ }),
-/* 92 */
+/* 93 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var metaMap = __webpack_require__(100),
+var metaMap = __webpack_require__(101),
     noop = __webpack_require__(429);
 
 /**
@@ -16375,7 +16271,7 @@ module.exports = getData;
 
 
 /***/ }),
-/* 93 */
+/* 94 */
 /***/ (function(module, exports) {
 
 /**
@@ -16394,13 +16290,13 @@ module.exports = getHolder;
 
 
 /***/ }),
-/* 94 */
+/* 95 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayPush = __webpack_require__(46),
-    getPrototype = __webpack_require__(51),
-    getSymbols = __webpack_require__(52),
-    stubArray = __webpack_require__(110);
+var arrayPush = __webpack_require__(47),
+    getPrototype = __webpack_require__(52),
+    getSymbols = __webpack_require__(53),
+    stubArray = __webpack_require__(111);
 
 /* Built-in method references for those with the same name as other `lodash` methods. */
 var nativeGetSymbols = Object.getOwnPropertySymbols;
@@ -16425,16 +16321,16 @@ module.exports = getSymbolsIn;
 
 
 /***/ }),
-/* 95 */
+/* 96 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var DataView = __webpack_require__(311),
-    Map = __webpack_require__(42),
+    Map = __webpack_require__(43),
     Promise = __webpack_require__(313),
     Set = __webpack_require__(314),
-    WeakMap = __webpack_require__(68),
+    WeakMap = __webpack_require__(69),
     baseGetTag = __webpack_require__(17),
-    toSource = __webpack_require__(108);
+    toSource = __webpack_require__(109);
 
 /** `Object#toString` result references. */
 var mapTag = '[object Map]',
@@ -16489,12 +16385,12 @@ module.exports = getTag;
 
 
 /***/ }),
-/* 96 */
+/* 97 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseCreate = __webpack_require__(27),
-    getPrototype = __webpack_require__(51),
-    isPrototype = __webpack_require__(54);
+    getPrototype = __webpack_require__(52),
+    isPrototype = __webpack_require__(55);
 
 /**
  * Initializes an object clone.
@@ -16513,7 +16409,7 @@ module.exports = initCloneObject;
 
 
 /***/ }),
-/* 97 */
+/* 98 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isObject = __webpack_require__(10);
@@ -16534,7 +16430,7 @@ module.exports = isStrictComparable;
 
 
 /***/ }),
-/* 98 */
+/* 99 */
 /***/ (function(module, exports) {
 
 /**
@@ -16558,7 +16454,7 @@ module.exports = mapToArray;
 
 
 /***/ }),
-/* 99 */
+/* 100 */
 /***/ (function(module, exports) {
 
 /**
@@ -16584,10 +16480,10 @@ module.exports = matchesStrictComparable;
 
 
 /***/ }),
-/* 100 */
+/* 101 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var WeakMap = __webpack_require__(68);
+var WeakMap = __webpack_require__(69);
 
 /** Used to store function metadata. */
 var metaMap = WeakMap && new WeakMap;
@@ -16596,7 +16492,7 @@ module.exports = metaMap;
 
 
 /***/ }),
-/* 101 */
+/* 102 */
 /***/ (function(module, exports) {
 
 /**
@@ -16617,10 +16513,10 @@ module.exports = overArg;
 
 
 /***/ }),
-/* 102 */
+/* 103 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var apply = __webpack_require__(44);
+var apply = __webpack_require__(45);
 
 /* Built-in method references for those with the same name as other `lodash` methods. */
 var nativeMax = Math.max;
@@ -16659,11 +16555,11 @@ module.exports = overRest;
 
 
 /***/ }),
-/* 103 */
+/* 104 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseSetData = __webpack_require__(80),
-    shortOut = __webpack_require__(106);
+var baseSetData = __webpack_require__(81),
+    shortOut = __webpack_require__(107);
 
 /**
  * Sets metadata for `func`.
@@ -16685,7 +16581,7 @@ module.exports = setData;
 
 
 /***/ }),
-/* 104 */
+/* 105 */
 /***/ (function(module, exports) {
 
 /**
@@ -16709,12 +16605,12 @@ module.exports = setToArray;
 
 
 /***/ }),
-/* 105 */
+/* 106 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var getWrapDetails = __webpack_require__(369),
     insertWrapDetails = __webpack_require__(378),
-    setToString = __webpack_require__(56),
+    setToString = __webpack_require__(57),
     updateWrapDetails = __webpack_require__(410);
 
 /**
@@ -16736,7 +16632,7 @@ module.exports = setWrapToString;
 
 
 /***/ }),
-/* 106 */
+/* 107 */
 /***/ (function(module, exports) {
 
 /** Used to detect hot functions by number of calls within a span of milliseconds. */
@@ -16779,7 +16675,7 @@ module.exports = shortOut;
 
 
 /***/ }),
-/* 107 */
+/* 108 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var memoizeCapped = __webpack_require__(394);
@@ -16813,7 +16709,7 @@ module.exports = stringToPath;
 
 
 /***/ }),
-/* 108 */
+/* 109 */
 /***/ (function(module, exports) {
 
 /** Used for built-in method references. */
@@ -16845,7 +16741,7 @@ module.exports = toSource;
 
 
 /***/ }),
-/* 109 */
+/* 110 */
 /***/ (function(module, exports) {
 
 /**
@@ -16857,7 +16753,7 @@ module.exports = {};
 
 
 /***/ }),
-/* 110 */
+/* 111 */
 /***/ (function(module, exports) {
 
 /**
@@ -16886,7 +16782,7 @@ module.exports = stubArray;
 
 
 /***/ }),
-/* 111 */
+/* 112 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var toFinite = __webpack_require__(433);
@@ -16928,7 +16824,7 @@ module.exports = toInteger;
 
 
 /***/ }),
-/* 112 */
+/* 113 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseToString = __webpack_require__(344);
@@ -16962,7 +16858,7 @@ module.exports = toString;
 
 
 /***/ }),
-/* 113 */
+/* 114 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17040,7 +16936,7 @@ return af;
 
 
 /***/ }),
-/* 114 */
+/* 115 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17104,7 +17000,7 @@ return arDz;
 
 
 /***/ }),
-/* 115 */
+/* 116 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17168,7 +17064,7 @@ return arKw;
 
 
 /***/ }),
-/* 116 */
+/* 117 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17299,7 +17195,7 @@ return arLy;
 
 
 /***/ }),
-/* 117 */
+/* 118 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17364,7 +17260,7 @@ return arMa;
 
 
 /***/ }),
-/* 118 */
+/* 119 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17474,7 +17370,7 @@ return arSa;
 
 
 /***/ }),
-/* 119 */
+/* 120 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17538,7 +17434,7 @@ return arTn;
 
 
 /***/ }),
-/* 120 */
+/* 121 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17685,7 +17581,7 @@ return ar;
 
 
 /***/ }),
-/* 121 */
+/* 122 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17795,7 +17691,7 @@ return az;
 
 
 /***/ }),
-/* 122 */
+/* 123 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -17934,7 +17830,7 @@ return be;
 
 
 /***/ }),
-/* 123 */
+/* 124 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -18029,7 +17925,7 @@ return bg;
 
 
 /***/ }),
-/* 124 */
+/* 125 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -18153,7 +18049,7 @@ return bn;
 
 
 /***/ }),
-/* 125 */
+/* 126 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -18277,7 +18173,7 @@ return bo;
 
 
 /***/ }),
-/* 126 */
+/* 127 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -18390,7 +18286,7 @@ return br;
 
 
 /***/ }),
-/* 127 */
+/* 128 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -18538,7 +18434,7 @@ return bs;
 
 
 /***/ }),
-/* 128 */
+/* 129 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -18631,7 +18527,7 @@ return ca;
 
 
 /***/ }),
-/* 129 */
+/* 130 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -18808,7 +18704,7 @@ return cs;
 
 
 /***/ }),
-/* 130 */
+/* 131 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -18876,7 +18772,7 @@ return cv;
 
 
 /***/ }),
-/* 131 */
+/* 132 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -18962,7 +18858,7 @@ return cy;
 
 
 /***/ }),
-/* 132 */
+/* 133 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -19027,7 +18923,7 @@ return da;
 
 
 /***/ }),
-/* 133 */
+/* 134 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -19111,7 +19007,7 @@ return deAt;
 
 
 /***/ }),
-/* 134 */
+/* 135 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -19194,7 +19090,7 @@ return deCh;
 
 
 /***/ }),
-/* 135 */
+/* 136 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -19277,7 +19173,7 @@ return de;
 
 
 /***/ }),
-/* 136 */
+/* 137 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -19382,7 +19278,7 @@ return dv;
 
 
 /***/ }),
-/* 137 */
+/* 138 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -19487,7 +19383,7 @@ return el;
 
 
 /***/ }),
-/* 138 */
+/* 139 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -19559,7 +19455,7 @@ return enAu;
 
 
 /***/ }),
-/* 139 */
+/* 140 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -19627,7 +19523,7 @@ return enCa;
 
 
 /***/ }),
-/* 140 */
+/* 141 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -19699,7 +19595,7 @@ return enGb;
 
 
 /***/ }),
-/* 141 */
+/* 142 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -19771,7 +19667,7 @@ return enIe;
 
 
 /***/ }),
-/* 142 */
+/* 143 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -19843,7 +19739,7 @@ return enNz;
 
 
 /***/ }),
-/* 143 */
+/* 144 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -19921,7 +19817,7 @@ return eo;
 
 
 /***/ }),
-/* 144 */
+/* 145 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20008,7 +19904,7 @@ return esDo;
 
 
 /***/ }),
-/* 145 */
+/* 146 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20096,7 +19992,7 @@ return es;
 
 
 /***/ }),
-/* 146 */
+/* 147 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20181,7 +20077,7 @@ return et;
 
 
 /***/ }),
-/* 147 */
+/* 148 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20252,7 +20148,7 @@ return eu;
 
 
 /***/ }),
-/* 148 */
+/* 149 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20364,7 +20260,7 @@ return fa;
 
 
 /***/ }),
-/* 149 */
+/* 150 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20476,7 +20372,7 @@ return fi;
 
 
 /***/ }),
-/* 150 */
+/* 151 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20541,7 +20437,7 @@ return fo;
 
 
 /***/ }),
-/* 151 */
+/* 152 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20620,7 +20516,7 @@ return frCa;
 
 
 /***/ }),
-/* 152 */
+/* 153 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20703,7 +20599,7 @@ return frCh;
 
 
 /***/ }),
-/* 153 */
+/* 154 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20791,7 +20687,7 @@ return fr;
 
 
 /***/ }),
-/* 154 */
+/* 155 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20871,7 +20767,7 @@ return fy;
 
 
 /***/ }),
-/* 155 */
+/* 156 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -20952,7 +20848,7 @@ return gd;
 
 
 /***/ }),
-/* 156 */
+/* 157 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -21034,7 +20930,7 @@ return gl;
 
 
 /***/ }),
-/* 157 */
+/* 158 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -21161,7 +21057,7 @@ return gomLatn;
 
 
 /***/ }),
-/* 158 */
+/* 159 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -21265,7 +21161,7 @@ return he;
 
 
 /***/ }),
-/* 159 */
+/* 160 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -21394,7 +21290,7 @@ return hi;
 
 
 /***/ }),
-/* 160 */
+/* 161 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -21544,7 +21440,7 @@ return hr;
 
 
 /***/ }),
-/* 161 */
+/* 162 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -21658,7 +21554,7 @@ return hu;
 
 
 /***/ }),
-/* 162 */
+/* 163 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -21758,7 +21654,7 @@ return hyAm;
 
 
 /***/ }),
-/* 163 */
+/* 164 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -21846,7 +21742,7 @@ return id;
 
 
 /***/ }),
-/* 164 */
+/* 165 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -21978,7 +21874,7 @@ return is;
 
 
 /***/ }),
-/* 165 */
+/* 166 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -22053,7 +21949,7 @@ return it;
 
 
 /***/ }),
-/* 166 */
+/* 167 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -22138,7 +22034,7 @@ return ja;
 
 
 /***/ }),
-/* 167 */
+/* 168 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -22226,7 +22122,7 @@ return jv;
 
 
 /***/ }),
-/* 168 */
+/* 169 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -22320,7 +22216,7 @@ return ka;
 
 
 /***/ }),
-/* 169 */
+/* 170 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -22412,7 +22308,7 @@ return kk;
 
 
 /***/ }),
-/* 170 */
+/* 171 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -22475,7 +22371,7 @@ return km;
 
 
 /***/ }),
-/* 171 */
+/* 172 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -22606,7 +22502,7 @@ return kn;
 
 
 /***/ }),
-/* 172 */
+/* 173 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -22680,7 +22576,7 @@ return ko;
 
 
 /***/ }),
-/* 173 */
+/* 174 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -22773,7 +22669,7 @@ return ky;
 
 
 /***/ }),
-/* 174 */
+/* 175 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -22915,7 +22811,7 @@ return lb;
 
 
 /***/ }),
-/* 175 */
+/* 176 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -22990,7 +22886,7 @@ return lo;
 
 
 /***/ }),
-/* 176 */
+/* 177 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -23112,7 +23008,7 @@ return lt;
 
 
 /***/ }),
-/* 177 */
+/* 178 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -23214,7 +23110,7 @@ return lv;
 
 
 /***/ }),
-/* 178 */
+/* 179 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -23330,7 +23226,7 @@ return me;
 
 
 /***/ }),
-/* 179 */
+/* 180 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -23399,7 +23295,7 @@ return mi;
 
 
 /***/ }),
-/* 180 */
+/* 181 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -23494,7 +23390,7 @@ return mk;
 
 
 /***/ }),
-/* 181 */
+/* 182 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -23580,7 +23476,7 @@ return ml;
 
 
 /***/ }),
-/* 182 */
+/* 183 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -23744,7 +23640,7 @@ return mr;
 
 
 /***/ }),
-/* 183 */
+/* 184 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -23832,7 +23728,7 @@ return msMy;
 
 
 /***/ }),
-/* 184 */
+/* 185 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -23919,7 +23815,7 @@ return ms;
 
 
 /***/ }),
-/* 185 */
+/* 186 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -24020,7 +23916,7 @@ return my;
 
 
 /***/ }),
-/* 186 */
+/* 187 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -24088,7 +23984,7 @@ return nb;
 
 
 /***/ }),
-/* 187 */
+/* 188 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -24216,7 +24112,7 @@ return ne;
 
 
 /***/ }),
-/* 188 */
+/* 189 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -24309,7 +24205,7 @@ return nlBe;
 
 
 /***/ }),
-/* 189 */
+/* 190 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -24402,7 +24298,7 @@ return nl;
 
 
 /***/ }),
-/* 190 */
+/* 191 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -24467,7 +24363,7 @@ return nn;
 
 
 /***/ }),
-/* 191 */
+/* 192 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -24596,7 +24492,7 @@ return paIn;
 
 
 /***/ }),
-/* 192 */
+/* 193 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -24708,7 +24604,7 @@ return pl;
 
 
 /***/ }),
-/* 193 */
+/* 194 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -24774,7 +24670,7 @@ return ptBr;
 
 
 /***/ }),
-/* 194 */
+/* 195 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -24844,7 +24740,7 @@ return pt;
 
 
 /***/ }),
-/* 195 */
+/* 196 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -24924,7 +24820,7 @@ return ro;
 
 
 /***/ }),
-/* 196 */
+/* 197 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -25112,7 +25008,7 @@ return ru;
 
 
 /***/ }),
-/* 197 */
+/* 198 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -25215,7 +25111,7 @@ return sd;
 
 
 /***/ }),
-/* 198 */
+/* 199 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -25281,7 +25177,7 @@ return se;
 
 
 /***/ }),
-/* 199 */
+/* 200 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -25357,7 +25253,7 @@ return si;
 
 
 /***/ }),
-/* 200 */
+/* 201 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -25512,7 +25408,7 @@ return sk;
 
 
 /***/ }),
-/* 201 */
+/* 202 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -25679,7 +25575,7 @@ return sl;
 
 
 /***/ }),
-/* 202 */
+/* 203 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -25754,7 +25650,7 @@ return sq;
 
 
 /***/ }),
-/* 203 */
+/* 204 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -25869,7 +25765,7 @@ return srCyrl;
 
 
 /***/ }),
-/* 204 */
+/* 205 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -25984,7 +25880,7 @@ return sr;
 
 
 /***/ }),
-/* 205 */
+/* 206 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -26078,7 +25974,7 @@ return ss;
 
 
 /***/ }),
-/* 206 */
+/* 207 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -26152,7 +26048,7 @@ return sv;
 
 
 /***/ }),
-/* 207 */
+/* 208 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -26216,7 +26112,7 @@ return sw;
 
 
 /***/ }),
-/* 208 */
+/* 209 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -26351,7 +26247,7 @@ return ta;
 
 
 /***/ }),
-/* 209 */
+/* 210 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -26445,7 +26341,7 @@ return te;
 
 
 /***/ }),
-/* 210 */
+/* 211 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -26518,7 +26414,7 @@ return tet;
 
 
 /***/ }),
-/* 211 */
+/* 212 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -26590,7 +26486,7 @@ return th;
 
 
 /***/ }),
-/* 212 */
+/* 213 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -26657,7 +26553,7 @@ return tlPh;
 
 
 /***/ }),
-/* 213 */
+/* 214 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -26782,7 +26678,7 @@ return tlh;
 
 
 /***/ }),
-/* 214 */
+/* 215 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -26877,7 +26773,7 @@ return tr;
 
 
 /***/ }),
-/* 215 */
+/* 216 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -26973,7 +26869,7 @@ return tzl;
 
 
 /***/ }),
-/* 216 */
+/* 217 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -27036,7 +26932,7 @@ return tzmLatn;
 
 
 /***/ }),
-/* 217 */
+/* 218 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -27099,7 +26995,7 @@ return tzm;
 
 
 /***/ }),
-/* 218 */
+/* 219 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -27255,7 +27151,7 @@ return uk;
 
 
 /***/ }),
-/* 219 */
+/* 220 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -27359,7 +27255,7 @@ return ur;
 
 
 /***/ }),
-/* 220 */
+/* 221 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -27422,7 +27318,7 @@ return uzLatn;
 
 
 /***/ }),
-/* 221 */
+/* 222 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -27485,7 +27381,7 @@ return uz;
 
 
 /***/ }),
-/* 222 */
+/* 223 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -27569,7 +27465,7 @@ return vi;
 
 
 /***/ }),
-/* 223 */
+/* 224 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -27642,7 +27538,7 @@ return xPseudo;
 
 
 /***/ }),
-/* 224 */
+/* 225 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -27707,7 +27603,7 @@ return yo;
 
 
 /***/ }),
-/* 225 */
+/* 226 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -27823,7 +27719,7 @@ return zhCn;
 
 
 /***/ }),
-/* 226 */
+/* 227 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -27933,7 +27829,7 @@ return zhHk;
 
 
 /***/ }),
-/* 227 */
+/* 228 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -28040,45 +27936,6 @@ return zhTw;
 
 })));
 
-
-/***/ }),
-/* 228 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["b"] = getBalance;
-/* harmony export (immutable) */ __webpack_exports__["a"] = getHistory;
-function getBalance(gameId, teamIndex) {
-  return new Promise(function (resolve, reject) {
-    axios.post('/api/account/get_balance', {
-      gameId: gameId,
-      teamIndex: teamIndex
-    }).then(function (res) {
-      if (res.data.err) {
-        reject(res);
-      }
-      resolve(res);
-    }).catch(function (err) {
-      reject(err);
-    });
-  });
-}
-
-function getHistory(gameId, teamIndex) {
-  return new Promise(function (resolve, reject) {
-    axios.post('/api/account/get_history', {
-      gameId: gameId,
-      teamIndex: teamIndex
-    }).then(function (res) {
-      if (res.data.err) {
-        reject(res);
-      }
-      resolve(res);
-    }).catch(function (err) {
-      reject(err);
-    });
-  });
-}
 
 /***/ }),
 /* 229 */
@@ -31743,7 +31600,7 @@ module.exports = function(Chart) {
 "use strict";
 
 
-var color = __webpack_require__(65);
+var color = __webpack_require__(66);
 
 module.exports = function(Chart) {
 
@@ -31871,7 +31728,7 @@ module.exports = function(Chart) {
 /* global document: false */
 
 
-var color = __webpack_require__(65);
+var color = __webpack_require__(66);
 
 module.exports = function(Chart) {
 	// Global Chart helpers object for utility methods and classes
@@ -40915,7 +40772,7 @@ exports = module.exports = __webpack_require__(1)();
 
 
 // module
-exports.push([module.i, "\n.end .chart-title {\r\n  margin-bottom: 0;\r\n  margin-top: 20px;\n}\n.end .divider {\r\n  margin-top: 20px;\n}\r\n", "", {"version":3,"sources":["D:/Coding/ieemgameview/src/page/end/index.vue?32fb047a"],"names":[],"mappings":";AAmQA;EACA,iBAAA;EACA,iBAAA;CACA;AAEA;EACA,iBAAA;CACA","file":"index.vue","sourcesContent":["<template>\r\n  <div class=\"end\">\r\n    <main>\r\n      <v-tabs\r\n        v-model=\"activeTab\"\r\n        dark fixed centered\r\n      >\r\n        <v-toolbar dark class=\"cyan elevation-0\">\r\n          <v-btn icon v-on:click.native=\"backToHome\">\r\n            <v-icon>arrow_back</v-icon>\r\n          </v-btn>\r\n          <v-toolbar-title>{{ title }}</v-toolbar-title>\r\n        </v-toolbar>\r\n        <v-tabs-bar\r\n          slot=\"activators\"\r\n          class=\"cyan\"\r\n        >\r\n          <v-tabs-item\r\n            v-for=\"tab in tabs\"\r\n            :key=\"tab.index\"\r\n            :href=\"'#' + tab.id\"\r\n          >\r\n            {{ tab.title }}\r\n          </v-tabs-item>\r\n          <v-tabs-slider class=\"yellow\"></v-tabs-slider>\r\n        </v-tabs-bar>\r\n        <v-tabs-content\r\n          :key=\"0\"\r\n          id=\"charts\"\r\n        >\r\n          <v-card>\r\n            <v-card-text>\r\n              <v-select\r\n                v-bind:items=\"itemTeam\"\r\n                v-model=\"selectedTeam\"\r\n                label=\"選擇小隊\"\r\n                single-line\r\n                item-value=\"index\"\r\n                bottom\r\n              ></v-select>\r\n              \r\n              <div\r\n                v-for=\"(chart, key) in charts\"\r\n                :key=\"key\"\r\n              >\r\n                <h5 class=\"chart-title\">{{ chart.title }}</h5>\r\n                <div :id=\"chart.id\"></div>\r\n                <v-divider v-if=\"key + 1 < charts.length\"></v-divider>\r\n              </div>\r\n            </v-card-text>\r\n          </v-card>\r\n        </v-tabs-content>\r\n        <v-tabs-content\r\n          :key=\"1\"\r\n          id=\"game-info\"\r\n        >\r\n          <info-panel :game-config=\"gameConfig\"></info-panel>\r\n        </v-tabs-content>\r\n      </v-tabs>\r\n    </main>\r\n    {{ loadChart }}\r\n  </div>\r\n</template>\r\n\r\n<script>\r\nimport {router} from '../../router'\r\nimport * as constant from '../../lib/constant'\r\nimport * as readable from '../../lib/readable'\r\nimport * as api from '../../lib/api'\r\nimport * as accountApi from '../../lib/api/account'\r\nimport * as storageApi from '../../lib/api/storage'\r\nimport * as gameApi from '../../lib/api/game'\r\n\r\nexport default {\r\n  data () {\r\n    return {\r\n      teamNumber: 4,\r\n      title: api.nowUser.getGameConfig().title + ' 結果',\r\n      dayTime: api.nowUser.getDayTime(),\r\n      tabs: [\r\n        { index: 0, id: 'charts', title: '圖表' },\r\n        { index: 1, id: 'game-info', title: '遊戲資訊' }\r\n      ],\r\n      activeTab: null,\r\n      selectedTeam: 1,\r\n      charts: [\r\n        {\r\n          id: 'chart-profit',\r\n          title: '淨利與毛利'\r\n        },\r\n        {\r\n          id: 'chart-productivity',\r\n          title: '產量'\r\n        },\r\n        {\r\n          id: 'chart-storage',\r\n          title: '倉儲'\r\n        }\r\n      ],\r\n      gameConfig: api.nowUser.getGameConfig()\r\n    }\r\n  },\r\n  computed: {\r\n    itemTeam () {\r\n      let list = [{\r\n        index: 0,\r\n        text: '全部'\r\n      }]\r\n      return list.concat(readable.toReadableTeamList(api.nowUser.getTeamNumber()))\r\n    },\r\n    loadChart () {\r\n      if (this.selectedTeam === 0) {\r\n        return\r\n      }\r\n\r\n      let days = api.nowUser.getGameConfig().days\r\n      let dayLong = api.nowUser.getGameConfig().dayLong\r\n      let interval = 10\r\n\r\n      accountApi.getHistory(api.nowUser.getGameId(), this.selectedTeam)\r\n        .then((function (res) {\r\n          let history = res.data.list\r\n\r\n          let calculate = (day, time) => {\r\n            let n = 0\r\n            let g = 0\r\n            for (let key in history) {\r\n              let item = history[key]\r\n              if (item.day < day || (item.day === day && item.time <= time * 1000)) {\r\n                if (item.balance > n) {\r\n                  n += item.balance - n\r\n                }\r\n                g = item.balance\r\n              } else {\r\n                break\r\n              }\r\n            }\r\n            return [g, n]\r\n          }\r\n\r\n          let dataTable = [['時間', '毛利', '淨利']]\r\n          for (let d = 1; d <= days; d++) {\r\n            for (let i = 0; i <= parseInt(dayLong / interval); i++) {\r\n              let result = calculate(d, i * interval)\r\n              dataTable.push([i === 0 ? readable.toReadableDay(d) : '', result[0], result[1]])\r\n            }\r\n          }\r\n          let data = google.visualization.arrayToDataTable(dataTable)\r\n\r\n          let options = {\r\n            chartArea: {left: '15%', width: '85%', height: '70%'},\r\n            legend: { position: 'bottom' },\r\n            height: 300\r\n          }\r\n\r\n          // material design charts\r\n          // remember to add 'line' package to 'google.charts.load' before using this\r\n          // let chart = new google.charts.Line(document.getElementById('chart-profit'))\r\n          // chart.draw(data, google.charts.Line.convertOptions(options))\r\n\r\n          let chart = new google.visualization.LineChart(document.getElementById('chart-profit'))\r\n          chart.draw(data, options)\r\n        }).bind(this))\r\n        .catch((function (err) {\r\n          console.error(err)\r\n        }).bind(this))\r\n      \r\n      storageApi.getHistory(api.nowUser.getGameId(), this.selectedTeam, constant.JOBS.FACTORY)\r\n        .then((function (res) {\r\n          let history = res.data.list\r\n\r\n          // chart-productivity\r\n          let calculate = (day) => {\r\n            let n = 0 // accumulate\r\n            for (let key in history) {\r\n              let item = history[key]\r\n              if (item.day <= day) {\r\n                if (item.product === constant.PRODUCTS.CAR && item.amount > n) {\r\n                  n += item.amount - n\r\n                }\r\n              } else {\r\n                break\r\n              }\r\n            }\r\n            return n\r\n          }\r\n\r\n          let dataTable = [['日子', '累積產量', '單日產量']]\r\n          let k = 0\r\n          for (let d = 1; d <= days; d++) {\r\n            let result = calculate(d)\r\n            k = result - k\r\n            dataTable.push([readable.toReadableDay(d), result, k])\r\n          }\r\n          let data = google.visualization.arrayToDataTable(dataTable)\r\n\r\n          let options = {\r\n            chartArea: {left: '15%', width: '85%', height: '70%'},\r\n            legend: { position: 'bottom' },\r\n            height: 300\r\n          }\r\n\r\n          let chart = new google.visualization.ColumnChart(document.getElementById('chart-productivity'))\r\n          chart.draw(data, options)\r\n        }).bind(this))\r\n        .catch((function (err) {\r\n          console.error(err)\r\n        }).bind(this))\r\n\r\n      return ''\r\n    }\r\n  },\r\n  methods: {\r\n    backToHome () {\r\n      router.push('/')\r\n    },\r\n    drawStorageChart (history) {\r\n      let calculate = (day) => {\r\n        let n = 0 // accumulate\r\n        for (let key in history) {\r\n          let item = history[key]\r\n          if (item.day <= day) {\r\n            if (item.product === constant.PRODUCTS.CAR && item.amount > n) {\r\n              n += item.amount - n\r\n            }\r\n          } else {\r\n            break\r\n          }\r\n        }\r\n        return n\r\n      }\r\n\r\n      let dataTable = [['日子', '累積產量', '單日產量']]\r\n      let k = 0\r\n      for (let d = 1; d <= days; d++) {\r\n        let result = calculate(d)\r\n        k = result - k\r\n        dataTable.push([readable.toReadableDay(d), result, k])\r\n      }\r\n      let data = google.visualization.arrayToDataTable(dataTable)\r\n\r\n      let options = {\r\n        chartArea: {left: '15%', width: '85%', height: '70%'},\r\n        legend: { position: 'bottom' },\r\n        height: 300\r\n      }\r\n\r\n      let chart = new google.visualization.ColumnChart(document.getElementById('chart-productivity'))\r\n      chart.draw(data, options)\r\n    }\r\n  },\r\n  mounted () {\r\n    // this.loadChart()\r\n    // google.charts.setOnLoadCallback(this.loadChart)\r\n  }\r\n}\r\n</script>\r\n\r\n<style>\r\n.end .chart-title {\r\n  margin-bottom: 0;\r\n  margin-top: 20px;\r\n}\r\n\r\n.end .divider {\r\n  margin-top: 20px;\r\n}\r\n</style>\r\n"],"sourceRoot":""}]);
+exports.push([module.i, "\n.end .chart-title {\r\n  margin-bottom: 0;\r\n  margin-top: 20px;\n}\n.end .divider {\r\n  margin-top: 20px;\n}\r\n", "", {"version":3,"sources":["d:/Coding/ieemgameview/src/page/end/index.vue?3f29e972"],"names":[],"mappings":";AAoQA;EACA,iBAAA;EACA,iBAAA;CACA;AAEA;EACA,iBAAA;CACA","file":"index.vue","sourcesContent":["<template>\r\n  <div class=\"end\">\r\n    <main>\r\n      <v-tabs\r\n        v-model=\"activeTab\"\r\n        dark fixed centered\r\n      >\r\n        <v-toolbar dark class=\"cyan elevation-0\">\r\n          <v-btn icon v-on:click.native=\"backToHome\">\r\n            <v-icon>arrow_back</v-icon>\r\n          </v-btn>\r\n          <v-toolbar-title>{{ title }}</v-toolbar-title>\r\n        </v-toolbar>\r\n        <v-tabs-bar\r\n          slot=\"activators\"\r\n          class=\"cyan\"\r\n        >\r\n          <v-tabs-item\r\n            v-for=\"tab in tabs\"\r\n            :key=\"tab.index\"\r\n            :href=\"'#' + tab.id\"\r\n          >\r\n            {{ tab.title }}\r\n          </v-tabs-item>\r\n          <v-tabs-slider class=\"yellow\"></v-tabs-slider>\r\n        </v-tabs-bar>\r\n        <v-tabs-content\r\n          :key=\"0\"\r\n          id=\"charts\"\r\n        >\r\n          <v-card>\r\n            <v-card-text>\r\n              <v-select\r\n                v-bind:items=\"itemTeam\"\r\n                v-model=\"selectedTeam\"\r\n                label=\"選擇小隊\"\r\n                single-line\r\n                item-value=\"index\"\r\n                bottom\r\n              ></v-select>\r\n              \r\n              <div\r\n                v-for=\"(chart, key) in charts\"\r\n                :key=\"key\"\r\n              >\r\n                <h5 class=\"chart-title\">{{ chart.title }}</h5>\r\n                <div :id=\"chart.id\"></div>\r\n                <v-divider v-if=\"key + 1 < charts.length\"></v-divider>\r\n              </div>\r\n            </v-card-text>\r\n          </v-card>\r\n        </v-tabs-content>\r\n        <v-tabs-content\r\n          :key=\"1\"\r\n          id=\"game-info\"\r\n        >\r\n          <info-panel :game-config=\"gameConfig\"></info-panel>\r\n        </v-tabs-content>\r\n      </v-tabs>\r\n    </main>\r\n    {{ loadChart }}\r\n  </div>\r\n</template>\r\n\r\n<script>\r\nimport {router} from '../../router'\r\nimport * as constant from '../../lib/constant'\r\nimport * as readable from '../../lib/readable'\r\nimport * as api from '../../lib/api'\r\nimport * as accountApi from '../../lib/api/account'\r\nimport * as storageApi from '../../lib/api/storage'\r\nimport * as gameApi from '../../lib/api/game'\r\n\r\nexport default {\r\n  data () {\r\n    return {\r\n      teamNumber: 4,\r\n      title: api.nowUser.getGameConfig().title + ' 結果',\r\n      dayTime: api.nowUser.getDayTime(),\r\n      tabs: [\r\n        { index: 0, id: 'charts', title: '圖表' },\r\n        { index: 1, id: 'game-info', title: '遊戲資訊' }\r\n      ],\r\n      activeTab: null,\r\n      selectedTeam: 1,\r\n      charts: [\r\n        {\r\n          id: 'chart-profit',\r\n          title: '淨利與毛利'\r\n        },\r\n        {\r\n          id: 'chart-productivity',\r\n          title: '產量'\r\n        },\r\n        {\r\n          id: 'chart-storage',\r\n          title: '倉儲'\r\n        }\r\n      ],\r\n      gameConfig: api.nowUser.getGameConfig()\r\n    }\r\n  },\r\n  computed: {\r\n    itemTeam () {\r\n      let list = [{\r\n        index: 0,\r\n        text: '全部'\r\n      }]\r\n      return list.concat(readable.toReadableTeamList(api.nowUser.getTeamNumber()))\r\n    },\r\n    loadChart () {\r\n      if (this.selectedTeam === 0) {\r\n        return\r\n      }\r\n\r\n      let days = api.nowUser.getGameConfig().days\r\n      let dayLong = api.nowUser.getGameConfig().dayLong\r\n      let interval = 10\r\n\r\n      accountApi.getHistory(api.nowUser.getGameId(), this.selectedTeam)\r\n        .then((function (res) {\r\n          let history = res.data.list\r\n\r\n          let calculate = (day, time) => {\r\n            let n = 0\r\n            let g = 0\r\n            for (let key in history) {\r\n              let item = history[key]\r\n              if (item.day < day || (item.day === day && item.time <= time * 1000)) {\r\n                if (item.balance > n) {\r\n                  n += item.balance - n\r\n                }\r\n                g = item.balance\r\n              } else {\r\n                break\r\n              }\r\n            }\r\n            return [g, n]\r\n          }\r\n\r\n          let dataTable = [['時間', '毛利', '淨利']]\r\n          for (let d = 1; d <= days; d++) {\r\n            for (let i = 0; i <= parseInt(dayLong / interval); i++) {\r\n              let result = calculate(d, i * interval)\r\n              dataTable.push([i === 0 ? d + '' : '', result[0], result[1]])\r\n            }\r\n          }\r\n          console.log(dataTable)\r\n          let data = google.visualization.arrayToDataTable(dataTable)\r\n\r\n          let options = {\r\n            chartArea: {left: '15%', width: '85%', height: '70%'},\r\n            legend: { position: 'bottom' },\r\n            height: 300\r\n          }\r\n\r\n          // material design charts\r\n          // remember to add 'line' package to 'google.charts.load' before using this\r\n          // let chart = new google.charts.Line(document.getElementById('chart-profit'))\r\n          // chart.draw(data, google.charts.Line.convertOptions(options))\r\n\r\n          let chart = new google.visualization.LineChart(document.getElementById('chart-profit'))\r\n          chart.draw(data, options)\r\n        }).bind(this))\r\n        .catch((function (err) {\r\n          console.error(err)\r\n        }).bind(this))\r\n      \r\n      storageApi.getHistory(api.nowUser.getGameId(), this.selectedTeam, constant.JOBS.FACTORY)\r\n        .then((function (res) {\r\n          let history = res.data.list\r\n\r\n          // chart-productivity\r\n          let calculate = (day) => {\r\n            let n = 0 // accumulate\r\n            for (let key in history) {\r\n              let item = history[key]\r\n              if (item.day <= day) {\r\n                if (item.product === constant.PRODUCTS.CAR && item.amount > n) {\r\n                  n += item.amount - n\r\n                }\r\n              } else {\r\n                break\r\n              }\r\n            }\r\n            return n\r\n          }\r\n\r\n          let dataTable = [['日子', '累積產量', '單日產量']]\r\n          let k = 0\r\n          for (let d = 1; d <= days; d++) {\r\n            let result = calculate(d)\r\n            k = result - k\r\n            dataTable.push([readable.toReadableDay(d), result, k])\r\n          }\r\n          let data = google.visualization.arrayToDataTable(dataTable)\r\n\r\n          let options = {\r\n            chartArea: {left: '15%', width: '85%', height: '70%'},\r\n            legend: { position: 'bottom' },\r\n            height: 300\r\n          }\r\n\r\n          let chart = new google.visualization.ColumnChart(document.getElementById('chart-productivity'))\r\n          chart.draw(data, options)\r\n        }).bind(this))\r\n        .catch((function (err) {\r\n          console.error(err)\r\n        }).bind(this))\r\n\r\n      return ''\r\n    }\r\n  },\r\n  methods: {\r\n    backToHome () {\r\n      router.push('/')\r\n    },\r\n    drawStorageChart (history) {\r\n      let calculate = (day) => {\r\n        let n = 0 // accumulate\r\n        for (let key in history) {\r\n          let item = history[key]\r\n          if (item.day <= day) {\r\n            if (item.product === constant.PRODUCTS.CAR && item.amount > n) {\r\n              n += item.amount - n\r\n            }\r\n          } else {\r\n            break\r\n          }\r\n        }\r\n        return n\r\n      }\r\n\r\n      let dataTable = [['日子', '累積產量', '單日產量']]\r\n      let k = 0\r\n      for (let d = 1; d <= days; d++) {\r\n        let result = calculate(d)\r\n        k = result - k\r\n        dataTable.push([readable.toReadableDay(d), result, k])\r\n      }\r\n      let data = google.visualization.arrayToDataTable(dataTable)\r\n\r\n      let options = {\r\n        chartArea: {left: '15%', width: '85%', height: '70%'},\r\n        legend: { position: 'bottom' },\r\n        height: 300\r\n      }\r\n\r\n      let chart = new google.visualization.ColumnChart(document.getElementById('chart-productivity'))\r\n      chart.draw(data, options)\r\n    }\r\n  },\r\n  mounted () {\r\n    // this.loadChart()\r\n    // google.charts.setOnLoadCallback(this.loadChart)\r\n  }\r\n}\r\n</script>\r\n\r\n<style>\r\n.end .chart-title {\r\n  margin-bottom: 0;\r\n  margin-top: 20px;\r\n}\r\n\r\n.end .divider {\r\n  margin-top: 20px;\r\n}\r\n</style>\r\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -40957,7 +40814,7 @@ exports = module.exports = __webpack_require__(1)();
 
 
 // module
-exports.push([module.i, "\n.game-clock .more-info {\r\n  font-size: 20px;\n}\n.game-clock .time {\r\n  font-size: 50px;\r\n  line-height: 50px;\n}\r\n", "", {"version":3,"sources":["D:/Coding/ieemgameview/src/components/game-clock.vue?19ee63b2"],"names":[],"mappings":";AAiCA;EACA,gBAAA;CACA;AAEA;EACA,gBAAA;EACA,kBAAA;CACA","file":"game-clock.vue","sourcesContent":["<template>\r\n  <div class=\"game-clock\">\r\n    <v-card>\r\n      <v-card-text>\r\n        <span class=\"more-info\">{{ readableDay }}</span><br>\r\n        <span class=\"time\">{{ readableTime }}</span>\r\n      </v-card-text>\r\n    </v-card>\r\n  </div>\r\n</template>\r\n\r\n<script>\r\nimport * as api from '../lib/api'\r\nimport * as readable from '../lib/readable'\r\n\r\nexport default {\r\n  data () {\r\n    return {\r\n      state: api.nowUser.getDayTime()\r\n    }\r\n  },\r\n  computed: {\r\n    readableTime: function () {\r\n      return readable.toReadableTime(this.state.time)\r\n    },\r\n    readableDay: function () {\r\n      return readable.toReadableDay(this.state.day)\r\n    }\r\n  }\r\n}\r\n</script>\r\n\r\n<style>\r\n.game-clock .more-info {\r\n  font-size: 20px;\r\n}\r\n\r\n.game-clock .time {\r\n  font-size: 50px;\r\n  line-height: 50px;\r\n}\r\n</style>\r\n"],"sourceRoot":""}]);
+exports.push([module.i, "\n.game-clock .more-info {\r\n  font-size: 20px;\n}\n.game-clock .time {\r\n  font-size: 50px;\r\n  line-height: 50px;\n}\r\n", "", {"version":3,"sources":["d:/Coding/ieemgameview/src/components/game-clock.vue?19ee63b2"],"names":[],"mappings":";AAiCA;EACA,gBAAA;CACA;AAEA;EACA,gBAAA;EACA,kBAAA;CACA","file":"game-clock.vue","sourcesContent":["<template>\r\n  <div class=\"game-clock\">\r\n    <v-card>\r\n      <v-card-text>\r\n        <span class=\"more-info\">{{ readableDay }}</span><br>\r\n        <span class=\"time\">{{ readableTime }}</span>\r\n      </v-card-text>\r\n    </v-card>\r\n  </div>\r\n</template>\r\n\r\n<script>\r\nimport * as api from '../lib/api'\r\nimport * as readable from '../lib/readable'\r\n\r\nexport default {\r\n  data () {\r\n    return {\r\n      state: api.nowUser.getDayTime()\r\n    }\r\n  },\r\n  computed: {\r\n    readableTime: function () {\r\n      return readable.toReadableTime(this.state.time)\r\n    },\r\n    readableDay: function () {\r\n      return readable.toReadableDay(this.state.day)\r\n    }\r\n  }\r\n}\r\n</script>\r\n\r\n<style>\r\n.game-clock .more-info {\r\n  font-size: 20px;\r\n}\r\n\r\n.game-clock .time {\r\n  font-size: 50px;\r\n  line-height: 50px;\r\n}\r\n</style>\r\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -40971,7 +40828,7 @@ exports = module.exports = __webpack_require__(1)();
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"team-storage-list.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"team-storage-list.vue","sourceRoot":""}]);
 
 // exports
 
@@ -40985,7 +40842,7 @@ exports = module.exports = __webpack_require__(1)();
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"deliver-dialog.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"deliver-dialog.vue","sourceRoot":""}]);
 
 // exports
 
@@ -40999,7 +40856,7 @@ exports = module.exports = __webpack_require__(1)();
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"storage-register-dialog.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"storage-register-dialog.vue","sourceRoot":""}]);
 
 // exports
 
@@ -41069,7 +40926,7 @@ exports = module.exports = __webpack_require__(1)();
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
 
 // exports
 
@@ -41097,7 +40954,7 @@ exports = module.exports = __webpack_require__(1)();
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"news-publisher-dialog.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
 
 // exports
 
@@ -41111,7 +40968,7 @@ exports = module.exports = __webpack_require__(1)();
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
+exports.push([module.i, "\n.home {\n  min-height: 100%;\n}\n.home .head {\n  padding-top: 60px;\n  padding-bottom: 60px;\n}\n.home .layout {\n  padding-left: 14px;\n  padding-right: 14px;\n}\n.home .card {\n  height: 100% !important;\n}\n.home .headline {\n  display: block;\n  width: 100%;\n}\n.home .card__text {\n  padding-right: 0;\n  padding-left: 0;\n}\n.home .list__tile__title {\n  color: rgba(0, 0, 0, 0.87);\n}\n.home .flex {\n  margin-bottom: 8px;\n}\n", "", {"version":3,"sources":["d:/Coding/ieemgameview/src/page/home/index.vue?7dc36830"],"names":[],"mappings":";AAmEA;EACA,iBAAA;CACA;AAEA;EACA,kBAAA;EACA,qBAAA;CACA;AAEA;EACA,mBAAA;EACA,oBAAA;CACA;AAEA;EACA,wBAAA;CACA;AAEA;EACA,eAAA;EACA,YAAA;CACA;AAEA;EACA,iBAAA;EACA,gBAAA;CACA;AAEA;EACA,2BAAA;CACA;AAEA;EACA,mBAAA;CACA","file":"index.vue","sourcesContent":["<template>\n  <div id=\"home\" class=\"home\">\n    <v-card>\n      <v-card-text class=\"text-xs-center head\">\n        <div class=\"logo\"></div>\n        <!--<h3>REDRO產銷遊戲</h3>-->\n        <h5>2017 工工營 BETA</h5>\n      </v-card-text>\n      <v-layout row wrap>\n        <v-flex v-for=\"(item, index) in gameList\" :key=\"index\" xs12>\n          <v-card class=\"cyan darken-2 white--text\">\n            <v-card-title primary-title>\n              <div class=\"headline\">{{ item.text }}</div>\n              <div>{{ item.describe }}</div>\n            </v-card-title>\n            <v-card-actions>\n              <v-spacer></v-spacer>\n              <v-btn flat dark v-on:click.native=\"intoGame(item.index, item.gameConfig)\">進入遊戲</v-btn>\n            </v-card-actions>\n          </v-card>\n        </v-flex>\n      </v-layout>\n    </v-card>\n  </div>\n</template>\n\n<script>\nimport * as api from '../../lib/api'\nimport * as enterApi from '../../lib/api/enter'\nimport {router} from '../../router'\n\nexport default {\n  data () {\n    return {\n      gameList: []\n    }\n  },\n  methods: {\n    intoGame (gameId, gameConfig) {\n      console.log('User Game:', gameId)\n      api.nowUser.setGameId(gameId)\n      api.nowUser.setGameConfig(gameConfig)\n      router.push('/choose')\n    }\n  },\n  created: function () {\n    // load gameList and use promise to change the gameList\n    api.nowUser.resetState()\n    enterApi.getGameIdList()\n      .then((function (res) {\n        for (let game of res.data.gameList) {\n          this.gameList.unshift({\n            index: game.gameId,\n            text: game.gameConfig.title,\n            describe: game.gameConfig.describe,\n            gameConfig: game.gameConfig\n          })\n        }\n      }).bind(this))\n      .catch(function (err) {\n        console.error(err)\n      })\n  }\n}\n</script>\n\n<style>\n.home {\n  min-height: 100%;\n}\n\n.home .head {\n  padding-top: 60px;\n  padding-bottom: 60px;\n}\n\n.home .layout {\n  padding-left: 14px;\n  padding-right: 14px;\n}\n\n.home .card {\n  height: 100% !important;\n}\n\n.home .headline {\n  display: block;\n  width: 100%;\n}\n\n.home .card__text {\n  padding-right: 0;\n  padding-left: 0;\n}\n\n.home .list__tile__title {\n  color: rgba(0, 0, 0, 0.87);\n}\n\n.home .flex {\n  margin-bottom: 8px;\n}\n</style>\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -41125,7 +40982,7 @@ exports = module.exports = __webpack_require__(1)();
 
 
 // module
-exports.push([module.i, "\n.home {\n  min-height: 100%;\n}\n.home .head {\n  padding-top: 60px;\n  padding-bottom: 60px;\n}\n.home .layout {\n  padding-left: 14px;\n  padding-right: 14px;\n}\n.home .card {\n  height: 100% !important;\n}\n.home .headline {\n  display: block;\n  width: 100%;\n}\n.home .card__text {\n  padding-right: 0;\n  padding-left: 0;\n}\n.home .list__tile__title {\n  color: rgba(0, 0, 0, 0.87);\n}\n.home .flex {\n  margin-bottom: 8px;\n}\n", "", {"version":3,"sources":["D:/Coding/ieemgameview/src/page/home/index.vue?7dc36830"],"names":[],"mappings":";AAmEA;EACA,iBAAA;CACA;AAEA;EACA,kBAAA;EACA,qBAAA;CACA;AAEA;EACA,mBAAA;EACA,oBAAA;CACA;AAEA;EACA,wBAAA;CACA;AAEA;EACA,eAAA;EACA,YAAA;CACA;AAEA;EACA,iBAAA;EACA,gBAAA;CACA;AAEA;EACA,2BAAA;CACA;AAEA;EACA,mBAAA;CACA","file":"index.vue","sourcesContent":["<template>\n  <div id=\"home\" class=\"home\">\n    <v-card>\n      <v-card-text class=\"text-xs-center head\">\n        <div class=\"logo\"></div>\n        <!--<h3>REDRO產銷遊戲</h3>-->\n        <h5>2017 工工營 BETA</h5>\n      </v-card-text>\n      <v-layout row wrap>\n        <v-flex v-for=\"(item, index) in gameList\" :key=\"index\" xs12>\n          <v-card class=\"cyan darken-2 white--text\">\n            <v-card-title primary-title>\n              <div class=\"headline\">{{ item.text }}</div>\n              <div>{{ item.describe }}</div>\n            </v-card-title>\n            <v-card-actions>\n              <v-spacer></v-spacer>\n              <v-btn flat dark v-on:click.native=\"intoGame(item.index, item.gameConfig)\">進入遊戲</v-btn>\n            </v-card-actions>\n          </v-card>\n        </v-flex>\n      </v-layout>\n    </v-card>\n  </div>\n</template>\n\n<script>\nimport * as api from '../../lib/api'\nimport * as enterApi from '../../lib/api/enter'\nimport {router} from '../../router'\n\nexport default {\n  data () {\n    return {\n      gameList: []\n    }\n  },\n  methods: {\n    intoGame (gameId, gameConfig) {\n      console.log('User Game:', gameId)\n      api.nowUser.setGameId(gameId)\n      api.nowUser.setGameConfig(gameConfig)\n      router.push('/choose')\n    }\n  },\n  created: function () {\n    // load gameList and use promise to change the gameList\n    api.nowUser.resetState()\n    enterApi.getGameIdList()\n      .then((function (res) {\n        for (let game of res.data.gameList) {\n          this.gameList.unshift({\n            index: game.gameId,\n            text: game.gameConfig.title,\n            describe: game.gameConfig.describe,\n            gameConfig: game.gameConfig\n          })\n        }\n      }).bind(this))\n      .catch(function (err) {\n        console.error(err)\n      })\n  }\n}\n</script>\n\n<style>\n.home {\n  min-height: 100%;\n}\n\n.home .head {\n  padding-top: 60px;\n  padding-bottom: 60px;\n}\n\n.home .layout {\n  padding-left: 14px;\n  padding-right: 14px;\n}\n\n.home .card {\n  height: 100% !important;\n}\n\n.home .headline {\n  display: block;\n  width: 100%;\n}\n\n.home .card__text {\n  padding-right: 0;\n  padding-left: 0;\n}\n\n.home .list__tile__title {\n  color: rgba(0, 0, 0, 0.87);\n}\n\n.home .flex {\n  margin-bottom: 8px;\n}\n</style>\n"],"sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
 
 // exports
 
@@ -41139,7 +40996,7 @@ exports = module.exports = __webpack_require__(1)();
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"deliver-history.vue","sourceRoot":""}]);
 
 // exports
 
@@ -41153,7 +41010,7 @@ exports = module.exports = __webpack_require__(1)();
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"deliver-history.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
 
 // exports
 
@@ -41167,7 +41024,7 @@ exports = module.exports = __webpack_require__(1)();
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"order-history.vue","sourceRoot":""}]);
 
 // exports
 
@@ -41181,7 +41038,7 @@ exports = module.exports = __webpack_require__(1)();
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"order-history.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
 
 // exports
 
@@ -41195,7 +41052,7 @@ exports = module.exports = __webpack_require__(1)();
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
 
 // exports
 
@@ -41209,7 +41066,7 @@ exports = module.exports = __webpack_require__(1)();
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"account-dialog.vue","sourceRoot":""}]);
 
 // exports
 
@@ -41223,7 +41080,7 @@ exports = module.exports = __webpack_require__(1)();
 
 
 // module
-exports.push([module.i, "\n.online-status .status-card {\r\n  color: #fff;\r\n  text-align: center;\r\n  font-size: 24px;\r\n  padding: 0 14px;\n}\n.online-status .status-card .flex {\r\n  padding-bottom: 16px;\n}\r\n", "", {"version":3,"sources":["D:/Coding/ieemgameview/src/components/online-status.vue?1a4daff2"],"names":[],"mappings":";AAgEA;EACA,YAAA;EACA,mBAAA;EACA,gBAAA;EACA,gBAAA;CACA;AAEA;EACA,qBAAA;CACA","file":"online-status.vue","sourcesContent":["<template>\r\n  <div class=\"online-status\">\r\n    <v-expansion-panel expand>\r\n      <v-expansion-panel-content>\r\n        <div slot=\"header\">小隊員</div>\r\n        <v-card class=\"status-card\">\r\n          <v-layout row wrap v-for=\"team in teamList\" :key=\"team.index\">\r\n            <v-flex xs3>\r\n              <v-card dark class=\"secondary\">\r\n                <v-card-text>{{ team.text }}</v-card-text>\r\n              </v-card>\r\n            </v-flex>\r\n            <v-flex xs3 v-for=\"job in jobList\" :key=\"job.index\">\r\n              <v-card dark class=\"secondary\">\r\n                <v-card-text>{{ job.text }}</v-card-text>\r\n              </v-card>\r\n            </v-flex>\r\n          </v-layout>\r\n        </v-card>\r\n      </v-expansion-panel-content>\r\n      <v-expansion-panel-content>\r\n        <div slot=\"header\">工作人員</div>\r\n        <v-card class=\"status-card\">\r\n          <v-layout row wrap>\r\n            <v-flex xs3 v-for=\"job in staffJobList\" :key=\"job.index\">\r\n              <v-card dark class=\"secondary\">\r\n                <v-card-text>{{ job.text }}</v-card-text>\r\n              </v-card>\r\n            </v-flex>\r\n          </v-layout>\r\n        </v-card>\r\n      </v-expansion-panel-content>\r\n    </v-expansion-panel>\r\n  </div>\r\n</template>\r\n\r\n<script>\r\nimport * as api from '../lib/api'\r\nimport * as readable from '../lib/readable'\r\n\r\nexport default {\r\n  props: [\r\n    'list'\r\n  ],\r\n  data () {\r\n    return {\r\n      teamNumber: 4\r\n    }\r\n  },\r\n  computed: {\r\n    jobList () {\r\n      return readable.readableJobList()\r\n    },\r\n    staffJobList () {\r\n      return readable.readableStaffJobList()\r\n    },\r\n    teamList () {\r\n      return readable.toReadableTeamList(this.teamNumber)\r\n    }\r\n  }\r\n}\r\n</script>\r\n\r\n<style>\r\n.online-status .status-card {\r\n  color: #fff;\r\n  text-align: center;\r\n  font-size: 24px;\r\n  padding: 0 14px;\r\n}\r\n\r\n.online-status .status-card .flex {\r\n  padding-bottom: 16px;\r\n}\r\n</style>\r\n"],"sourceRoot":""}]);
+exports.push([module.i, "\n.online-status .status-card {\r\n  color: #fff;\r\n  text-align: center;\r\n  font-size: 24px;\r\n  padding: 0 14px;\n}\n.online-status .status-card .flex {\r\n  padding-bottom: 16px;\n}\r\n", "", {"version":3,"sources":["d:/Coding/ieemgameview/src/components/online-status.vue?1a4daff2"],"names":[],"mappings":";AAgEA;EACA,YAAA;EACA,mBAAA;EACA,gBAAA;EACA,gBAAA;CACA;AAEA;EACA,qBAAA;CACA","file":"online-status.vue","sourcesContent":["<template>\r\n  <div class=\"online-status\">\r\n    <v-expansion-panel expand>\r\n      <v-expansion-panel-content>\r\n        <div slot=\"header\">小隊員</div>\r\n        <v-card class=\"status-card\">\r\n          <v-layout row wrap v-for=\"team in teamList\" :key=\"team.index\">\r\n            <v-flex xs3>\r\n              <v-card dark class=\"secondary\">\r\n                <v-card-text>{{ team.text }}</v-card-text>\r\n              </v-card>\r\n            </v-flex>\r\n            <v-flex xs3 v-for=\"job in jobList\" :key=\"job.index\">\r\n              <v-card dark class=\"secondary\">\r\n                <v-card-text>{{ job.text }}</v-card-text>\r\n              </v-card>\r\n            </v-flex>\r\n          </v-layout>\r\n        </v-card>\r\n      </v-expansion-panel-content>\r\n      <v-expansion-panel-content>\r\n        <div slot=\"header\">工作人員</div>\r\n        <v-card class=\"status-card\">\r\n          <v-layout row wrap>\r\n            <v-flex xs3 v-for=\"job in staffJobList\" :key=\"job.index\">\r\n              <v-card dark class=\"secondary\">\r\n                <v-card-text>{{ job.text }}</v-card-text>\r\n              </v-card>\r\n            </v-flex>\r\n          </v-layout>\r\n        </v-card>\r\n      </v-expansion-panel-content>\r\n    </v-expansion-panel>\r\n  </div>\r\n</template>\r\n\r\n<script>\r\nimport * as api from '../lib/api'\r\nimport * as readable from '../lib/readable'\r\n\r\nexport default {\r\n  props: [\r\n    'list'\r\n  ],\r\n  data () {\r\n    return {\r\n      teamNumber: 4\r\n    }\r\n  },\r\n  computed: {\r\n    jobList () {\r\n      return readable.readableJobList()\r\n    },\r\n    staffJobList () {\r\n      return readable.readableStaffJobList()\r\n    },\r\n    teamList () {\r\n      return readable.toReadableTeamList(this.teamNumber)\r\n    }\r\n  }\r\n}\r\n</script>\r\n\r\n<style>\r\n.online-status .status-card {\r\n  color: #fff;\r\n  text-align: center;\r\n  font-size: 24px;\r\n  padding: 0 14px;\r\n}\r\n\r\n.online-status .status-card .flex {\r\n  padding-bottom: 16px;\r\n}\r\n</style>\r\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -41237,7 +41094,7 @@ exports = module.exports = __webpack_require__(1)();
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"info-panel.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"info-panel.vue","sourceRoot":""}]);
 
 // exports
 
@@ -41337,7 +41194,7 @@ module.exports = Set;
 /* 315 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var MapCache = __webpack_require__(43),
+var MapCache = __webpack_require__(44),
     setCacheAdd = __webpack_require__(402),
     setCacheHas = __webpack_require__(403);
 
@@ -41548,7 +41405,7 @@ module.exports = baseFindIndex;
 /* 323 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayPush = __webpack_require__(46),
+var arrayPush = __webpack_require__(47),
     isFlattenable = __webpack_require__(379);
 
 /**
@@ -41684,13 +41541,13 @@ module.exports = baseIsArguments;
 /***/ (function(module, exports, __webpack_require__) {
 
 var Stack = __webpack_require__(25),
-    equalArrays = __webpack_require__(89),
+    equalArrays = __webpack_require__(90),
     equalByTag = __webpack_require__(361),
     equalObjects = __webpack_require__(362),
-    getTag = __webpack_require__(95),
+    getTag = __webpack_require__(96),
     isArray = __webpack_require__(9),
     isBuffer = __webpack_require__(35),
-    isTypedArray = __webpack_require__(58);
+    isTypedArray = __webpack_require__(59);
 
 /** Used to compose bitmasks for value comparisons. */
 var COMPARE_PARTIAL_FLAG = 1;
@@ -41773,7 +41630,7 @@ module.exports = baseIsEqualDeep;
 /***/ (function(module, exports, __webpack_require__) {
 
 var Stack = __webpack_require__(25),
-    baseIsEqual = __webpack_require__(78);
+    baseIsEqual = __webpack_require__(79);
 
 /** Used to compose bitmasks for value comparisons. */
 var COMPARE_PARTIAL_FLAG = 1,
@@ -41861,7 +41718,7 @@ module.exports = baseIsNaN;
 var isFunction = __webpack_require__(36),
     isMasked = __webpack_require__(383),
     isObject = __webpack_require__(10),
-    toSource = __webpack_require__(108);
+    toSource = __webpack_require__(109);
 
 /**
  * Used to match `RegExp`
@@ -41912,7 +41769,7 @@ module.exports = baseIsNative;
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseGetTag = __webpack_require__(17),
-    isLength = __webpack_require__(57),
+    isLength = __webpack_require__(58),
     isObjectLike = __webpack_require__(14);
 
 /** `Object#toString` result references. */
@@ -42015,7 +41872,7 @@ module.exports = baseIteratee;
 /***/ (function(module, exports, __webpack_require__) {
 
 var isObject = __webpack_require__(10),
-    isPrototype = __webpack_require__(54),
+    isPrototype = __webpack_require__(55),
     nativeKeysIn = __webpack_require__(397);
 
 /** Used for built-in method references. */
@@ -42055,7 +41912,7 @@ module.exports = baseKeysIn;
 
 var baseIsMatch = __webpack_require__(329),
     getMatchData = __webpack_require__(366),
-    matchesStrictComparable = __webpack_require__(99);
+    matchesStrictComparable = __webpack_require__(100);
 
 /**
  * The base implementation of `_.matches` which doesn't clone `source`.
@@ -42081,12 +41938,12 @@ module.exports = baseMatches;
 /* 336 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseIsEqual = __webpack_require__(78),
+var baseIsEqual = __webpack_require__(79),
     get = __webpack_require__(422),
     hasIn = __webpack_require__(423),
-    isKey = __webpack_require__(53),
-    isStrictComparable = __webpack_require__(97),
-    matchesStrictComparable = __webpack_require__(99),
+    isKey = __webpack_require__(54),
+    isStrictComparable = __webpack_require__(98),
+    matchesStrictComparable = __webpack_require__(100),
     toKey = __webpack_require__(20);
 
 /** Used to compose bitmasks for value comparisons. */
@@ -42121,7 +41978,7 @@ module.exports = baseMatchesProperty;
 /***/ (function(module, exports, __webpack_require__) {
 
 var Stack = __webpack_require__(25),
-    assignMergeValue = __webpack_require__(72),
+    assignMergeValue = __webpack_require__(73),
     baseFor = __webpack_require__(324),
     baseMergeDeep = __webpack_require__(338),
     isObject = __webpack_require__(10),
@@ -42167,11 +42024,11 @@ module.exports = baseMerge;
 /* 338 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var assignMergeValue = __webpack_require__(72),
-    cloneBuffer = __webpack_require__(82),
-    cloneTypedArray = __webpack_require__(83),
+var assignMergeValue = __webpack_require__(73),
+    cloneBuffer = __webpack_require__(83),
+    cloneTypedArray = __webpack_require__(84),
     copyArray = __webpack_require__(18),
-    initCloneObject = __webpack_require__(96),
+    initCloneObject = __webpack_require__(97),
     isArguments = __webpack_require__(33),
     isArray = __webpack_require__(9),
     isArrayLikeObject = __webpack_require__(424),
@@ -42179,7 +42036,7 @@ var assignMergeValue = __webpack_require__(72),
     isFunction = __webpack_require__(36),
     isObject = __webpack_require__(10),
     isPlainObject = __webpack_require__(425),
-    isTypedArray = __webpack_require__(58),
+    isTypedArray = __webpack_require__(59),
     toPlainObject = __webpack_require__(436);
 
 /**
@@ -42286,7 +42143,7 @@ module.exports = baseProperty;
 /* 340 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseGet = __webpack_require__(76);
+var baseGet = __webpack_require__(77);
 
 /**
  * A specialized version of `baseProperty` which supports deep paths.
@@ -42309,8 +42166,8 @@ module.exports = basePropertyDeep;
 /***/ (function(module, exports, __webpack_require__) {
 
 var identity = __webpack_require__(32),
-    overRest = __webpack_require__(102),
-    setToString = __webpack_require__(56);
+    overRest = __webpack_require__(103),
+    setToString = __webpack_require__(57);
 
 /**
  * The base implementation of `_.rest` which doesn't validate or coerce arguments.
@@ -42332,7 +42189,7 @@ module.exports = baseRest;
 /***/ (function(module, exports, __webpack_require__) {
 
 var constant = __webpack_require__(414),
-    defineProperty = __webpack_require__(88),
+    defineProperty = __webpack_require__(89),
     identity = __webpack_require__(32);
 
 /**
@@ -42386,7 +42243,7 @@ module.exports = baseTimes;
 /***/ (function(module, exports, __webpack_require__) {
 
 var Symbol = __webpack_require__(16),
-    arrayMap = __webpack_require__(70),
+    arrayMap = __webpack_require__(71),
     isArray = __webpack_require__(9),
     isSymbol = __webpack_require__(22);
 
@@ -42467,7 +42324,7 @@ module.exports = cacheHas;
 /* 347 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var cloneArrayBuffer = __webpack_require__(49);
+var cloneArrayBuffer = __webpack_require__(50);
 
 /**
  * Creates a clone of `dataView`.
@@ -42490,8 +42347,8 @@ module.exports = cloneDataView;
 /***/ (function(module, exports, __webpack_require__) {
 
 var addMapEntry = __webpack_require__(316),
-    arrayReduce = __webpack_require__(71),
-    mapToArray = __webpack_require__(98);
+    arrayReduce = __webpack_require__(72),
+    mapToArray = __webpack_require__(99);
 
 /** Used to compose bitmasks for cloning. */
 var CLONE_DEEP_FLAG = 1;
@@ -42541,8 +42398,8 @@ module.exports = cloneRegExp;
 /***/ (function(module, exports, __webpack_require__) {
 
 var addSetEntry = __webpack_require__(317),
-    arrayReduce = __webpack_require__(71),
-    setToArray = __webpack_require__(104);
+    arrayReduce = __webpack_require__(72),
+    setToArray = __webpack_require__(105);
 
 /** Used to compose bitmasks for cloning. */
 var CLONE_DEEP_FLAG = 1;
@@ -42593,7 +42450,7 @@ module.exports = cloneSymbol;
 /***/ (function(module, exports, __webpack_require__) {
 
 var copyObject = __webpack_require__(19),
-    getSymbols = __webpack_require__(52);
+    getSymbols = __webpack_require__(53);
 
 /**
  * Copies own symbols of `source` to `object`.
@@ -42615,7 +42472,7 @@ module.exports = copySymbols;
 /***/ (function(module, exports, __webpack_require__) {
 
 var copyObject = __webpack_require__(19),
-    getSymbolsIn = __webpack_require__(94);
+    getSymbolsIn = __webpack_require__(95);
 
 /**
  * Copies own and inherited symbols of `source` to `object`.
@@ -42783,12 +42640,12 @@ module.exports = createBind;
 /* 359 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var apply = __webpack_require__(44),
+var apply = __webpack_require__(45),
     createCtor = __webpack_require__(28),
-    createHybrid = __webpack_require__(86),
-    createRecurry = __webpack_require__(87),
-    getHolder = __webpack_require__(93),
-    replaceHolders = __webpack_require__(55),
+    createHybrid = __webpack_require__(87),
+    createRecurry = __webpack_require__(88),
+    getHolder = __webpack_require__(94),
+    replaceHolders = __webpack_require__(56),
     root = __webpack_require__(8);
 
 /**
@@ -42835,7 +42692,7 @@ module.exports = createCurry;
 /* 360 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var apply = __webpack_require__(44),
+var apply = __webpack_require__(45),
     createCtor = __webpack_require__(28),
     root = __webpack_require__(8);
 
@@ -42885,11 +42742,11 @@ module.exports = createPartial;
 /***/ (function(module, exports, __webpack_require__) {
 
 var Symbol = __webpack_require__(16),
-    Uint8Array = __webpack_require__(67),
+    Uint8Array = __webpack_require__(68),
     eq = __webpack_require__(21),
-    equalArrays = __webpack_require__(89),
-    mapToArray = __webpack_require__(98),
-    setToArray = __webpack_require__(104);
+    equalArrays = __webpack_require__(90),
+    mapToArray = __webpack_require__(99),
+    setToArray = __webpack_require__(105);
 
 /** Used to compose bitmasks for value comparisons. */
 var COMPARE_PARTIAL_FLAG = 1,
@@ -43002,7 +42859,7 @@ module.exports = equalByTag;
 /* 362 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getAllKeys = __webpack_require__(91);
+var getAllKeys = __webpack_require__(92);
 
 /** Used to compose bitmasks for value comparisons. */
 var COMPARE_PARTIAL_FLAG = 1;
@@ -43098,8 +42955,8 @@ module.exports = equalObjects;
 /***/ (function(module, exports, __webpack_require__) {
 
 var flatten = __webpack_require__(416),
-    overRest = __webpack_require__(102),
-    setToString = __webpack_require__(56);
+    overRest = __webpack_require__(103),
+    setToString = __webpack_require__(57);
 
 /**
  * A specialized version of `baseRest` which flattens the rest array.
@@ -43119,8 +42976,8 @@ module.exports = flatRest;
 /* 364 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseGetAllKeys = __webpack_require__(77),
-    getSymbolsIn = __webpack_require__(94),
+var baseGetAllKeys = __webpack_require__(78),
+    getSymbolsIn = __webpack_require__(95),
     keysIn = __webpack_require__(38);
 
 /**
@@ -43179,7 +43036,7 @@ module.exports = getFuncName;
 /* 366 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var isStrictComparable = __webpack_require__(97),
+var isStrictComparable = __webpack_require__(98),
     keys = __webpack_require__(37);
 
 /**
@@ -43303,11 +43160,11 @@ module.exports = getWrapDetails;
 /* 370 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var castPath = __webpack_require__(81),
+var castPath = __webpack_require__(82),
     isArguments = __webpack_require__(33),
     isArray = __webpack_require__(9),
     isIndex = __webpack_require__(30),
-    isLength = __webpack_require__(57),
+    isLength = __webpack_require__(58),
     toKey = __webpack_require__(20);
 
 /**
@@ -43518,13 +43375,13 @@ module.exports = initCloneArray;
 /* 377 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var cloneArrayBuffer = __webpack_require__(49),
+var cloneArrayBuffer = __webpack_require__(50),
     cloneDataView = __webpack_require__(347),
     cloneMap = __webpack_require__(348),
     cloneRegExp = __webpack_require__(349),
     cloneSet = __webpack_require__(350),
     cloneSymbol = __webpack_require__(351),
-    cloneTypedArray = __webpack_require__(83);
+    cloneTypedArray = __webpack_require__(84);
 
 /** `Object#toString` result references. */
 var boolTag = '[object Boolean]',
@@ -43716,8 +43573,8 @@ module.exports = isKeyable;
 /* 382 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var LazyWrapper = __webpack_require__(41),
-    getData = __webpack_require__(92),
+var LazyWrapper = __webpack_require__(42),
+    getData = __webpack_require__(93),
     getFuncName = __webpack_require__(365),
     lodash = __webpack_require__(437);
 
@@ -43917,7 +43774,7 @@ module.exports = listCacheSet;
 
 var Hash = __webpack_require__(312),
     ListCache = __webpack_require__(24),
-    Map = __webpack_require__(42);
+    Map = __webpack_require__(43);
 
 /**
  * Removes all key-value entries from the map.
@@ -44070,9 +43927,9 @@ module.exports = memoizeCapped;
 /* 395 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var composeArgs = __webpack_require__(84),
-    composeArgsRight = __webpack_require__(85),
-    replaceHolders = __webpack_require__(55);
+var composeArgs = __webpack_require__(85),
+    composeArgsRight = __webpack_require__(86),
+    replaceHolders = __webpack_require__(56);
 
 /** Used as the internal argument placeholder. */
 var PLACEHOLDER = '__lodash_placeholder__';
@@ -44166,7 +44023,7 @@ module.exports = mergeData;
 /* 396 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var overArg = __webpack_require__(101);
+var overArg = __webpack_require__(102);
 
 /* Built-in method references for those with the same name as other `lodash` methods. */
 var nativeKeys = overArg(Object.keys, Object);
@@ -44204,7 +44061,7 @@ module.exports = nativeKeysIn;
 /* 398 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(module) {var freeGlobal = __webpack_require__(90);
+/* WEBPACK VAR INJECTION */(function(module) {var freeGlobal = __webpack_require__(91);
 
 /** Detect free variable `exports`. */
 var freeExports = typeof exports == 'object' && exports && !exports.nodeType && exports;
@@ -44437,8 +44294,8 @@ module.exports = stackHas;
 /***/ (function(module, exports, __webpack_require__) {
 
 var ListCache = __webpack_require__(24),
-    Map = __webpack_require__(42),
-    MapCache = __webpack_require__(43);
+    Map = __webpack_require__(43),
+    MapCache = __webpack_require__(44);
 
 /** Used as the size to enable large array optimizations. */
 var LARGE_ARRAY_SIZE = 200;
@@ -44505,7 +44362,7 @@ module.exports = strictIndexOf;
 /* 410 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayEach = __webpack_require__(45),
+var arrayEach = __webpack_require__(46),
     arrayIncludes = __webpack_require__(319);
 
 /** Used to compose bitmasks for function metadata. */
@@ -44557,8 +44414,8 @@ module.exports = updateWrapDetails;
 /* 411 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var LazyWrapper = __webpack_require__(41),
-    LodashWrapper = __webpack_require__(66),
+var LazyWrapper = __webpack_require__(42),
+    LodashWrapper = __webpack_require__(67),
     copyArray = __webpack_require__(18);
 
 /**
@@ -44586,7 +44443,7 @@ module.exports = wrapperClone;
 /* 412 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var createWrap = __webpack_require__(50);
+var createWrap = __webpack_require__(51);
 
 /** Used to compose bitmasks for function metadata. */
 var WRAP_ARY_FLAG = 128;
@@ -44621,7 +44478,7 @@ module.exports = ary;
 /* 413 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseClone = __webpack_require__(75);
+var baseClone = __webpack_require__(76);
 
 /** Used to compose bitmasks for cloning. */
 var CLONE_SYMBOLS_FLAG = 4;
@@ -44695,7 +44552,7 @@ module.exports = constant;
 /* 415 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var createWrap = __webpack_require__(50);
+var createWrap = __webpack_require__(51);
 
 /** Used to compose bitmasks for function metadata. */
 var WRAP_CURRY_FLAG = 8;
@@ -44787,7 +44644,7 @@ module.exports = flatten;
 /***/ (function(module, exports, __webpack_require__) {
 
 var mapping = __webpack_require__(418),
-    fallbackHolder = __webpack_require__(109);
+    fallbackHolder = __webpack_require__(110);
 
 /** Built-in value reference. */
 var push = Array.prototype.push;
@@ -45736,16 +45593,16 @@ exports.skipRearg = {
 
 module.exports = {
   'ary': __webpack_require__(412),
-  'assign': __webpack_require__(74),
+  'assign': __webpack_require__(75),
   'clone': __webpack_require__(413),
   'curry': __webpack_require__(415),
-  'forEach': __webpack_require__(45),
+  'forEach': __webpack_require__(46),
   'isArray': __webpack_require__(9),
   'isFunction': __webpack_require__(36),
   'iteratee': __webpack_require__(426),
-  'keys': __webpack_require__(79),
+  'keys': __webpack_require__(80),
   'rearg': __webpack_require__(431),
-  'toInteger': __webpack_require__(111),
+  'toInteger': __webpack_require__(112),
   'toPath': __webpack_require__(435)
 };
 
@@ -45781,7 +45638,7 @@ module.exports = convert;
 var convert = __webpack_require__(420),
     func = convert('merge', __webpack_require__(428));
 
-func.placeholder = __webpack_require__(109);
+func.placeholder = __webpack_require__(110);
 module.exports = func;
 
 
@@ -45789,7 +45646,7 @@ module.exports = func;
 /* 422 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseGet = __webpack_require__(76);
+var baseGet = __webpack_require__(77);
 
 /**
  * Gets the value at `path` of `object`. If the resolved value is
@@ -45908,7 +45765,7 @@ module.exports = isArrayLikeObject;
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseGetTag = __webpack_require__(17),
-    getPrototype = __webpack_require__(51),
+    getPrototype = __webpack_require__(52),
     isObjectLike = __webpack_require__(14);
 
 /** `Object#toString` result references. */
@@ -45975,7 +45832,7 @@ module.exports = isPlainObject;
 /* 426 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseClone = __webpack_require__(75),
+var baseClone = __webpack_require__(76),
     baseIteratee = __webpack_require__(333);
 
 /** Used to compose bitmasks for cloning. */
@@ -46034,7 +45891,7 @@ module.exports = iteratee;
 /* 427 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var MapCache = __webpack_require__(43);
+var MapCache = __webpack_require__(44);
 
 /** Error message constants. */
 var FUNC_ERROR_TEXT = 'Expected a function';
@@ -46183,7 +46040,7 @@ module.exports = noop;
 
 var baseProperty = __webpack_require__(339),
     basePropertyDeep = __webpack_require__(340),
-    isKey = __webpack_require__(53),
+    isKey = __webpack_require__(54),
     toKey = __webpack_require__(20);
 
 /**
@@ -46219,7 +46076,7 @@ module.exports = property;
 /* 431 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var createWrap = __webpack_require__(50),
+var createWrap = __webpack_require__(51),
     flatRest = __webpack_require__(363);
 
 /** Used to compose bitmasks for function metadata. */
@@ -46402,13 +46259,13 @@ module.exports = toNumber;
 /* 435 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayMap = __webpack_require__(70),
+var arrayMap = __webpack_require__(71),
     copyArray = __webpack_require__(18),
     isArray = __webpack_require__(9),
     isSymbol = __webpack_require__(22),
-    stringToPath = __webpack_require__(107),
+    stringToPath = __webpack_require__(108),
     toKey = __webpack_require__(20),
-    toString = __webpack_require__(112);
+    toString = __webpack_require__(113);
 
 /**
  * Converts `value` to a property path array.
@@ -46479,9 +46336,9 @@ module.exports = toPlainObject;
 /* 437 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var LazyWrapper = __webpack_require__(41),
-    LodashWrapper = __webpack_require__(66),
-    baseLodash = __webpack_require__(48),
+var LazyWrapper = __webpack_require__(42),
+    LodashWrapper = __webpack_require__(67),
+    baseLodash = __webpack_require__(49),
     isArray = __webpack_require__(9),
     isObjectLike = __webpack_require__(14),
     wrapperClone = __webpack_require__(411);
@@ -46633,236 +46490,236 @@ module.exports = lodash;
 /***/ (function(module, exports, __webpack_require__) {
 
 var map = {
-	"./af": 113,
-	"./af.js": 113,
-	"./ar": 120,
-	"./ar-dz": 114,
-	"./ar-dz.js": 114,
-	"./ar-kw": 115,
-	"./ar-kw.js": 115,
-	"./ar-ly": 116,
-	"./ar-ly.js": 116,
-	"./ar-ma": 117,
-	"./ar-ma.js": 117,
-	"./ar-sa": 118,
-	"./ar-sa.js": 118,
-	"./ar-tn": 119,
-	"./ar-tn.js": 119,
-	"./ar.js": 120,
-	"./az": 121,
-	"./az.js": 121,
-	"./be": 122,
-	"./be.js": 122,
-	"./bg": 123,
-	"./bg.js": 123,
-	"./bn": 124,
-	"./bn.js": 124,
-	"./bo": 125,
-	"./bo.js": 125,
-	"./br": 126,
-	"./br.js": 126,
-	"./bs": 127,
-	"./bs.js": 127,
-	"./ca": 128,
-	"./ca.js": 128,
-	"./cs": 129,
-	"./cs.js": 129,
-	"./cv": 130,
-	"./cv.js": 130,
-	"./cy": 131,
-	"./cy.js": 131,
-	"./da": 132,
-	"./da.js": 132,
-	"./de": 135,
-	"./de-at": 133,
-	"./de-at.js": 133,
-	"./de-ch": 134,
-	"./de-ch.js": 134,
-	"./de.js": 135,
-	"./dv": 136,
-	"./dv.js": 136,
-	"./el": 137,
-	"./el.js": 137,
-	"./en-au": 138,
-	"./en-au.js": 138,
-	"./en-ca": 139,
-	"./en-ca.js": 139,
-	"./en-gb": 140,
-	"./en-gb.js": 140,
-	"./en-ie": 141,
-	"./en-ie.js": 141,
-	"./en-nz": 142,
-	"./en-nz.js": 142,
-	"./eo": 143,
-	"./eo.js": 143,
-	"./es": 145,
-	"./es-do": 144,
-	"./es-do.js": 144,
-	"./es.js": 145,
-	"./et": 146,
-	"./et.js": 146,
-	"./eu": 147,
-	"./eu.js": 147,
-	"./fa": 148,
-	"./fa.js": 148,
-	"./fi": 149,
-	"./fi.js": 149,
-	"./fo": 150,
-	"./fo.js": 150,
-	"./fr": 153,
-	"./fr-ca": 151,
-	"./fr-ca.js": 151,
-	"./fr-ch": 152,
-	"./fr-ch.js": 152,
-	"./fr.js": 153,
-	"./fy": 154,
-	"./fy.js": 154,
-	"./gd": 155,
-	"./gd.js": 155,
-	"./gl": 156,
-	"./gl.js": 156,
-	"./gom-latn": 157,
-	"./gom-latn.js": 157,
-	"./he": 158,
-	"./he.js": 158,
-	"./hi": 159,
-	"./hi.js": 159,
-	"./hr": 160,
-	"./hr.js": 160,
-	"./hu": 161,
-	"./hu.js": 161,
-	"./hy-am": 162,
-	"./hy-am.js": 162,
-	"./id": 163,
-	"./id.js": 163,
-	"./is": 164,
-	"./is.js": 164,
-	"./it": 165,
-	"./it.js": 165,
-	"./ja": 166,
-	"./ja.js": 166,
-	"./jv": 167,
-	"./jv.js": 167,
-	"./ka": 168,
-	"./ka.js": 168,
-	"./kk": 169,
-	"./kk.js": 169,
-	"./km": 170,
-	"./km.js": 170,
-	"./kn": 171,
-	"./kn.js": 171,
-	"./ko": 172,
-	"./ko.js": 172,
-	"./ky": 173,
-	"./ky.js": 173,
-	"./lb": 174,
-	"./lb.js": 174,
-	"./lo": 175,
-	"./lo.js": 175,
-	"./lt": 176,
-	"./lt.js": 176,
-	"./lv": 177,
-	"./lv.js": 177,
-	"./me": 178,
-	"./me.js": 178,
-	"./mi": 179,
-	"./mi.js": 179,
-	"./mk": 180,
-	"./mk.js": 180,
-	"./ml": 181,
-	"./ml.js": 181,
-	"./mr": 182,
-	"./mr.js": 182,
-	"./ms": 184,
-	"./ms-my": 183,
-	"./ms-my.js": 183,
-	"./ms.js": 184,
-	"./my": 185,
-	"./my.js": 185,
-	"./nb": 186,
-	"./nb.js": 186,
-	"./ne": 187,
-	"./ne.js": 187,
-	"./nl": 189,
-	"./nl-be": 188,
-	"./nl-be.js": 188,
-	"./nl.js": 189,
-	"./nn": 190,
-	"./nn.js": 190,
-	"./pa-in": 191,
-	"./pa-in.js": 191,
-	"./pl": 192,
-	"./pl.js": 192,
-	"./pt": 194,
-	"./pt-br": 193,
-	"./pt-br.js": 193,
-	"./pt.js": 194,
-	"./ro": 195,
-	"./ro.js": 195,
-	"./ru": 196,
-	"./ru.js": 196,
-	"./sd": 197,
-	"./sd.js": 197,
-	"./se": 198,
-	"./se.js": 198,
-	"./si": 199,
-	"./si.js": 199,
-	"./sk": 200,
-	"./sk.js": 200,
-	"./sl": 201,
-	"./sl.js": 201,
-	"./sq": 202,
-	"./sq.js": 202,
-	"./sr": 204,
-	"./sr-cyrl": 203,
-	"./sr-cyrl.js": 203,
-	"./sr.js": 204,
-	"./ss": 205,
-	"./ss.js": 205,
-	"./sv": 206,
-	"./sv.js": 206,
-	"./sw": 207,
-	"./sw.js": 207,
-	"./ta": 208,
-	"./ta.js": 208,
-	"./te": 209,
-	"./te.js": 209,
-	"./tet": 210,
-	"./tet.js": 210,
-	"./th": 211,
-	"./th.js": 211,
-	"./tl-ph": 212,
-	"./tl-ph.js": 212,
-	"./tlh": 213,
-	"./tlh.js": 213,
-	"./tr": 214,
-	"./tr.js": 214,
-	"./tzl": 215,
-	"./tzl.js": 215,
-	"./tzm": 217,
-	"./tzm-latn": 216,
-	"./tzm-latn.js": 216,
-	"./tzm.js": 217,
-	"./uk": 218,
-	"./uk.js": 218,
-	"./ur": 219,
-	"./ur.js": 219,
-	"./uz": 221,
-	"./uz-latn": 220,
-	"./uz-latn.js": 220,
-	"./uz.js": 221,
-	"./vi": 222,
-	"./vi.js": 222,
-	"./x-pseudo": 223,
-	"./x-pseudo.js": 223,
-	"./yo": 224,
-	"./yo.js": 224,
-	"./zh-cn": 225,
-	"./zh-cn.js": 225,
-	"./zh-hk": 226,
-	"./zh-hk.js": 226,
-	"./zh-tw": 227,
-	"./zh-tw.js": 227
+	"./af": 114,
+	"./af.js": 114,
+	"./ar": 121,
+	"./ar-dz": 115,
+	"./ar-dz.js": 115,
+	"./ar-kw": 116,
+	"./ar-kw.js": 116,
+	"./ar-ly": 117,
+	"./ar-ly.js": 117,
+	"./ar-ma": 118,
+	"./ar-ma.js": 118,
+	"./ar-sa": 119,
+	"./ar-sa.js": 119,
+	"./ar-tn": 120,
+	"./ar-tn.js": 120,
+	"./ar.js": 121,
+	"./az": 122,
+	"./az.js": 122,
+	"./be": 123,
+	"./be.js": 123,
+	"./bg": 124,
+	"./bg.js": 124,
+	"./bn": 125,
+	"./bn.js": 125,
+	"./bo": 126,
+	"./bo.js": 126,
+	"./br": 127,
+	"./br.js": 127,
+	"./bs": 128,
+	"./bs.js": 128,
+	"./ca": 129,
+	"./ca.js": 129,
+	"./cs": 130,
+	"./cs.js": 130,
+	"./cv": 131,
+	"./cv.js": 131,
+	"./cy": 132,
+	"./cy.js": 132,
+	"./da": 133,
+	"./da.js": 133,
+	"./de": 136,
+	"./de-at": 134,
+	"./de-at.js": 134,
+	"./de-ch": 135,
+	"./de-ch.js": 135,
+	"./de.js": 136,
+	"./dv": 137,
+	"./dv.js": 137,
+	"./el": 138,
+	"./el.js": 138,
+	"./en-au": 139,
+	"./en-au.js": 139,
+	"./en-ca": 140,
+	"./en-ca.js": 140,
+	"./en-gb": 141,
+	"./en-gb.js": 141,
+	"./en-ie": 142,
+	"./en-ie.js": 142,
+	"./en-nz": 143,
+	"./en-nz.js": 143,
+	"./eo": 144,
+	"./eo.js": 144,
+	"./es": 146,
+	"./es-do": 145,
+	"./es-do.js": 145,
+	"./es.js": 146,
+	"./et": 147,
+	"./et.js": 147,
+	"./eu": 148,
+	"./eu.js": 148,
+	"./fa": 149,
+	"./fa.js": 149,
+	"./fi": 150,
+	"./fi.js": 150,
+	"./fo": 151,
+	"./fo.js": 151,
+	"./fr": 154,
+	"./fr-ca": 152,
+	"./fr-ca.js": 152,
+	"./fr-ch": 153,
+	"./fr-ch.js": 153,
+	"./fr.js": 154,
+	"./fy": 155,
+	"./fy.js": 155,
+	"./gd": 156,
+	"./gd.js": 156,
+	"./gl": 157,
+	"./gl.js": 157,
+	"./gom-latn": 158,
+	"./gom-latn.js": 158,
+	"./he": 159,
+	"./he.js": 159,
+	"./hi": 160,
+	"./hi.js": 160,
+	"./hr": 161,
+	"./hr.js": 161,
+	"./hu": 162,
+	"./hu.js": 162,
+	"./hy-am": 163,
+	"./hy-am.js": 163,
+	"./id": 164,
+	"./id.js": 164,
+	"./is": 165,
+	"./is.js": 165,
+	"./it": 166,
+	"./it.js": 166,
+	"./ja": 167,
+	"./ja.js": 167,
+	"./jv": 168,
+	"./jv.js": 168,
+	"./ka": 169,
+	"./ka.js": 169,
+	"./kk": 170,
+	"./kk.js": 170,
+	"./km": 171,
+	"./km.js": 171,
+	"./kn": 172,
+	"./kn.js": 172,
+	"./ko": 173,
+	"./ko.js": 173,
+	"./ky": 174,
+	"./ky.js": 174,
+	"./lb": 175,
+	"./lb.js": 175,
+	"./lo": 176,
+	"./lo.js": 176,
+	"./lt": 177,
+	"./lt.js": 177,
+	"./lv": 178,
+	"./lv.js": 178,
+	"./me": 179,
+	"./me.js": 179,
+	"./mi": 180,
+	"./mi.js": 180,
+	"./mk": 181,
+	"./mk.js": 181,
+	"./ml": 182,
+	"./ml.js": 182,
+	"./mr": 183,
+	"./mr.js": 183,
+	"./ms": 185,
+	"./ms-my": 184,
+	"./ms-my.js": 184,
+	"./ms.js": 185,
+	"./my": 186,
+	"./my.js": 186,
+	"./nb": 187,
+	"./nb.js": 187,
+	"./ne": 188,
+	"./ne.js": 188,
+	"./nl": 190,
+	"./nl-be": 189,
+	"./nl-be.js": 189,
+	"./nl.js": 190,
+	"./nn": 191,
+	"./nn.js": 191,
+	"./pa-in": 192,
+	"./pa-in.js": 192,
+	"./pl": 193,
+	"./pl.js": 193,
+	"./pt": 195,
+	"./pt-br": 194,
+	"./pt-br.js": 194,
+	"./pt.js": 195,
+	"./ro": 196,
+	"./ro.js": 196,
+	"./ru": 197,
+	"./ru.js": 197,
+	"./sd": 198,
+	"./sd.js": 198,
+	"./se": 199,
+	"./se.js": 199,
+	"./si": 200,
+	"./si.js": 200,
+	"./sk": 201,
+	"./sk.js": 201,
+	"./sl": 202,
+	"./sl.js": 202,
+	"./sq": 203,
+	"./sq.js": 203,
+	"./sr": 205,
+	"./sr-cyrl": 204,
+	"./sr-cyrl.js": 204,
+	"./sr.js": 205,
+	"./ss": 206,
+	"./ss.js": 206,
+	"./sv": 207,
+	"./sv.js": 207,
+	"./sw": 208,
+	"./sw.js": 208,
+	"./ta": 209,
+	"./ta.js": 209,
+	"./te": 210,
+	"./te.js": 210,
+	"./tet": 211,
+	"./tet.js": 211,
+	"./th": 212,
+	"./th.js": 212,
+	"./tl-ph": 213,
+	"./tl-ph.js": 213,
+	"./tlh": 214,
+	"./tlh.js": 214,
+	"./tr": 215,
+	"./tr.js": 215,
+	"./tzl": 216,
+	"./tzl.js": 216,
+	"./tzm": 218,
+	"./tzm-latn": 217,
+	"./tzm-latn.js": 217,
+	"./tzm.js": 218,
+	"./uk": 219,
+	"./uk.js": 219,
+	"./ur": 220,
+	"./ur.js": 220,
+	"./uz": 222,
+	"./uz-latn": 221,
+	"./uz-latn.js": 221,
+	"./uz.js": 222,
+	"./vi": 223,
+	"./vi.js": 223,
+	"./x-pseudo": 224,
+	"./x-pseudo.js": 224,
+	"./yo": 225,
+	"./yo.js": 225,
+	"./zh-cn": 226,
+	"./zh-cn.js": 226,
+	"./zh-hk": 227,
+	"./zh-hk.js": 227,
+	"./zh-tw": 228,
+	"./zh-tw.js": 228
 };
 function webpackContext(req) {
 	return __webpack_require__(webpackContextResolve(req));
@@ -48165,11 +48022,49 @@ module.exports = {
 
 
 /* styles */
-__webpack_require__(511)
+__webpack_require__(527)
 
 var Component = __webpack_require__(2)(
   /* script */
   __webpack_require__(532),
+  /* template */
+  __webpack_require__(501),
+  /* scopeId */
+  null,
+  /* cssModules */
+  null
+)
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\components\\account-dialog.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
+if (Component.options.functional) {console.error("[vue-loader] account-dialog.vue: functional components are not supported with templates, they should use render functions.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-ab65ee20", Component.options)
+  } else {
+    hotAPI.reload("data-v-ab65ee20", Component.options)
+  }
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 454 */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+/* styles */
+__webpack_require__(511)
+
+var Component = __webpack_require__(2)(
+  /* script */
+  __webpack_require__(533),
   /* template */
   __webpack_require__(485),
   /* scopeId */
@@ -48177,7 +48072,7 @@ var Component = __webpack_require__(2)(
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\components\\deliver-dialog.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\components\\deliver-dialog.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] deliver-dialog.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -48198,24 +48093,24 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 454 */
+/* 455 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
 /* styles */
-__webpack_require__(523)
+__webpack_require__(522)
 
 var Component = __webpack_require__(2)(
   /* script */
-  __webpack_require__(533),
+  __webpack_require__(534),
   /* template */
-  __webpack_require__(497),
+  __webpack_require__(496),
   /* scopeId */
   null,
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\components\\deliver-history.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\components\\deliver-history.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] deliver-history.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -48236,7 +48131,7 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 455 */
+/* 456 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -48245,7 +48140,7 @@ __webpack_require__(509)
 
 var Component = __webpack_require__(2)(
   /* script */
-  __webpack_require__(534),
+  __webpack_require__(535),
   /* template */
   __webpack_require__(483),
   /* scopeId */
@@ -48253,7 +48148,7 @@ var Component = __webpack_require__(2)(
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\components\\game-clock.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\components\\game-clock.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] game-clock.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -48274,7 +48169,7 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 456 */
+/* 457 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -48283,7 +48178,7 @@ __webpack_require__(529)
 
 var Component = __webpack_require__(2)(
   /* script */
-  __webpack_require__(535),
+  __webpack_require__(536),
   /* template */
   __webpack_require__(503),
   /* scopeId */
@@ -48291,7 +48186,7 @@ var Component = __webpack_require__(2)(
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\components\\info-panel.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\components\\info-panel.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] info-panel.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -48312,7 +48207,7 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 457 */
+/* 458 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -48321,7 +48216,7 @@ __webpack_require__(516)
 
 var Component = __webpack_require__(2)(
   /* script */
-  __webpack_require__(536),
+  __webpack_require__(537),
   /* template */
   __webpack_require__(490),
   /* scopeId */
@@ -48329,7 +48224,7 @@ var Component = __webpack_require__(2)(
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\components\\news-list.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\components\\news-list.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] news-list.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -48343,44 +48238,6 @@ if (false) {(function () {
     hotAPI.createRecord("data-v-5acaab00", Component.options)
   } else {
     hotAPI.reload("data-v-5acaab00", Component.options)
-  }
-})()}
-
-module.exports = Component.exports
-
-
-/***/ }),
-/* 458 */
-/***/ (function(module, exports, __webpack_require__) {
-
-
-/* styles */
-__webpack_require__(519)
-
-var Component = __webpack_require__(2)(
-  /* script */
-  __webpack_require__(537),
-  /* template */
-  __webpack_require__(493),
-  /* scopeId */
-  null,
-  /* cssModules */
-  null
-)
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\components\\news-publisher-dialog.vue"
-if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
-if (Component.options.functional) {console.error("[vue-loader] news-publisher-dialog.vue: functional components are not supported with templates, they should use render functions.")}
-
-/* hot reload */
-if (false) {(function () {
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), false)
-  if (!hotAPI.compatible) return
-  module.hot.accept()
-  if (!module.hot.data) {
-    hotAPI.createRecord("data-v-6c6c679b", Component.options)
-  } else {
-    hotAPI.reload("data-v-6c6c679b", Component.options)
   }
 })()}
 
@@ -48405,7 +48262,7 @@ var Component = __webpack_require__(2)(
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\components\\online-status.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\components\\online-status.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] online-status.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -48443,7 +48300,7 @@ var Component = __webpack_require__(2)(
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\components\\order-dialog.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\components\\order-dialog.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] order-dialog.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -48469,19 +48326,19 @@ module.exports = Component.exports
 
 
 /* styles */
-__webpack_require__(525)
+__webpack_require__(524)
 
 var Component = __webpack_require__(2)(
   /* script */
   __webpack_require__(540),
   /* template */
-  __webpack_require__(499),
+  __webpack_require__(498),
   /* scopeId */
   null,
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\components\\order-history.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\components\\order-history.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] order-history.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -48519,7 +48376,7 @@ var Component = __webpack_require__(2)(
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\components\\storage-list.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\components\\storage-list.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] storage-list.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -48557,7 +48414,7 @@ var Component = __webpack_require__(2)(
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\components\\storage-register-dialog.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\components\\storage-register-dialog.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] storage-register-dialog.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -48595,7 +48452,7 @@ var Component = __webpack_require__(2)(
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\components\\team-storage-list.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\components\\team-storage-list.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] team-storage-list.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -48621,19 +48478,19 @@ module.exports = Component.exports
 
 
 /* styles */
-__webpack_require__(522)
+__webpack_require__(521)
 
 var Component = __webpack_require__(2)(
   /* script */
   __webpack_require__(544),
   /* template */
-  __webpack_require__(496),
+  __webpack_require__(495),
   /* scopeId */
   null,
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\page\\admin\\construct\\index.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\page\\admin\\construct\\index.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] index.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -48671,7 +48528,7 @@ var Component = __webpack_require__(2)(
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\page\\choose\\job\\index.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\page\\choose\\job\\index.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] index.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -48709,7 +48566,7 @@ var Component = __webpack_require__(2)(
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\page\\choose\\ready\\index.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\page\\choose\\ready\\index.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] index.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -48747,7 +48604,7 @@ var Component = __webpack_require__(2)(
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\page\\choose\\team\\index.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\page\\choose\\team\\index.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] index.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -48785,7 +48642,7 @@ var Component = __webpack_require__(2)(
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\page\\end\\index.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\page\\end\\index.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] index.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -48811,19 +48668,19 @@ module.exports = Component.exports
 
 
 /* styles */
-__webpack_require__(521)
+__webpack_require__(520)
 
 var Component = __webpack_require__(2)(
   /* script */
   __webpack_require__(549),
   /* template */
-  __webpack_require__(495),
+  __webpack_require__(494),
   /* scopeId */
   null,
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\page\\home\\index.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\page\\home\\index.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] index.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -48849,19 +48706,19 @@ module.exports = Component.exports
 
 
 /* styles */
-__webpack_require__(526)
+__webpack_require__(525)
 
 var Component = __webpack_require__(2)(
   /* script */
   __webpack_require__(550),
   /* template */
-  __webpack_require__(500),
+  __webpack_require__(499),
   /* scopeId */
   null,
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\page\\round\\consoler\\index.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\page\\round\\consoler\\index.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] index.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -48899,7 +48756,7 @@ var Component = __webpack_require__(2)(
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\page\\round\\exchanger\\index.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\page\\round\\exchanger\\index.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] index.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -48925,19 +48782,19 @@ module.exports = Component.exports
 
 
 /* styles */
-__webpack_require__(527)
+__webpack_require__(526)
 
 var Component = __webpack_require__(2)(
   /* script */
   __webpack_require__(552),
   /* template */
-  __webpack_require__(501),
+  __webpack_require__(500),
   /* scopeId */
   null,
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\page\\round\\factory\\index.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\page\\round\\factory\\index.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] index.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -48975,7 +48832,7 @@ var Component = __webpack_require__(2)(
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\page\\round\\guerrilla\\index.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\page\\round\\guerrilla\\index.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] index.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -49013,7 +48870,7 @@ var Component = __webpack_require__(2)(
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\page\\round\\market\\index.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\page\\round\\market\\index.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] index.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -49039,19 +48896,19 @@ module.exports = Component.exports
 
 
 /* styles */
-__webpack_require__(524)
+__webpack_require__(523)
 
 var Component = __webpack_require__(2)(
   /* script */
   __webpack_require__(555),
   /* template */
-  __webpack_require__(498),
+  __webpack_require__(497),
   /* scopeId */
   null,
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\page\\round\\retailer\\index.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\page\\round\\retailer\\index.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] index.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -49077,19 +48934,19 @@ module.exports = Component.exports
 
 
 /* styles */
-__webpack_require__(520)
+__webpack_require__(519)
 
 var Component = __webpack_require__(2)(
   /* script */
   __webpack_require__(556),
   /* template */
-  __webpack_require__(494),
+  __webpack_require__(493),
   /* scopeId */
   null,
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\page\\round\\transporter\\index.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\page\\round\\transporter\\index.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] index.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -49127,7 +48984,7 @@ var Component = __webpack_require__(2)(
   /* cssModules */
   null
 )
-Component.options.__file = "D:\\Coding\\ieemgameview\\src\\page\\round\\wholesaler\\index.vue"
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\page\\round\\wholesaler\\index.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] index.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -49464,6 +49321,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
   }, [_c('v-card-text', [_c('v-select', {
     attrs: {
       "items": _vm.teamList,
+      "item-value": "index",
       "label": "選擇組別",
       "single-line": "",
       "bottom": ""
@@ -49475,11 +49333,26 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       },
       expression: "selectedTeam"
     }
+  }), _vm._v(" "), _c('v-select', {
+    attrs: {
+      "items": _vm.jobList,
+      "item-value": "index",
+      "label": "選擇工作",
+      "single-line": "",
+      "bottom": ""
+    },
+    model: {
+      value: (_vm.selectedJob),
+      callback: function($$v) {
+        _vm.selectedJob = $$v
+      },
+      expression: "selectedJob"
+    }
   }), _vm._v(" "), _c('storage-list', {
     attrs: {
-      "list": ""
+      "list": "storageList"
     }
-  })], 1)], 1)], 1)
+  })], 1)], 1), _vm._v("\n  " + _vm._s(_vm.getStorageList) + "\n")], 1)
 },staticRenderFns: []}
 module.exports.render._withStripped = true
 if (false) {
@@ -49552,8 +49425,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       "name": "car",
       "label": "車子",
       "type": "number",
-      "suffix": "臺",
-      "item-value": "index"
+      "suffix": "臺"
     },
     model: {
       value: (_vm.amount),
@@ -49634,21 +49506,6 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
         _vm.selectedTeam = $$v
       },
       expression: "selectedTeam"
-    }
-  }), _vm._v(" "), _c('v-select', {
-    attrs: {
-      "items": _vm.jobList,
-      "label": "選擇工作",
-      "single-line": "",
-      "item-value": "index",
-      "bottom": ""
-    },
-    model: {
-      value: (_vm.selectedJob),
-      callback: function($$v) {
-        _vm.selectedJob = $$v
-      },
-      expression: "selectedJob"
     }
   }), _vm._v(" "), _vm._l((_vm.productList), function(product) {
     return _c('div', [_c('v-text-field', {
@@ -49920,11 +49777,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     staticClass: "green"
   }, [_c('v-toolbar-title', {
     staticClass: "white--text"
-  }, [_vm._v(_vm._s(_vm.title))]), _vm._v(" "), _c('v-spacer'), _vm._v(" "), _c('span', [_vm._v(_vm._s(_vm.toolbarInfo))])], 1), _vm._v(" "), _c('main', [_c('news-publisher-dialog', {
-    attrs: {
-      "secondary": _vm.secondary
-    }
-  }), _vm._v(" "), _c('deliver-dialog', {
+  }, [_vm._v(_vm._s(_vm.title))]), _vm._v(" "), _c('v-spacer'), _vm._v(" "), _c('span', [_vm._v(_vm._s(_vm.toolbarInfo))])], 1), _vm._v(" "), _c('main', [_c('deliver-dialog', {
     attrs: {
       "announce": _vm.announce
     }
@@ -50033,82 +49886,6 @@ if (false) {
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
-  return _c('v-dialog', {
-    staticClass: "dialog",
-    attrs: {
-      "persistent": "",
-      "fullscreen": ""
-    },
-    model: {
-      value: (_vm.newsPublisherDialog),
-      callback: function($$v) {
-        _vm.newsPublisherDialog = $$v
-      },
-      expression: "newsPublisherDialog"
-    }
-  }, [_c('v-btn', {
-    class: _vm.btnClass,
-    attrs: {
-      "primary": "",
-      "fab": "",
-      "small": _vm.secondary === true
-    },
-    slot: "activator"
-  }, [_c('v-icon', {
-    staticClass: "white--text"
-  }, [_vm._v("subject")])], 1), _vm._v(" "), _c('v-card', [_c('v-card-title', [_vm._v("發布新聞")]), _vm._v(" "), _c('v-card-text', [_c('v-text-field', {
-    attrs: {
-      "name": "title",
-      "label": "標題"
-    }
-  }), _vm._v(" "), _c('v-text-field', {
-    attrs: {
-      "name": "demanded",
-      "label": "需求量",
-      "type": "number",
-      "suffix": "臺"
-    }
-  }), _vm._v(" "), _c('v-text-field', {
-    attrs: {
-      "name": "content",
-      "label": "內文",
-      "multi-line": ""
-    }
-  })], 1), _vm._v(" "), _c('v-card-actions', [_c('v-spacer'), _vm._v(" "), _c('v-btn', {
-    staticClass: "blue--text darken-1",
-    attrs: {
-      "flat": "flat"
-    },
-    nativeOn: {
-      "click": function($event) {
-        _vm.newsPublisherDialog = false
-      }
-    }
-  }, [_vm._v("取消")]), _vm._v(" "), _c('v-btn', {
-    staticClass: "blue--text darken-1",
-    attrs: {
-      "flat": "flat"
-    },
-    nativeOn: {
-      "click": function($event) {
-        _vm.newsPublisherDialog = false
-      }
-    }
-  }, [_vm._v("發布")])], 1)], 1)], 1)
-},staticRenderFns: []}
-module.exports.render._withStripped = true
-if (false) {
-  module.hot.accept()
-  if (module.hot.data) {
-     require("vue-hot-reload-api").rerender("data-v-6c6c679b", module.exports)
-  }
-}
-
-/***/ }),
-/* 494 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
   return _c('div', {
     staticClass: "round"
   }, [_c('v-toolbar', {
@@ -50152,7 +49929,7 @@ if (false) {
 }
 
 /***/ }),
-/* 495 */
+/* 494 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -50206,7 +49983,7 @@ if (false) {
 }
 
 /***/ }),
-/* 496 */
+/* 495 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -50275,7 +50052,7 @@ if (false) {
 }
 
 /***/ }),
-/* 497 */
+/* 496 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -50304,7 +50081,7 @@ if (false) {
 }
 
 /***/ }),
-/* 498 */
+/* 497 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -50429,7 +50206,7 @@ if (false) {
 }
 
 /***/ }),
-/* 499 */
+/* 498 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -50460,7 +50237,7 @@ if (false) {
 }
 
 /***/ }),
-/* 500 */
+/* 499 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -50522,7 +50299,20 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
         _vm.nextDay($event)
       }
     }
-  }, [_vm._v("下一天")])], 1)], 1)], 1), _vm._v(" "), _c('v-tabs-content', {
+  }, [_vm._v("下一天")])], 1)], 1), _vm._v(" "), _c('v-card', [_c('v-card-title', [_vm._v("特別功能")]), _vm._v(" "), _c('v-card-actions', [_c('v-spacer'), _vm._v(" "), _c('account-dialog', {
+    attrs: {
+      "account": _vm.account
+    }
+  })], 1)], 1), _vm._v(" "), _c('v-card', [_c('v-card-title', [_vm._v("處理速度測試")]), _vm._v(" "), _c('v-card-text', [_c('ul', [_c('li', [_vm._v("確定list")])])]), _vm._v(" "), _c('v-card-actions', [_c('v-spacer'), _vm._v(" "), _c('v-btn', {
+    attrs: {
+      "primary": ""
+    },
+    nativeOn: {
+      "click": function($event) {
+        _vm.test($event)
+      }
+    }
+  }, [_vm._v("測試")])], 1)], 1)], 1), _vm._v(" "), _c('v-tabs-content', {
     key: 2,
     attrs: {
       "id": "game-info"
@@ -50564,7 +50354,7 @@ if (false) {
 }
 
 /***/ }),
-/* 501 */
+/* 500 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -50666,6 +50456,102 @@ if (false) {
   module.hot.accept()
   if (module.hot.data) {
      require("vue-hot-reload-api").rerender("data-v-a5b505a6", module.exports)
+  }
+}
+
+/***/ }),
+/* 501 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('v-dialog', {
+    staticClass: "inline-dialog",
+    attrs: {
+      "persistent": ""
+    },
+    model: {
+      value: (_vm.accountDialog),
+      callback: function($$v) {
+        _vm.accountDialog = $$v
+      },
+      expression: "accountDialog"
+    }
+  }, [_c('v-btn', {
+    staticClass: "activator",
+    attrs: {
+      "primary": ""
+    },
+    slot: "activator"
+  }, [_vm._v("\n    變更組別金額\n  ")]), _vm._v(" "), _c('v-card', [_c('v-card-title', [_vm._v("變更組別金額")]), _vm._v(" "), _c('v-card-text', [_c('v-select', {
+    attrs: {
+      "items": _vm.teamList,
+      "label": "選擇組別",
+      "single-line": "",
+      "item-value": "index",
+      "bottom": ""
+    },
+    model: {
+      value: (_vm.selectedTeam),
+      callback: function($$v) {
+        _vm.selectedTeam = $$v
+      },
+      expression: "selectedTeam"
+    }
+  }), _vm._v(" "), _c('v-select', {
+    attrs: {
+      "items": _vm.actionList,
+      "label": "給予或拿取",
+      "single-line": "",
+      "item-value": "index",
+      "bottom": ""
+    },
+    model: {
+      value: (_vm.selectedAction),
+      callback: function($$v) {
+        _vm.selectedAction = $$v
+      },
+      expression: "selectedAction"
+    }
+  }), _vm._v(" "), _c('v-text-field', {
+    attrs: {
+      "label": "金額",
+      "type": "number",
+      "suffix": "元"
+    },
+    model: {
+      value: (_vm.balance),
+      callback: function($$v) {
+        _vm.balance = $$v
+      },
+      expression: "balance"
+    }
+  })], 1), _vm._v(" "), _c('v-card-actions', [_c('v-spacer'), _vm._v(" "), _c('v-btn', {
+    staticClass: "blue--text darken-1",
+    attrs: {
+      "flat": "flat"
+    },
+    nativeOn: {
+      "click": function($event) {
+        _vm.accountDialog = false
+      }
+    }
+  }, [_vm._v("取消")]), _vm._v(" "), _c('v-btn', {
+    staticClass: "blue--text darken-1",
+    attrs: {
+      "flat": "flat"
+    },
+    nativeOn: {
+      "click": function($event) {
+        _vm.act($event)
+      }
+    }
+  }, [_vm._v("登記")])], 1)], 1)], 1)
+},staticRenderFns: []}
+module.exports.render._withStripped = true
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+     require("vue-hot-reload-api").rerender("data-v-ab65ee20", module.exports)
   }
 }
 
@@ -51187,13 +51073,13 @@ var content = __webpack_require__(299);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(3)("47258f36", content, false);
+var update = __webpack_require__(3)("3f5ce04f", content, false);
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-6c6c679b!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./news-publisher-dialog.vue", function() {
-     var newContent = require("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-6c6c679b!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./news-publisher-dialog.vue");
+   module.hot.accept("!!../../../../node_modules/css-loader/index.js?sourceMap!../../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-7946e6b9!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue", function() {
+     var newContent = require("!!../../../../node_modules/css-loader/index.js?sourceMap!../../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-7946e6b9!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -51213,13 +51099,13 @@ var content = __webpack_require__(300);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(3)("3f5ce04f", content, false);
+var update = __webpack_require__(3)("43df6a33", content, false);
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../../../node_modules/css-loader/index.js?sourceMap!../../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-7946e6b9!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue", function() {
-     var newContent = require("!!../../../../node_modules/css-loader/index.js?sourceMap!../../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-7946e6b9!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue");
+   module.hot.accept("!!../../../node_modules/css-loader/index.js?sourceMap!../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-7e14ff51!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue", function() {
+     var newContent = require("!!../../../node_modules/css-loader/index.js?sourceMap!../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-7e14ff51!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -51239,13 +51125,13 @@ var content = __webpack_require__(301);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(3)("43df6a33", content, false);
+var update = __webpack_require__(3)("e78fe6ce", content, false);
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../../node_modules/css-loader/index.js?sourceMap!../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-7e14ff51!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue", function() {
-     var newContent = require("!!../../../node_modules/css-loader/index.js?sourceMap!../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-7e14ff51!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue");
+   module.hot.accept("!!../../../../node_modules/css-loader/index.js?sourceMap!../../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-7e28f8fb!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue", function() {
+     var newContent = require("!!../../../../node_modules/css-loader/index.js?sourceMap!../../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-7e28f8fb!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -51265,13 +51151,13 @@ var content = __webpack_require__(302);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(3)("e78fe6ce", content, false);
+var update = __webpack_require__(3)("2cec5678", content, false);
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../../../node_modules/css-loader/index.js?sourceMap!../../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-7e28f8fb!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue", function() {
-     var newContent = require("!!../../../../node_modules/css-loader/index.js?sourceMap!../../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-7e28f8fb!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue");
+   module.hot.accept("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-7f8145d8!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./deliver-history.vue", function() {
+     var newContent = require("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-7f8145d8!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./deliver-history.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -51291,13 +51177,13 @@ var content = __webpack_require__(303);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(3)("2cec5678", content, false);
+var update = __webpack_require__(3)("75914bce", content, false);
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-7f8145d8!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./deliver-history.vue", function() {
-     var newContent = require("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-7f8145d8!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./deliver-history.vue");
+   module.hot.accept("!!../../../../node_modules/css-loader/index.js?sourceMap!../../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-88d468fa!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue", function() {
+     var newContent = require("!!../../../../node_modules/css-loader/index.js?sourceMap!../../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-88d468fa!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -51317,13 +51203,13 @@ var content = __webpack_require__(304);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(3)("75914bce", content, false);
+var update = __webpack_require__(3)("a4e99542", content, false);
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../../../node_modules/css-loader/index.js?sourceMap!../../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-88d468fa!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue", function() {
-     var newContent = require("!!../../../../node_modules/css-loader/index.js?sourceMap!../../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-88d468fa!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue");
+   module.hot.accept("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-8c586c86!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./order-history.vue", function() {
+     var newContent = require("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-8c586c86!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./order-history.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -51343,13 +51229,13 @@ var content = __webpack_require__(305);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(3)("a4e99542", content, false);
+var update = __webpack_require__(3)("3a519887", content, false);
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-8c586c86!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./order-history.vue", function() {
-     var newContent = require("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-8c586c86!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./order-history.vue");
+   module.hot.accept("!!../../../../node_modules/css-loader/index.js?sourceMap!../../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-9e3d9264!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue", function() {
+     var newContent = require("!!../../../../node_modules/css-loader/index.js?sourceMap!../../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-9e3d9264!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -51369,13 +51255,13 @@ var content = __webpack_require__(306);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(3)("3a519887", content, false);
+var update = __webpack_require__(3)("7431ce5a", content, false);
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../../../node_modules/css-loader/index.js?sourceMap!../../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-9e3d9264!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue", function() {
-     var newContent = require("!!../../../../node_modules/css-loader/index.js?sourceMap!../../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-9e3d9264!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue");
+   module.hot.accept("!!../../../../node_modules/css-loader/index.js?sourceMap!../../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-a5b505a6!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue", function() {
+     var newContent = require("!!../../../../node_modules/css-loader/index.js?sourceMap!../../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-a5b505a6!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -51395,13 +51281,13 @@ var content = __webpack_require__(307);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(3)("7431ce5a", content, false);
+var update = __webpack_require__(3)("ce048646", content, false);
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../../../node_modules/css-loader/index.js?sourceMap!../../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-a5b505a6!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue", function() {
-     var newContent = require("!!../../../../node_modules/css-loader/index.js?sourceMap!../../../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-a5b505a6!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue");
+   module.hot.accept("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-ab65ee20!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./account-dialog.vue", function() {
+     var newContent = require("!!../../node_modules/css-loader/index.js?sourceMap!../../node_modules/vue-loader/lib/style-rewriter.js?id=data-v-ab65ee20!../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./account-dialog.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -51530,6 +51416,125 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_readable__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_constant__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_api__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api_account__ = __webpack_require__(60);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: {
+    'announce': Function
+  },
+  data: function data() {
+    return {
+      accountDialog: false,
+      selectedAction: null,
+      selectedTeam: null,
+      amount: null,
+      balance: null,
+      state: __WEBPACK_IMPORTED_MODULE_2__lib_api__["a" /* nowUser */].getState()
+    };
+  },
+  computed: {
+    teamList: function teamList() {
+      return __WEBPACK_IMPORTED_MODULE_0__lib_readable__["a" /* toReadableTeamList */](__WEBPACK_IMPORTED_MODULE_2__lib_api__["a" /* nowUser */].getTeamNumber());
+    },
+    actionList: function actionList() {
+      return [{
+        index: 'TAKE',
+        text: '扣款'
+      }, {
+        index: 'GIVE',
+        text: '給予'
+      }];
+    }
+  },
+  methods: {
+    act: function act() {
+      this.accountDialog = false;
+      switch (this.selectedAction) {
+        case 'TAKE':
+          __WEBPACK_IMPORTED_MODULE_3__lib_api_account__["c" /* take */](__WEBPACK_IMPORTED_MODULE_2__lib_api__["a" /* nowUser */].getGameId(), this.selectedTeam, this.balance).then(function (res) {
+            var data = res.data;
+            this.announce('\u6210\u529F\u7D66\u4E88' + data.teamIndex + '\u7D44' + data.balance + '\u5143');
+          }.bind(this)).catch(function (err) {
+            console.log(err);
+            this.announce(err.data && (err.data.readableMsg || err.data.msg));
+          }.bind(this));
+          break;
+        case 'GIVE':
+          __WEBPACK_IMPORTED_MODULE_3__lib_api_account__["d" /* give */](__WEBPACK_IMPORTED_MODULE_2__lib_api__["a" /* nowUser */].getGameId(), this.selectedTeam, this.balance).then(function (res) {
+            var data = res.data;
+            this.announce('\u6210\u529F\u62FF\u53D6' + data.teamIndex + '\u7D44' + data.balance + '\u5143');
+          }.bind(this)).catch(function (err) {
+            console.log(err);
+            this.announce(err.data && (err.data.readableMsg || err.data.msg));
+          }.bind(this));
+          break;
+      }
+    }
+  }
+});
+
+/***/ }),
+/* 533 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_readable__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_constant__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_api__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api_deliver__ = __webpack_require__(229);
 //
 //
@@ -51583,7 +51588,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
-//
 
 
 
@@ -51602,17 +51606,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   },
   data: function data() {
     return {
-      teamNumber: 4,
       deliverDialog: false,
       jobList: __WEBPACK_IMPORTED_MODULE_0__lib_readable__["h" /* readableJobList */](),
       selectedJob: null,
       selectedTeam: null,
-      amount: null
+      amount: null,
+      state: __WEBPACK_IMPORTED_MODULE_2__lib_api__["a" /* nowUser */].getState()
     };
   },
   computed: {
     teamList: function teamList() {
-      return __WEBPACK_IMPORTED_MODULE_0__lib_readable__["a" /* toReadableTeamList */](this.teamNumber);
+      return __WEBPACK_IMPORTED_MODULE_0__lib_readable__["a" /* toReadableTeamList */](__WEBPACK_IMPORTED_MODULE_2__lib_api__["a" /* nowUser */].getTeamNumber());
     },
     productList: function productList() {
       return [{
@@ -51640,7 +51644,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 533 */
+/* 534 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -51674,14 +51678,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       if (this.list) {
         return __WEBPACK_IMPORTED_MODULE_0__lib_readable__["n" /* toReadableDeliverList */](this.list);
       } else {
-        return [{ readableGameTime: 'A', amount: 123 }, { readableGameTime: 'B', amount: 456 }];
+        return [];
       }
     }
   }
 });
 
 /***/ }),
-/* 534 */
+/* 535 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -51712,7 +51716,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
   computed: {
     readableTime: function readableTime() {
-      return __WEBPACK_IMPORTED_MODULE_1__lib_readable__["k" /* toReadableTime */](this.state.time);
+      return __WEBPACK_IMPORTED_MODULE_1__lib_readable__["l" /* toReadableTime */](this.state.time);
     },
     readableDay: function readableDay() {
       return __WEBPACK_IMPORTED_MODULE_1__lib_readable__["b" /* toReadableDay */](this.state.day);
@@ -51721,7 +51725,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 535 */
+/* 536 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -51753,16 +51757,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     'game-config': Object
-  },
-  data: function data() {
-    return {};
-  },
-  computed: {},
-  methods: {}
+  }
 });
 
 /***/ }),
-/* 536 */
+/* 537 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -51805,110 +51804,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       if (this.list) {
         return this.list;
       } else {
-        return [{ id: 0, title: '123', content: 'Lorem ipsum dolor sit amet, brute iriure accusata ne mea. Eos suavitate referrentur ad, te duo agam libris qualisque, utroque quaestio accommodare no qui. Et percipit laboramus usu, no invidunt verterem nominati mel. Dolorem ancillae an mei, ut putant invenire splendide mel, ea nec propriae adipisci. Ignota salutandi accusamus in sed, et per malis fuisset, qui id ludus appareat.' }];
-      }
-    }
-  }
-});
-
-/***/ }),
-/* 537 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_readable__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_constant__ = __webpack_require__(6);
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-
-
-
-/* harmony default export */ __webpack_exports__["default"] = ({
-  props: {
-    'announce': Function,
-    'secondary': {
-      type: Boolean,
-      default: function _default() {
-        return false;
-      }
-    }
-  },
-  data: function data() {
-    return {
-      teamNumber: 4,
-      newsPublisherDialog: false,
-      jobList: __WEBPACK_IMPORTED_MODULE_0__lib_readable__["h" /* readableJobList */](),
-      selectedJob: null,
-      selectedTeam: null
-    };
-  },
-  computed: {
-    teamList: function teamList() {
-      return __WEBPACK_IMPORTED_MODULE_0__lib_readable__["a" /* toReadableTeamList */](this.teamNumber);
-    },
-    productList: function productList() {
-      if (!this.selectedJob) {
         return [];
       }
-      if (this.selectedJob.index === 'FACTORY') {
-        return __WEBPACK_IMPORTED_MODULE_0__lib_readable__["j" /* readableProductList */]();
-      } else {
-        return [{
-          index: 'CAR',
-          text: __WEBPACK_IMPORTED_MODULE_1__lib_constant__["j" /* READABLE_PRODUCTS */].CAR
-        }];
-      }
-    },
-    btnClass: function btnClass() {
-      return this.secondary ? 'floating-right-bottom-secondary' : 'floating-right-bottom';
     }
-  },
-  methods: {
-    order: function order(amount) {}
   }
 });
 
@@ -52097,7 +51995,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   computed: {
     readableOrderList: function readableOrderList() {
       if (this.list) {
-        return __WEBPACK_IMPORTED_MODULE_0__lib_readable__["l" /* toReadableOrderList */](this.list);
+        return __WEBPACK_IMPORTED_MODULE_0__lib_readable__["m" /* toReadableOrderList */](this.list);
       } else {
         return [{ readableGameTime: 'A', amount: 123 }, { readableGameTime: 'B', amount: 456 }];
       }
@@ -52138,7 +52036,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   computed: {
     readableStorageList: function readableStorageList() {
       if (this.list) {
-        return __WEBPACK_IMPORTED_MODULE_0__lib_readable__["m" /* toReadableStorageList */](this.list);
+        return __WEBPACK_IMPORTED_MODULE_0__lib_readable__["k" /* toReadableStorageList */](this.list);
       } else {
         return [{ readableProduct: 'A', amount: 123 }, { readableProduct: 'B', amount: 456 }, { readableProduct: 'B', amount: 456 }, { readableProduct: 'B', amount: 456 }, { readableProduct: 'B', amount: 456 }, { readableProduct: 'B', amount: 456 }, { readableProduct: 'B', amount: 456 }, { readableProduct: 'B', amount: 456 }, { readableProduct: 'B', amount: 456 }, { readableProduct: 'B', amount: 456 }];
       }
@@ -52155,15 +52053,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_readable__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_constant__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_api__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api_storage__ = __webpack_require__(59);
-//
-//
-//
-//
-//
-//
-//
-//
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api_storage__ = __webpack_require__(40);
 //
 //
 //
@@ -52230,10 +52120,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   },
   data: function data() {
     return {
-      teamNumber: 4,
       storageRegisterDialog: false,
       jobList: __WEBPACK_IMPORTED_MODULE_0__lib_readable__["h" /* readableJobList */](),
-      selectedJob: null,
+      selectedJob: __WEBPACK_IMPORTED_MODULE_1__lib_constant__["a" /* JOBS */].FACTORY,
       selectedTeam: null,
       amount: {
         'CAR': 0,
@@ -52246,7 +52135,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
   computed: {
     teamList: function teamList() {
-      return __WEBPACK_IMPORTED_MODULE_0__lib_readable__["a" /* toReadableTeamList */](this.teamNumber);
+      return __WEBPACK_IMPORTED_MODULE_0__lib_readable__["a" /* toReadableTeamList */](__WEBPACK_IMPORTED_MODULE_2__lib_api__["a" /* nowUser */].getTeamNumber());
     },
     productList: function productList() {
       if (!this.selectedJob) {
@@ -52299,7 +52188,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_readable__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_constant__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_readable__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_api__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api_storage__ = __webpack_require__(40);
 //
 //
 //
@@ -52317,20 +52209,47 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+
 
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  props: ['position'],
   data: function data() {
     return {
-      selectedTeam: -1,
-      teamNumber: 4
+      selectedTeam: 1,
+      selectedJob: __WEBPACK_IMPORTED_MODULE_0__lib_constant__["a" /* JOBS */].FACTORY,
+      state: __WEBPACK_IMPORTED_MODULE_2__lib_api__["a" /* nowUser */].getState(),
+      storageList: []
     };
   },
   computed: {
     teamList: function teamList() {
-      return __WEBPACK_IMPORTED_MODULE_0__lib_readable__["a" /* toReadableTeamList */](this.teamNumber);
+      return __WEBPACK_IMPORTED_MODULE_1__lib_readable__["a" /* toReadableTeamList */](__WEBPACK_IMPORTED_MODULE_2__lib_api__["a" /* nowUser */].getGameConfig().teamNumber);
+    },
+    jobList: function jobList() {
+      return __WEBPACK_IMPORTED_MODULE_1__lib_readable__["h" /* readableJobList */]();
+    },
+    getStorageList: function getStorageList() {
+      __WEBPACK_IMPORTED_MODULE_3__lib_api_storage__["a" /* getHistory */](__WEBPACK_IMPORTED_MODULE_2__lib_api__["a" /* nowUser */].getGameId(), this.selectedTeam, this.selectedJob).then(function (res) {
+        console.log(res.data);
+        console.log(__WEBPACK_IMPORTED_MODULE_1__lib_readable__["k" /* toReadableStorageList */](res.data.list));
+        this.storageList = __WEBPACK_IMPORTED_MODULE_1__lib_readable__["k" /* toReadableStorageList */](res.data.list);
+      }.bind(this)).catch(function (err) {
+        console.error(err);
+      }.bind(this));
+      return '';
     }
   }
 });
@@ -52407,7 +52326,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         __WEBPACK_IMPORTED_MODULE_3__lib_api__["a" /* nowUser */].setTeam(__WEBPACK_IMPORTED_MODULE_1__lib_constant__["f" /* TEAMS */].STAFF);
         __WEBPACK_IMPORTED_MODULE_3__lib_api__["a" /* nowUser */].setJob(__WEBPACK_IMPORTED_MODULE_1__lib_constant__["h" /* STAFF_JOBS */].CONSOLER);
         __WEBPACK_IMPORTED_MODULE_0__router__["a" /* router */].push('/round/consoler');
-        console.log('get in');
       }.bind(this)).catch(function (err) {
         console.error(err);
       });
@@ -52726,8 +52644,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_constant__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_readable__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__lib_api_account__ = __webpack_require__(228);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__lib_api_storage__ = __webpack_require__(59);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__lib_api_account__ = __webpack_require__(60);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__lib_api_storage__ = __webpack_require__(40);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__lib_api_game__ = __webpack_require__(39);
 //
 //
@@ -52866,9 +52784,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         for (var d = 1; d <= days; d++) {
           for (var i = 0; i <= parseInt(dayLong / interval); i++) {
             var result = calculate(d, i * interval);
-            dataTable.push([i === 0 ? __WEBPACK_IMPORTED_MODULE_2__lib_readable__["b" /* toReadableDay */](d) : '', result[0], result[1]]);
+            dataTable.push([i === 0 ? d + '' : '', result[0], result[1]]);
           }
         }
+        console.log(dataTable);
         var data = google.visualization.arrayToDataTable(dataTable);
 
         var options = {
@@ -53159,6 +53078,25 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -53204,6 +53142,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       }.bind(this)).catch(function (err) {
         console.error(err);
       });
+    },
+    test: function test() {
+      __WEBPACK_IMPORTED_MODULE_3__lib_api__["a" /* nowUser */].test();
     },
     announce: function announce(msg) {
       this.snackbarText = msg;
@@ -53476,7 +53417,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_constant__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_readable__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api__ = __webpack_require__(5);
-//
 //
 //
 //
@@ -53858,18 +53798,19 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* 558 */
 /***/ (function(module, exports, __webpack_require__) {
 
-Vue.component('deliver-history', __webpack_require__(454));
+Vue.component('deliver-history', __webpack_require__(455));
 Vue.component('storage-list', __webpack_require__(462));
 Vue.component('order-history', __webpack_require__(461));
-Vue.component('news-list', __webpack_require__(457));
+Vue.component('news-list', __webpack_require__(458));
 Vue.component('order-dialog', __webpack_require__(460));
-Vue.component('game-clock', __webpack_require__(455));
+Vue.component('game-clock', __webpack_require__(456));
 Vue.component('team-storage-list', __webpack_require__(464));
 Vue.component('storage-register-dialog', __webpack_require__(463));
-Vue.component('deliver-dialog', __webpack_require__(453));
-Vue.component('news-publisher-dialog', __webpack_require__(458));
-Vue.component('online-status', __webpack_require__(459));
-Vue.component('info-panel', __webpack_require__(456)
+Vue.component('deliver-dialog', __webpack_require__(454)
+// Vue.component('news-publisher-dialog', require('./news-publisher-dialog.vue'))
+);Vue.component('online-status', __webpack_require__(459));
+Vue.component('info-panel', __webpack_require__(457));
+Vue.component('account-dialog', __webpack_require__(453)
 
 // Discarded:
 // Vue.component('received-order', require('./received-order.vue'))
@@ -53924,7 +53865,7 @@ function getNews(gameId) {
 /* 561 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var core  = __webpack_require__(40)
+var core  = __webpack_require__(41)
   , $JSON = core.JSON || (core.JSON = {stringify: JSON.stringify});
 module.exports = function stringify(it){ // eslint-disable-line no-unused-vars
   return $JSON.stringify.apply($JSON, arguments);
@@ -53935,7 +53876,7 @@ module.exports = function stringify(it){ // eslint-disable-line no-unused-vars
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(587);
-module.exports = __webpack_require__(40).Object.keys;
+module.exports = __webpack_require__(41).Object.keys;
 
 /***/ }),
 /* 563 */
@@ -53950,7 +53891,7 @@ module.exports = function(it){
 /* 564 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var isObject = __webpack_require__(63);
+var isObject = __webpack_require__(64);
 module.exports = function(it){
   if(!isObject(it))throw TypeError(it + ' is not an object!');
   return it;
@@ -54021,8 +53962,8 @@ module.exports = function(fn, that, length){
 /* 568 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var isObject = __webpack_require__(63)
-  , document = __webpack_require__(62).document
+var isObject = __webpack_require__(64)
+  , document = __webpack_require__(63).document
   // in old IE typeof document.createElement is 'object'
   , is = isObject(document) && isObject(document.createElement);
 module.exports = function(it){
@@ -54042,8 +53983,8 @@ module.exports = (
 /* 570 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var global    = __webpack_require__(62)
-  , core      = __webpack_require__(40)
+var global    = __webpack_require__(63)
+  , core      = __webpack_require__(41)
   , ctx       = __webpack_require__(567)
   , hide      = __webpack_require__(572)
   , PROTOTYPE = 'prototype';
@@ -54119,7 +54060,7 @@ module.exports = function(it, key){
 
 var dP         = __webpack_require__(575)
   , createDesc = __webpack_require__(579);
-module.exports = __webpack_require__(60) ? function(object, key, value){
+module.exports = __webpack_require__(61) ? function(object, key, value){
   return dP.f(object, key, createDesc(1, value));
 } : function(object, key, value){
   object[key] = value;
@@ -54130,7 +54071,7 @@ module.exports = __webpack_require__(60) ? function(object, key, value){
 /* 573 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = !__webpack_require__(60) && !__webpack_require__(61)(function(){
+module.exports = !__webpack_require__(61) && !__webpack_require__(62)(function(){
   return Object.defineProperty(__webpack_require__(568)('div'), 'a', {get: function(){ return 7; }}).a != 7;
 });
 
@@ -54153,7 +54094,7 @@ var anObject       = __webpack_require__(564)
   , toPrimitive    = __webpack_require__(585)
   , dP             = Object.defineProperty;
 
-exports.f = __webpack_require__(60) ? Object.defineProperty : function defineProperty(O, P, Attributes){
+exports.f = __webpack_require__(61) ? Object.defineProperty : function defineProperty(O, P, Attributes){
   anObject(O);
   P = toPrimitive(P, true);
   anObject(Attributes);
@@ -54205,8 +54146,8 @@ module.exports = Object.keys || function keys(O){
 
 // most Object methods by ES6 should accept primitives
 var $export = __webpack_require__(570)
-  , core    = __webpack_require__(40)
-  , fails   = __webpack_require__(61);
+  , core    = __webpack_require__(41)
+  , fails   = __webpack_require__(62);
 module.exports = function(KEY, exec){
   var fn  = (core.Object || {})[KEY] || Object[KEY]
     , exp = {};
@@ -54241,7 +54182,7 @@ module.exports = function(key){
 /* 581 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var global = __webpack_require__(62)
+var global = __webpack_require__(63)
   , SHARED = '__core-js_shared__'
   , store  = global[SHARED] || (global[SHARED] = {});
 module.exports = function(key){
@@ -54286,7 +54227,7 @@ module.exports = function(it){
 /***/ (function(module, exports, __webpack_require__) {
 
 // 7.1.1 ToPrimitive(input [, PreferredType])
-var isObject = __webpack_require__(63);
+var isObject = __webpack_require__(64);
 // instead of the ES6 spec version, we didn't implement @@toPrimitive case
 // and the second argument - flag - preferred type is a string
 module.exports = function(it, S){

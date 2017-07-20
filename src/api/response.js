@@ -48,6 +48,12 @@ export const ResponseErrorMsg = {
       msg: `GameId='${gameId}'遊戲不存在，請重新整理`
     })
   },
+  NicknameAlreadyExist (nickname) {
+    return ResponseErrorJSON({
+      id: 23,
+      msg: `名字 '${nickname}' 已經被使用了，請使用其他名字`
+    })
+  },
   IsWorking (gameId) {
     return ResponseErrorJSON({
       id: 30,

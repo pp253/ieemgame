@@ -5,6 +5,7 @@ import Storages from './storages'
 import Orders from './orders'
 import Deliver from './deliver'
 import News from './news'
+import Regist from './regist'
 
 export default {
   Games: Games,
@@ -13,5 +14,6 @@ export default {
   Storages: Storages,
   Orders: Orders,
   Deliver: Deliver,
-  News: News
+  News: News,
+  Regist: Regist
 }

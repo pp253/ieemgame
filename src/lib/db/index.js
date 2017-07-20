@@ -10,12 +10,13 @@ let port = config.database.port
 let name = config.database.name
 
 new Promise((resolve, reject) => {
-  mongoose.connect(`mongodb://${host}:${port}/${name}`, (err) => {
+  mongoose.connect(`mongodb://${host}:${port}/${name}`, {
+      useMongoClient: true
+    }, (err) => {
     if (err) {
       reject(err)
       return
     }
-    
     resolve()
   })
 }).then(() => {

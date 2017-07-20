@@ -77,6 +77,10 @@
   bottom: 78px;
 }
 
+.inline-dialog .activator{
+  margin: 0;
+}
+
 label {
   left: 0 !important;
 }

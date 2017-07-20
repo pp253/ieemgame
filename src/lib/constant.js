@@ -36,11 +36,26 @@ export const NewsItem = (obj) => {
   }
 }
 
+export const PlayerItem = (obj) => {
+  return {
+    userId: obj.userId || -1,
+    nickname: obj.nickname || '',
+    code: obj.code || -1,
+    level: obj.level || constant.LEVEL.PLAYER
+  }
+}
+
 export const TriggerItem = (obj) => {
   return {
     collection: obj.collection,
     id: obj.id
   }
+}
+
+export const LEVEL = {
+  PLAYER: 0,
+  STAFF: 1,
+  ADMIN: 2
 }
 
 export const GAMES = {
@@ -169,6 +184,7 @@ export default {
   UNKNOWN_TIME: UNKNOWN_TIME,
   STORAGE_EMPTY: STORAGE_EMPTY,
   ZERO_DAYTIME: ZERO_DAYTIME,
+  LEVEL: LEVEL,
   GAMES: GAMES,
   GAME_STAGE: GAME_STAGE,
   GAME_WORK: GAME_WORK,
@@ -183,5 +199,6 @@ export default {
   TimeType: TimeType,
   ProductItem: ProductItem,
   AccountItem: AccountItem,
-  NewsItem: NewsItem
+  NewsItem: NewsItem,
+  PlayerItem: PlayerItem
 }
