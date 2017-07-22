@@ -4,6 +4,7 @@ database/
 *.key
 *.csr
 #config.json
+public/
 
 # Logs
 logs
