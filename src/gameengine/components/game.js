@@ -307,6 +307,7 @@ export default class Game {
     if (!this.isOffWork()) {
       return false
     }
+    console.log(this.isOffWork())
     
     for (let team of this.getTeamList()) {
       let cost = 0
@@ -321,7 +322,7 @@ export default class Game {
           continue
         }
         for (let productItem of team.selectJob(job).storage.getStorageList()) {
-          cost += storageCost[job][productItem.product] * productItem.amount
+          cost += Math.ceil(productItem.amount / this.getConfig().cost.storage.patchSize) * storageCost[job][productItem.product]
         }
       }
 

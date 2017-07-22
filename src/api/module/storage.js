@@ -98,6 +98,26 @@ export function setStorage (req, res, next) {
     })
     team.selectJob(job).storage.add(productItem)
     
+    if (job === constant.JOBS.FACTORY && product === constant.PRODUCTS.CAR) {
+      let map = {
+        'BODY': 1,
+        'ENGINE': 1,
+        'WHEEL': 4
+      }
+      for (let p in map) {
+        let last = team.selectJob(job).storage.getStorage(p)
+        let need = map[p] * amount
+        if (last > 0) {
+          team.selectJob(job).storage.remove(constant.ProductItem({
+            day: game.getDay(),
+            time: game.getTime(),
+            product: p,
+            amount: need >= last ? last : need
+          }))
+        }
+      }
+    }
+
     res.json(response.ResponseSuccessJSON({
       gameId: gameId,
       teamIndex: teamIndex,

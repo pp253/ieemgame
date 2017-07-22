@@ -67,9 +67,11 @@ export default class Account {
   }
 
   take (accountItem, trigger) {
+    /*
     if (this.getBalance() < accountItem.balance) {
       throw new debug.Exception('錢不夠了')
     }
+    */
     accountItem.balance = this.getBalance() - accountItem.balance
     this.setBalance(accountItem, trigger)
     return this
