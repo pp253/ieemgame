@@ -17,7 +17,7 @@ export function getBalance (req, res, next) {
     }
 
     let gameId = req.body.gameId
-    let teamIndex = req.body.teamIndex
+    let teamIndex = parseInt(req.body.teamIndex)
     res.json(response.ResponseSuccessJSON({
       gameId: gameId,
       teamIndex: teamIndex,
@@ -39,7 +39,7 @@ export function getHistory (req, res, next) {
     }
 
     let gameId = req.body.gameId
-    let teamIndex = req.body.teamIndex
+    let teamIndex = parseInt(req.body.teamIndex)
     res.json(response.ResponseSuccessJSON({
       gameId: gameId,
       teamIndex: teamIndex,
@@ -63,8 +63,8 @@ export function take (req, res, next) {
 
     let gameId = req.body.gameId
     let game = GameEngine.selectGame(gameId)
-    let teamIndex = req.body.teamIndex
-    let balance = req.body.balance
+    let teamIndex = parseInt(req.body.teamIndex)
+    let balance = parseInt(req.body.balance)
     if (game.selectTeam(teamIndex).getAccount().getBalance() < balance) {
       // team account is not enough for delivering costing
       res.json(response.ResponseErrorMsg.AccountNotEnough(gameId, teamIndex))
@@ -101,8 +101,8 @@ export function give (req, res, next) {
 
     let gameId = req.body.gameId
     let game = GameEngine.selectGame(gameId)
-    let teamIndex = req.body.teamIndex
-    let balance = req.body.balance
+    let teamIndex = parseInt(req.body.teamIndex)
+    let balance = parseInt(req.body.balance)
     game.selectTeam(teamIndex).getAccount().give(constant.AccountItem({
       day: game.getDay(),
       time: game.getTime(),

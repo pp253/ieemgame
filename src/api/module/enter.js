@@ -19,7 +19,7 @@ export function regist (req, res, next) {
     }
 
     let gameId = req.body.gameId
-    let teamIndex = req.body.teamIndex
+    let teamIndex = parseInt(req.body.teamIndex)
     let job = req.body.job
     let nickname = req.body.nickname
 
@@ -63,7 +63,7 @@ export function enroll (req, res, next) {
     }
 
     let gameId = req.body.gameId
-    let teamIndex = req.body.teamIndex
+    let teamIndex = parseInt(req.body.teamIndex)
     let job = req.body.job
     let nickname = req.body.nickname
 

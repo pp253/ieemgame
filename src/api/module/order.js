@@ -18,7 +18,7 @@ export function getReceived (req, res, next) {
     }
 
     let gameId = req.body.gameId
-    let teamIndex = req.body.teamIndex
+    let teamIndex = parseInt(req.body.teamIndex)
     let job = req.body.job
 
     let game = GameEngine.selectGame(gameId)
@@ -49,7 +49,7 @@ export function getHistory (req, res, next) {
     }
 
     let gameId = req.body.gameId
-    let teamIndex = req.body.teamIndex
+    let teamIndex = parseInt(req.body.teamIndex)
     let job = req.body.job
 
     let game = GameEngine.selectGame(gameId)
@@ -83,7 +83,7 @@ export function setOrder (req, res, next) {
     }
 
     let gameId = req.body.gameId
-    let teamIndex = req.body.teamIndex
+    let teamIndex = parseInt(req.body.teamIndex)
     let job = req.body.job
     let product = req.body.product
     let amount = parseInt(req.body.amount)

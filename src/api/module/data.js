@@ -17,7 +17,7 @@ export function getStorageHistoryByTeam (req, res, next) {
     }
 
     let gameId = req.body.gameId
-    let teamIndex = req.body.teamIndex
+    let teamIndex = parseInt(req.body.teamIndex)
 
     let game = GameEngine.selectGame(gameId)
     let team = game.selectTeam(teamIndex)
@@ -49,7 +49,7 @@ export function getUpdate (req, res, next) {
     }
 
     let gameId = req.body.gameId
-    let teamIndex = req.body.teamIndex
+    let teamIndex = parseInt(req.body.teamIndex)
     let job = req.body.job
 
     let game = GameEngine.selectGame(gameId)
