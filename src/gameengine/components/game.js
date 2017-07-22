@@ -185,6 +185,7 @@ export default class Game {
   }
 
   nextDay () {
+    console.log('nextDay')
     if (this.isOffWork()) {
       this.settle()
       this.day += 1
