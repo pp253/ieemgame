@@ -11,6 +11,10 @@ export function isObjectId (value) {
   return mongoose.Types.ObjectId.isValid(value)
 }
 
+export function isCode (value) {
+  return value >= 0 && value < 10000
+}
+
 export default {
   'gameId': {
     in: 'body',
@@ -90,6 +94,13 @@ export default {
       errorMessage: '名字長度應介於2至10字'
     },
     errorMessage: 'Invalid Nickname'
+  },
+  'code': {
+    in: 'body',
+    notEmpty: true,
+    isInt: true,
+    isCode: true,
+    errorMessage: 'Invalid Code'
   }
 }
 

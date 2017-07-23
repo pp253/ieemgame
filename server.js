@@ -27,7 +27,8 @@ app.use(bodyParser.json())
 app.use(expressValidator({
   customValidators: {
     isObjectId: validation.isObjectId,
-    gameIsExist: validation.gameIsExist
+    gameIsExist: validation.gameIsExist,
+    isCode: validation.isCode
   }
 }))
 

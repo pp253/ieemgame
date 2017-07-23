@@ -5,6 +5,10 @@
   font-weight: 400;
 }
 
+.headline {
+  width: 100%; 
+}
+
 .home .logo {
   margin-top: 16px;
   background-image: url(../image/logo.svg);
@@ -33,13 +37,14 @@
   color: rgba(0, 0, 0, 0.87);
 }
 
-.choose .headline {
+.choose h5 {
   padding: 14px;
   padding-bottom: 2px;
   margin-bottom: 5px;
+  font-size: 20px;
 }
 
-.choose .subheading {
+.choose .subheader {
   padding: 14px;
   padding-top: 2px;
 }

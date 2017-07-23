@@ -58,13 +58,14 @@ export default class Regist {
 
     return new Promise((function (resolve, reject) {
       registOdm.save((function (err, regist) {
-      if (err) {
-        debug.error(err)
-        return
-      }
-      
-      this.registList.push(regist)
-      resolve(regist)
-    }).bind(this))).bind(this))
+        if (err) {
+          debug.error(err)
+          return
+        }
+        
+        this.registList.push(regist)
+        resolve(regist)
+      }).bind(this))
+    }).bind(this))
   }
 }

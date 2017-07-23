@@ -54,6 +54,12 @@ export const ResponseErrorMsg = {
       msg: `名字 '${nickname}' 已經被使用了，請使用其他名字`
     })
   },
+  NotRegisted () {
+    return ResponseErrorJSON({
+      id: 24,
+      msg: '此用戶尚未註冊'
+    })
+  },
   IsWorking (gameId) {
     return ResponseErrorJSON({
       id: 30,

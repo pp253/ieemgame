@@ -82,11 +82,13 @@ export function setDeliver (req, res, next) {
       let transportCost = game.getConfig().cost.transport.cost
       let transportPatchSize = game.getConfig().cost.transport.patchSize
       let cost = Math.ceil(amount / transportPatchSize) * transportCost
+      /*
       if (team.getAccount().getBalance() < cost) {
         // team account is not enough for delivering costing
         res.json(response.ResponseErrorMsg.AccountNotEnough(gameId, teamIndex))
         return
       }
+      */
 
       // take from account
       team.getAccount().take(constant.AccountItem({

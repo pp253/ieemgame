@@ -4,6 +4,35 @@ import GameEngine from '../../gameengine'
 import constant from '../../lib/constant'
 import debug from '../../lib/debug'
 
+export function getBalanceByGame (req, res, next) {
+  req.check({
+    gameId: validation.gameId
+  })
+
+  req.getValidationResult().then(function (result) {
+    if (!result.isEmpty()) {
+      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result.array()))
+      return
+    }
+
+    let gameId = req.body.gameId
+
+    let game = GameEngine.selectGame(gameId)
+
+    let balanceList = []
+    for (let team of game.getTeamList()) {
+      balanceList.push(team.getAccount().getBalance())
+    }
+
+    res.json(response.ResponseSuccessJSON({
+      gameId: gameId,
+      day: game.getDay(),
+      time: game.getTime(),
+      list: balanceList
+    }))
+  })
+}
+
 export function getStorageHistoryByTeam (req, res, next) {
   req.check({
     gameId: validation.gameId,
@@ -110,6 +139,7 @@ export function getUpdate (req, res, next) {
 }
 
 export default {
+  'get_balance_by_game': getBalanceByGame,
   'get_storage_history_by_team': getStorageHistoryByTeam,
   'get_update': getUpdate
 }

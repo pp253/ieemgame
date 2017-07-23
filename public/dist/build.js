@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "/dist/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 148);
+/******/ 	return __webpack_require__(__webpack_require__.s = 173);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -265,7 +265,7 @@ if (typeof DEBUG !== 'undefined' && DEBUG) {
   ) }
 }
 
-var listToStyles = __webpack_require__(147)
+var listToStyles = __webpack_require__(172)
 
 /*
 type StyleObject = {
@@ -525,8 +525,8 @@ function toReadableGameTime(dayTime) {
     case __WEBPACK_IMPORTED_MODULE_0__constant__["e" /* GAME_STAGE */].END:
       return '已結束';
       break;
-    case __WEBPACK_IMPORTED_MODULE_0__constant__["e" /* GAME_STAGE */].START:
     default:
+    case __WEBPACK_IMPORTED_MODULE_0__constant__["e" /* GAME_STAGE */].START:
       return toReadableDay(dayTime.day) + ' ' + toReadableTime(dayTime.time, dayTime.isWorking, showWorking);
       break;
   }
@@ -688,23 +688,19 @@ function readableProductList() {
   return list;
 }
 
-function toReadableOrderList(list) {
+function toReadableOrderList(list, getList) {
   var result = [];
-  var realAmount = 0;
+  if (!getList) {
+    getList = [];
+  }
+  var accumulateAmmount = 0;
   var _iteratorNormalCompletion3 = true;
   var _didIteratorError3 = false;
   var _iteratorError3 = undefined;
 
   try {
-    for (var _iterator3 = list[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-      var item = _step3.value;
-
-      realAmount = parseInt(item.amount) - realAmount;
-      result.push({
-        readableGameTime: toReadableGameTime(item, false),
-        amount: realAmount,
-        delivered: 0
-      });
+    for (var _iterator3 = getList[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+      var i = _step3.value;
     }
   } catch (err) {
     _didIteratorError3 = true;
@@ -721,6 +717,37 @@ function toReadableOrderList(list) {
     }
   }
 
+  var realAmount = 0;
+  var _iteratorNormalCompletion4 = true;
+  var _didIteratorError4 = false;
+  var _iteratorError4 = undefined;
+
+  try {
+    for (var _iterator4 = list[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+      var item = _step4.value;
+
+      realAmount = parseInt(item.amount) - realAmount;
+      result.push({
+        readableGameTime: toReadableGameTime(item, false),
+        amount: realAmount,
+        delivered: 0
+      });
+    }
+  } catch (err) {
+    _didIteratorError4 = true;
+    _iteratorError4 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion4 && _iterator4.return) {
+        _iterator4.return();
+      }
+    } finally {
+      if (_didIteratorError4) {
+        throw _iteratorError4;
+      }
+    }
+  }
+
   return result;
 }
 
@@ -730,13 +757,13 @@ function toReadableOrderList(list) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__game__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__account__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__deliver__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__order__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__storage__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__game__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__account__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__deliver__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__order__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__storage__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__news__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__data__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__data__ = __webpack_require__(11);
 /* unused harmony export isStaffTeam */
 /* unused harmony export isStaffJob */
 /* unused harmony export User */
@@ -866,7 +893,6 @@ var User = function () {
           console.log('Game Day has been set to', data.day);
         }
         if (this.getTime() >= this.getGameConfig().dayLong * 1000) {
-          console.log('off work');
           this.getState().time = this.getGameConfig().dayLong * 1000;
           this.dayStartTime = __WEBPACK_IMPORTED_MODULE_0__constant__["c" /* UNKNOWN_TIME */];
           this.getState().isWorking = false;
@@ -874,12 +900,9 @@ var User = function () {
             this.getState().state = __WEBPACK_IMPORTED_MODULE_0__constant__["e" /* GAME_STAGE */].FINAL;
           }
         } else {
-          console.log('on work');
           this.getState().time = this.getTime();
-          this.getState().isWorking = this.isWorking();
+          this.getState().isWorking = true;
         }
-
-        console.log(this.getTime(), this.isWorking());
 
         // update state
         if (this.getJob() !== __WEBPACK_IMPORTED_MODULE_0__constant__["a" /* JOBS */].UNKNOWN && !this.isStaffTeam()) {
@@ -1026,7 +1049,7 @@ var User = function () {
   }, {
     key: 'isWorking',
     value: function isWorking() {
-      return this.getGameStage() === __WEBPACK_IMPORTED_MODULE_0__constant__["e" /* GAME_STAGE */].START && this.getDayStartTime() !== __WEBPACK_IMPORTED_MODULE_0__constant__["c" /* UNKNOWN_TIME */];
+      return this.getState().isWorking;
     }
   }, {
     key: 'isOffWork',
@@ -1263,7 +1286,7 @@ var READABLE_JOBS = {
   UNKNOWN_STAFF: '未知工作人員',
   KEEPER: '關主',
   EXCHANGER: '製造部',
-  TRANSPORTER: '運輸者',
+  TRANSPORTER: '物流士',
   MARKET: '市場代表者',
   GUERRILLA: '游擊者、工人',
   CONFIRMER: '資料確認者',
@@ -1275,35 +1298,50 @@ var READABLE_JOBS = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__page_home_index_vue__ = __webpack_require__(86);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__page_home_index_vue__ = __webpack_require__(98);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__page_home_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__page_home_index_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__page_choose_team_index_vue__ = __webpack_require__(84);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__page_choose_team_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__page_choose_team_index_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__page_choose_job_index_vue__ = __webpack_require__(82);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__page_choose_job_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__page_choose_job_index_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__page_choose_ready_index_vue__ = __webpack_require__(83);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__page_choose_ready_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__page_choose_ready_index_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__page_round_factory_index_vue__ = __webpack_require__(89);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__page_round_factory_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4__page_round_factory_index_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__page_round_retailer_index_vue__ = __webpack_require__(92);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__page_round_retailer_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5__page_round_retailer_index_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__page_round_wholesaler_index_vue__ = __webpack_require__(94);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__page_round_wholesaler_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6__page_round_wholesaler_index_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__page_round_guerrilla_index_vue__ = __webpack_require__(90);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__page_round_guerrilla_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7__page_round_guerrilla_index_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__page_round_exchanger_index_vue__ = __webpack_require__(88);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__page_round_exchanger_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8__page_round_exchanger_index_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__page_round_transporter_index_vue__ = __webpack_require__(93);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__page_round_transporter_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_9__page_round_transporter_index_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__page_round_market_index_vue__ = __webpack_require__(91);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__page_round_market_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_10__page_round_market_index_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__page_round_consoler_index_vue__ = __webpack_require__(87);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__page_round_consoler_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_11__page_round_consoler_index_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__page_end_index_vue__ = __webpack_require__(85);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__page_end_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_12__page_end_index_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__page_admin_construct_index_vue__ = __webpack_require__(81);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__page_admin_construct_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_13__page_admin_construct_index_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__page_admin_construct_index_vue__ = __webpack_require__(91);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__page_admin_construct_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__page_admin_construct_index_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__page_boardcast_scoreboard_index_vue__ = __webpack_require__(92);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__page_boardcast_scoreboard_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__page_boardcast_scoreboard_index_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__page_regist_new_index_vue__ = __webpack_require__(99);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__page_regist_new_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__page_regist_new_index_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__page_regist_old_index_vue__ = __webpack_require__(100);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__page_regist_old_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4__page_regist_old_index_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__page_regist_player_index_vue__ = __webpack_require__(101);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__page_regist_player_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5__page_regist_player_index_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__page_choose_game_index_vue__ = __webpack_require__(93);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__page_choose_game_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6__page_choose_game_index_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__page_choose_team_index_vue__ = __webpack_require__(96);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__page_choose_team_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7__page_choose_team_index_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__page_choose_job_index_vue__ = __webpack_require__(94);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__page_choose_job_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8__page_choose_job_index_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__page_choose_ready_index_vue__ = __webpack_require__(95);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__page_choose_ready_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_9__page_choose_ready_index_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__page_round_factory_index_vue__ = __webpack_require__(104);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__page_round_factory_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_10__page_round_factory_index_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__page_round_retailer_index_vue__ = __webpack_require__(107);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__page_round_retailer_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_11__page_round_retailer_index_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__page_round_wholesaler_index_vue__ = __webpack_require__(109);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__page_round_wholesaler_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_12__page_round_wholesaler_index_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__page_round_guerrilla_index_vue__ = __webpack_require__(105);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__page_round_guerrilla_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_13__page_round_guerrilla_index_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__page_round_exchanger_index_vue__ = __webpack_require__(103);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__page_round_exchanger_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_14__page_round_exchanger_index_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__page_round_transporter_index_vue__ = __webpack_require__(108);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__page_round_transporter_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_15__page_round_transporter_index_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__page_round_market_index_vue__ = __webpack_require__(106);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__page_round_market_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_16__page_round_market_index_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__page_round_consoler_index_vue__ = __webpack_require__(102);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__page_round_consoler_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_17__page_round_consoler_index_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__page_end_index_vue__ = __webpack_require__(97);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__page_end_index_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_18__page_end_index_vue__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return router; });
+
+
+
+
+
 
 
 
@@ -1320,11 +1358,12 @@ var READABLE_JOBS = {
 
 //import gameend from '../page/gameend'
 
-var routes = [{ path: '/', component: __WEBPACK_IMPORTED_MODULE_0__page_home_index_vue___default.a }, { path: '/home', component: __WEBPACK_IMPORTED_MODULE_0__page_home_index_vue___default.a }, { path: '/admin', component: __WEBPACK_IMPORTED_MODULE_13__page_admin_construct_index_vue___default.a }, { path: '/admin/construct', component: __WEBPACK_IMPORTED_MODULE_13__page_admin_construct_index_vue___default.a }, { path: '/choose', component: __WEBPACK_IMPORTED_MODULE_1__page_choose_team_index_vue___default.a }, { path: '/choose/team', component: __WEBPACK_IMPORTED_MODULE_1__page_choose_team_index_vue___default.a }, { path: '/choose/job', component: __WEBPACK_IMPORTED_MODULE_2__page_choose_job_index_vue___default.a }, { path: '/choose/ready', component: __WEBPACK_IMPORTED_MODULE_3__page_choose_ready_index_vue___default.a }, { path: '/round/factory', component: __WEBPACK_IMPORTED_MODULE_4__page_round_factory_index_vue___default.a }, { path: '/round/retailer', component: __WEBPACK_IMPORTED_MODULE_5__page_round_retailer_index_vue___default.a }, { path: '/round/wholesaler', component: __WEBPACK_IMPORTED_MODULE_6__page_round_wholesaler_index_vue___default.a }, { path: '/round/guerrilla', component: __WEBPACK_IMPORTED_MODULE_7__page_round_guerrilla_index_vue___default.a }, { path: '/round/keeper', component: __WEBPACK_IMPORTED_MODULE_7__page_round_guerrilla_index_vue___default.a }, { path: '/round/exchanger', component: __WEBPACK_IMPORTED_MODULE_8__page_round_exchanger_index_vue___default.a }, { path: '/round/transporter', component: __WEBPACK_IMPORTED_MODULE_9__page_round_transporter_index_vue___default.a }, { path: '/round/market', component: __WEBPACK_IMPORTED_MODULE_10__page_round_market_index_vue___default.a }, { path: '/round/consoler', component: __WEBPACK_IMPORTED_MODULE_11__page_round_consoler_index_vue___default.a }, { path: '/end', component: __WEBPACK_IMPORTED_MODULE_12__page_end_index_vue___default.a /*,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              { path: '/gameend', component: gameend },
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              { path: '/round/exchange', component: roundExchange },
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              { path: '/round/market', component: roundMarket },
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              { path: '/round/teamleader', component: roundTeamleader }*/
+var routes = [{ path: '', component: __WEBPACK_IMPORTED_MODULE_0__page_home_index_vue___default.a }, { path: '/', component: __WEBPACK_IMPORTED_MODULE_0__page_home_index_vue___default.a }, { path: '/home', component: __WEBPACK_IMPORTED_MODULE_0__page_home_index_vue___default.a }, { path: '/admin', component: __WEBPACK_IMPORTED_MODULE_1__page_admin_construct_index_vue___default.a }, { path: '/admin/construct', component: __WEBPACK_IMPORTED_MODULE_1__page_admin_construct_index_vue___default.a }, { path: '/boardcast', component: __WEBPACK_IMPORTED_MODULE_2__page_boardcast_scoreboard_index_vue___default.a }, // this should be fixed
+{ path: '/boardcast/scoreboard', component: __WEBPACK_IMPORTED_MODULE_2__page_boardcast_scoreboard_index_vue___default.a }, { path: '/regist', component: __WEBPACK_IMPORTED_MODULE_3__page_regist_new_index_vue___default.a }, { path: '/regist/new', component: __WEBPACK_IMPORTED_MODULE_3__page_regist_new_index_vue___default.a }, { path: '/regist/old', component: __WEBPACK_IMPORTED_MODULE_4__page_regist_old_index_vue___default.a }, { path: '/regist/player', component: __WEBPACK_IMPORTED_MODULE_5__page_regist_player_index_vue___default.a }, { path: '/choose', component: __WEBPACK_IMPORTED_MODULE_6__page_choose_game_index_vue___default.a }, { path: '/choose/game', component: __WEBPACK_IMPORTED_MODULE_6__page_choose_game_index_vue___default.a }, { path: '/choose/team', component: __WEBPACK_IMPORTED_MODULE_7__page_choose_team_index_vue___default.a }, { path: '/choose/job', component: __WEBPACK_IMPORTED_MODULE_8__page_choose_job_index_vue___default.a }, { path: '/choose/ready', component: __WEBPACK_IMPORTED_MODULE_9__page_choose_ready_index_vue___default.a }, { path: '/round/factory', component: __WEBPACK_IMPORTED_MODULE_10__page_round_factory_index_vue___default.a }, { path: '/round/retailer', component: __WEBPACK_IMPORTED_MODULE_11__page_round_retailer_index_vue___default.a }, { path: '/round/wholesaler', component: __WEBPACK_IMPORTED_MODULE_12__page_round_wholesaler_index_vue___default.a }, { path: '/round/guerrilla', component: __WEBPACK_IMPORTED_MODULE_13__page_round_guerrilla_index_vue___default.a }, { path: '/round/keeper', component: __WEBPACK_IMPORTED_MODULE_13__page_round_guerrilla_index_vue___default.a }, { path: '/round/exchanger', component: __WEBPACK_IMPORTED_MODULE_14__page_round_exchanger_index_vue___default.a }, { path: '/round/transporter', component: __WEBPACK_IMPORTED_MODULE_15__page_round_transporter_index_vue___default.a }, { path: '/round/market', component: __WEBPACK_IMPORTED_MODULE_16__page_round_market_index_vue___default.a }, { path: '/round/consoler', component: __WEBPACK_IMPORTED_MODULE_17__page_round_consoler_index_vue___default.a }, { path: '/end', component: __WEBPACK_IMPORTED_MODULE_18__page_end_index_vue___default.a /*,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      { path: '/gameend', component: gameend },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      { path: '/round/exchange', component: roundExchange },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      { path: '/round/market', component: roundMarket },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      { path: '/round/teamleader', component: roundTeamleader }*/
 }];
 
 var router = new VueRouter({
@@ -1333,6 +1372,41 @@ var router = new VueRouter({
 
 /***/ }),
 /* 7 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = getGameIdList;
+/* harmony export (immutable) */ __webpack_exports__["b"] = newGame;
+function getGameIdList() {
+  return new Promise(function (resolve, reject) {
+    axios.post('/api/enter/get_game_list').then(function (res) {
+      if (res.data.err) {
+        reject(res);
+      }
+      resolve(res);
+    }).catch(function (err) {
+      reject(err);
+    });
+  });
+}
+
+function newGame(gameConfig) {
+  return new Promise(function (resolve, reject) {
+    axios.post('/api/enter/new_game', {
+      gameConfig: gameConfig
+    }).then(function (res) {
+      if (res.data.err) {
+        reject(res);
+      }
+      resolve(res);
+    }).catch(function (err) {
+      reject(err);
+    });
+  });
+}
+
+/***/ }),
+/* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1401,7 +1475,7 @@ function nextDay(gameId) {
 }
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1462,7 +1536,7 @@ function getHistory(gameId, teamIndex, job) {
 }
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1525,7 +1599,45 @@ function take(gameId, teamIndex, balance) {
 }
 
 /***/ }),
-/* 10 */
+/* 11 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = getUpdate;
+/* harmony export (immutable) */ __webpack_exports__["b"] = getBalanceByGame;
+function getUpdate(gameId, teamIndex, job) {
+  return new Promise(function (resolve, reject) {
+    axios.post('/api/data/get_update', {
+      gameId: gameId,
+      teamIndex: teamIndex,
+      job: job
+    }).then(function (res) {
+      if (res.data.err) {
+        reject(res);
+      }
+      resolve(res);
+    }).catch(function (err) {
+      reject(err);
+    });
+  });
+}
+function getBalanceByGame(gameId) {
+  return new Promise(function (resolve, reject) {
+    axios.post('/api/data/get_balance_by_game', {
+      gameId: gameId
+    }).then(function (res) {
+      if (res.data.err) {
+        reject(res);
+      }
+      resolve(res);
+    }).catch(function (err) {
+      reject(err);
+    });
+  });
+}
+
+/***/ }),
+/* 12 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1568,42 +1680,7 @@ function setDeliver(gameId, teamIndex, job, product, amount) {
 }
 
 /***/ }),
-/* 11 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["b"] = getGameIdList;
-/* harmony export (immutable) */ __webpack_exports__["a"] = newGame;
-function getGameIdList() {
-  return new Promise(function (resolve, reject) {
-    axios.post('/api/enter/get_game_list').then(function (res) {
-      if (res.data.err) {
-        reject(res);
-      }
-      resolve(res);
-    }).catch(function (err) {
-      reject(err);
-    });
-  });
-}
-
-function newGame(gameConfig) {
-  return new Promise(function (resolve, reject) {
-    axios.post('/api/enter/new_game', {
-      gameConfig: gameConfig
-    }).then(function (res) {
-      if (res.data.err) {
-        reject(res);
-      }
-      resolve(res);
-    }).catch(function (err) {
-      reject(err);
-    });
-  });
-}
-
-/***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1664,13 +1741,13 @@ function setOrder(gameId, teamIndex, job, product, amount) {
 }
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__router__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__components__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__components__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__components___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__components__);
 
 
@@ -1680,52 +1757,29 @@ var mainFrame = new Vue({
   router: __WEBPACK_IMPORTED_MODULE_0__router__["a" /* router */]
 });
 
-__WEBPACK_IMPORTED_MODULE_0__router__["a" /* router */].push('/');
+// router.push('/')
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
-Vue.component('deliver-history', __webpack_require__(71));
-Vue.component('storage-list', __webpack_require__(78));
-Vue.component('order-history', __webpack_require__(77));
-Vue.component('news-list', __webpack_require__(74));
-Vue.component('order-dialog', __webpack_require__(76));
-Vue.component('game-clock', __webpack_require__(72));
-Vue.component('team-storage-list', __webpack_require__(80));
-Vue.component('storage-register-dialog', __webpack_require__(79));
-Vue.component('deliver-dialog', __webpack_require__(70));
+Vue.component('deliver-history', __webpack_require__(81));
+Vue.component('storage-list', __webpack_require__(88));
+Vue.component('order-history', __webpack_require__(87));
+Vue.component('news-list', __webpack_require__(84));
+Vue.component('order-dialog', __webpack_require__(86));
+Vue.component('game-clock', __webpack_require__(82));
+Vue.component('team-storage-list', __webpack_require__(90));
+Vue.component('storage-register-dialog', __webpack_require__(89));
+Vue.component('deliver-dialog', __webpack_require__(80));
 // Vue.component('news-publisher-dialog', require('./news-publisher-dialog.vue'))
-Vue.component('online-status', __webpack_require__(75));
-Vue.component('info-panel', __webpack_require__(73));
-Vue.component('account-dialog', __webpack_require__(69));
+Vue.component('online-status', __webpack_require__(85));
+Vue.component('info-panel', __webpack_require__(83));
+Vue.component('account-dialog', __webpack_require__(79));
 
 // Discarded:
 // Vue.component('received-order', require('./received-order.vue'))
 // Vue.component('line-chart', require('./line-chart.vue'))
-
-/***/ }),
-/* 15 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = getUpdate;
-function getUpdate(gameId, teamIndex, job) {
-  return new Promise(function (resolve, reject) {
-    axios.post('/api/data/get_update', {
-      gameId: gameId,
-      teamIndex: teamIndex,
-      job: job
-    }).then(function (res) {
-      if (res.data.err) {
-        reject(res);
-      }
-      resolve(res);
-    }).catch(function (err) {
-      reject(err);
-    });
-  });
-}
 
 /***/ }),
 /* 16 */
@@ -1757,7 +1811,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_readable__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_constant__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_api__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api_account__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api_account__ = __webpack_require__(10);
 //
 //
 //
@@ -1847,7 +1901,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         case 'TAKE':
           __WEBPACK_IMPORTED_MODULE_3__lib_api_account__["c" /* take */](__WEBPACK_IMPORTED_MODULE_2__lib_api__["a" /* nowUser */].getGameId(), this.selectedTeam, this.balance).then(function (res) {
             var data = res.data;
-            this.announce('\u6210\u529F\u7D66\u4E88' + data.teamIndex + '\u7D44' + data.balance + '\u5143');
+            this.announce('\u6210\u529F\u62FF\u53D6' + data.teamIndex + '\u7D44' + data.balance + '\u5143');
           }.bind(this)).catch(function (err) {
             console.log(err);
             this.announce(err.data && (err.data.readableMsg || err.data.msg));
@@ -1856,7 +1910,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         case 'GIVE':
           __WEBPACK_IMPORTED_MODULE_3__lib_api_account__["d" /* give */](__WEBPACK_IMPORTED_MODULE_2__lib_api__["a" /* nowUser */].getGameId(), this.selectedTeam, this.balance).then(function (res) {
             var data = res.data;
-            this.announce('\u6210\u529F\u62FF\u53D6' + data.teamIndex + '\u7D44' + data.balance + '\u5143');
+            this.announce('\u6210\u529F\u7D66\u4E88' + data.teamIndex + '\u7D44' + data.balance + '\u5143');
           }.bind(this)).catch(function (err) {
             console.log(err);
             this.announce(err.data && (err.data.readableMsg || err.data.msg));
@@ -1876,7 +1930,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_readable__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_constant__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_api__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api_deliver__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api_deliver__ = __webpack_require__(12);
 //
 //
 //
@@ -2004,6 +2058,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 
 
@@ -2032,7 +2087,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_api__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_readable__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_constant__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_readable__ = __webpack_require__(3);
 //
 //
 //
@@ -2044,6 +2100,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+
 
 
 
@@ -2056,11 +2117,19 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   },
 
   computed: {
+    timeValue: function timeValue() {
+      // full round is 100
+      if (this.state.isWorking) {
+        return 100 - this.state.time / __WEBPACK_IMPORTED_MODULE_0__lib_api__["a" /* nowUser */].getGameConfig().dayLong / 10;
+      } else {
+        return 0;
+      }
+    },
     readableTime: function readableTime() {
-      return __WEBPACK_IMPORTED_MODULE_1__lib_readable__["l" /* toReadableTime */](this.state.time);
+      return __WEBPACK_IMPORTED_MODULE_2__lib_readable__["l" /* toReadableTime */](this.state.time, this.state.isWorking, true);
     },
     readableDay: function readableDay() {
-      return __WEBPACK_IMPORTED_MODULE_1__lib_readable__["b" /* toReadableDay */](this.state.day);
+      return __WEBPACK_IMPORTED_MODULE_2__lib_readable__["b" /* toReadableDay */](this.state.day);
     }
   }
 });
@@ -2228,7 +2297,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_readable__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_api__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_api_order__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_api_order__ = __webpack_require__(13);
 //
 //
 //
@@ -2323,20 +2392,27 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  props: ['list'],
+  props: {
+    'list': Array,
+    'get-list': Array
+  },
   data: function data() {
     return {
-      header: [{ text: '時間', align: 'left', value: 'readableGameTime' }, { text: '數量', value: 'amount' }, { text: '已送達', value: 'delivered' }]
+      header: [{ text: '時間', align: 'left', value: 'readableGameTime' }, { text: '數量', value: 'amount' /*,
+                                                                                                       { text: '已送達', value: 'delivered' }*/
+      }]
     };
   },
+
   computed: {
     readableOrderList: function readableOrderList() {
       if (this.list) {
-        return __WEBPACK_IMPORTED_MODULE_0__lib_readable__["m" /* toReadableOrderList */](this.list);
+        return __WEBPACK_IMPORTED_MODULE_0__lib_readable__["m" /* toReadableOrderList */](this.list, this.getList);
       } else {
         return [{ readableGameTime: 'A', amount: 123 }, { readableGameTime: 'B', amount: 456 }];
       }
@@ -2351,6 +2427,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_readable__ = __webpack_require__(3);
+//
 //
 //
 //
@@ -2394,7 +2471,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_readable__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_constant__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_api__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api_storage__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api_storage__ = __webpack_require__(9);
 //
 //
 //
@@ -2533,7 +2610,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_constant__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_readable__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_api__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api_storage__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api_storage__ = __webpack_require__(9);
 //
 //
 //
@@ -2606,7 +2683,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_constant__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_readable__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__lib_api_enter__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__lib_api_enter__ = __webpack_require__(7);
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 //
@@ -2661,7 +2738,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
   methods: {
     newGame: function newGame() {
-      __WEBPACK_IMPORTED_MODULE_4__lib_api_enter__["a" /* newGame */](JSON.parse(this.configText)).then(function (res) {
+      __WEBPACK_IMPORTED_MODULE_4__lib_api_enter__["b" /* newGame */](JSON.parse(this.configText)).then(function (res) {
         var data = res.data;
         __WEBPACK_IMPORTED_MODULE_3__lib_api__["a" /* nowUser */].setGameId(data.gameId);
         __WEBPACK_IMPORTED_MODULE_3__lib_api__["a" /* nowUser */].setGameConfig(data.gameConfig);
@@ -2728,6 +2805,224 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 /***/ }),
 /* 30 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_api__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_readable__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_api_data__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_constant__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__lib_api_enter__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__router__ = __webpack_require__(6);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+
+
+
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  data: function data() {
+    return {
+      state: __WEBPACK_IMPORTED_MODULE_0__lib_api__["a" /* nowUser */].getState(),
+      rankingList: [],
+      timer: null
+    };
+  },
+
+  methods: {
+    updateRanking: function updateRanking() {
+      __WEBPACK_IMPORTED_MODULE_2__lib_api_data__["b" /* getBalanceByGame */](__WEBPACK_IMPORTED_MODULE_0__lib_api__["a" /* nowUser */].getGameId()).then(function (res) {
+        var list = res.data.list;
+        var result = [];
+
+        list.forEach(function (i, k) {
+          result.push({
+            teamIndex: k + 1,
+            readableTeam: __WEBPACK_IMPORTED_MODULE_1__lib_readable__["e" /* toReadableTeam */](k + 1),
+            isTop: false,
+            balance: i,
+            readableBalance: __WEBPACK_IMPORTED_MODULE_1__lib_readable__["f" /* toReadableDollar */](i)
+          });
+        }.bind(this));
+
+        result.sort(function (a, b) {
+          return a.balance < b.balance;
+        });
+
+        var m = result[0].balance;
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+          for (var _iterator = result[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var i = _step.value;
+
+            if (i.balance === m) {
+              i.isTop = true;
+            }
+          }
+        } catch (err) {
+          _didIteratorError = true;
+          _iteratorError = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion && _iterator.return) {
+              _iterator.return();
+            }
+          } finally {
+            if (_didIteratorError) {
+              throw _iteratorError;
+            }
+          }
+        }
+
+        this.rankingList.splice(0, this.rankingList.length);
+        result.forEach(function (i) {
+          this.rankingList.push(i);
+        }.bind(this));
+      }.bind(this));
+
+      if (this.state.stage === __WEBPACK_IMPORTED_MODULE_3__lib_constant__["e" /* GAME_STAGE */].END) {
+        __WEBPACK_IMPORTED_MODULE_5__router__["a" /* router */].push('/boardcast/endpage');
+      }
+    }
+  },
+  mounted: function mounted() {
+    this.timer = setInterval(this.updateRanking.bind(this), 1000);
+  }
+});
+
+/***/ }),
+/* 31 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_api__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_api_enter__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__router__ = __webpack_require__(6);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  data: function data() {
+    return {
+      title: '選擇遊戲',
+      gameList: []
+    };
+  },
+
+  methods: {
+    intoGame: function intoGame(gameId, gameConfig) {
+      console.log('User Game:', gameId);
+      __WEBPACK_IMPORTED_MODULE_0__lib_api__["a" /* nowUser */].setGameId(gameId);
+      __WEBPACK_IMPORTED_MODULE_0__lib_api__["a" /* nowUser */].setGameConfig(gameConfig);
+      __WEBPACK_IMPORTED_MODULE_2__router__["a" /* router */].push('/choose/team');
+    }
+  },
+  created: function created() {
+    // load gameList and use promise to change the gameList
+    __WEBPACK_IMPORTED_MODULE_0__lib_api__["a" /* nowUser */].resetState();
+    __WEBPACK_IMPORTED_MODULE_1__lib_api_enter__["a" /* getGameIdList */]().then(function (res) {
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = res.data.gameList[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var game = _step.value;
+
+          this.gameList.unshift({
+            index: game.gameId,
+            text: game.gameConfig.title,
+            describe: game.gameConfig.describe,
+            gameConfig: game.gameConfig
+          });
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+    }.bind(this)).catch(function (err) {
+      console.error(err);
+    });
+  }
+});
+
+/***/ }),
+/* 32 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2833,7 +3128,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 31 */
+/* 33 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2842,7 +3137,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_constant__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_readable__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__lib_api_game__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__lib_api_game__ = __webpack_require__(8);
 //
 //
 //
@@ -2904,7 +3199,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 32 */
+/* 34 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2977,7 +3272,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 33 */
+/* 35 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2986,9 +3281,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_constant__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_readable__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__lib_api_account__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__lib_api_storage__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__lib_api_game__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__lib_api_account__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__lib_api_storage__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__lib_api_game__ = __webpack_require__(8);
 //
 //
 //
@@ -3237,27 +3532,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 34 */
+/* 36 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_api__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_api_enter__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_api_enter__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__router__ = __webpack_require__(6);
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 //
 //
 //
@@ -3277,61 +3559,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  data: function data() {
-    return {
-      gameList: []
-    };
-  },
-
   methods: {
-    intoGame: function intoGame(gameId, gameConfig) {
-      console.log('User Game:', gameId);
-      __WEBPACK_IMPORTED_MODULE_0__lib_api__["a" /* nowUser */].setGameId(gameId);
-      __WEBPACK_IMPORTED_MODULE_0__lib_api__["a" /* nowUser */].setGameConfig(gameConfig);
+    intoRegist: function intoRegist() {
+      // router.push('/regist')
       __WEBPACK_IMPORTED_MODULE_2__router__["a" /* router */].push('/choose');
     }
-  },
-  created: function created() {
-    // load gameList and use promise to change the gameList
-    __WEBPACK_IMPORTED_MODULE_0__lib_api__["a" /* nowUser */].resetState();
-    __WEBPACK_IMPORTED_MODULE_1__lib_api_enter__["b" /* getGameIdList */]().then(function (res) {
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
-
-      try {
-        for (var _iterator = res.data.gameList[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var game = _step.value;
-
-          this.gameList.unshift({
-            index: game.gameId,
-            text: game.gameConfig.title,
-            describe: game.gameConfig.describe,
-            gameConfig: game.gameConfig
-          });
-        }
-      } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator.return) {
-            _iterator.return();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
-      }
-    }.bind(this)).catch(function (err) {
-      console.error(err);
-    });
   }
 });
 
 /***/ }),
-/* 35 */
+/* 37 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3340,7 +3577,253 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_constant__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_readable__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__lib_api_game__ = __webpack_require__(7);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  data: function data() {
+    return {
+      title: '認證碼',
+      code: '1234'
+    };
+  },
+
+  methods: {
+    intoRegistOld: function intoRegistOld() {
+      __WEBPACK_IMPORTED_MODULE_0__router__["a" /* router */].push('/regist/old');
+    },
+    intoRegistPlayer: function intoRegistPlayer() {
+      __WEBPACK_IMPORTED_MODULE_0__router__["a" /* router */].push('/regist/player');
+    },
+    announce: function announce(msg) {
+      this.snackbarText = msg;
+      this.snackbar = true;
+    }
+  }
+});
+
+/***/ }),
+/* 38 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__router__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_constant__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_readable__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api__ = __webpack_require__(4);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  data: function data() {
+    return {
+      title: '輸入認證碼',
+      code: null,
+      btnDisabled: true,
+      errorDialog: false,
+      errorDialogMsg: ''
+    };
+  },
+
+  watch: {
+    code: function code() {
+      this.btnDisabled = !this.code;
+    }
+  },
+  methods: {
+    backToRegistNew: function backToRegistNew() {
+      __WEBPACK_IMPORTED_MODULE_0__router__["a" /* router */].push('/regist/new');
+    },
+    setCode: function setCode() {
+      var code = parseInt(this.code);
+      if (code < 0 || code > 9999) {
+        this.errorDialogMsg = '你的認證碼不正確，應該是由四位數字組成。';
+        this.errorDialog = true;
+      } else {
+        this.intoChoose();
+      }
+    },
+    intoChoose: function intoChoose() {
+      __WEBPACK_IMPORTED_MODULE_0__router__["a" /* router */].push('/choose');
+    },
+    announce: function announce(msg) {
+      this.snackbarText = msg;
+      this.snackbar = true;
+    }
+  }
+});
+
+/***/ }),
+/* 39 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__router__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_constant__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_readable__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api__ = __webpack_require__(4);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  data: function data() {
+    return {
+      title: '暱稱',
+      code: '1234',
+      nickname: '',
+      errorDialog: false,
+      errorDialogMsg: ''
+    };
+  },
+
+  methods: {
+    backToRegistNew: function backToRegistNew() {
+      __WEBPACK_IMPORTED_MODULE_0__router__["a" /* router */].push('/regist/new');
+    },
+    setName: function setName() {
+      if (this.nickname.length > 10) {
+        this.errorDialogMsg = '暱稱字數不可超過10字。';
+        this.errorDialog = true;
+      } else if (this.nickname.length < 1) {
+        this.errorDialogMsg = '你的暱稱太短了。';
+        this.errorDialog = true;
+      } else {
+        this.intoChooseGame();
+      }
+    },
+    intoChooseGame: function intoChooseGame() {
+      __WEBPACK_IMPORTED_MODULE_0__router__["a" /* router */].push('/choose/game');
+    },
+    intoRegistStaff: function intoRegistStaff() {
+      __WEBPACK_IMPORTED_MODULE_0__router__["a" /* router */].push('/regist/staff');
+    },
+    announce: function announce(msg) {
+      this.snackbarText = msg;
+      this.snackbar = true;
+    }
+  }
+});
+
+/***/ }),
+/* 40 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__router__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_constant__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_readable__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_api__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__lib_api_game__ = __webpack_require__(8);
 //
 //
 //
@@ -3465,6 +3948,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     }
   },
   methods: {
+    intoBoardCast: function intoBoardCast() {
+      __WEBPACK_IMPORTED_MODULE_0__router__["a" /* router */].push('/boardcast');
+    },
     nextGameStage: function nextGameStage() {
       __WEBPACK_IMPORTED_MODULE_4__lib_api_game__["c" /* nextGameStage */](__WEBPACK_IMPORTED_MODULE_3__lib_api__["a" /* nowUser */].getGameId()).then(function (res) {
         var data = res.data;
@@ -3496,7 +3982,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 36 */
+/* 41 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3569,7 +4055,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 37 */
+/* 42 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3686,7 +4172,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 38 */
+/* 43 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3756,7 +4242,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 39 */
+/* 44 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3828,7 +4314,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 40 */
+/* 45 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3953,7 +4439,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 41 */
+/* 46 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4026,7 +4512,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 42 */
+/* 47 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4151,7 +4637,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 43 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)(true);
@@ -4165,7 +4651,7 @@ exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\
 
 
 /***/ }),
-/* 44 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)(true);
@@ -4179,76 +4665,6 @@ exports.push([module.i, "\n.end .chart-title {\r\n  margin-bottom: 0;\r\n  margi
 
 
 /***/ }),
-/* 45 */
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__(0)(true);
-// imports
-
-
-// module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"storage-list.vue","sourceRoot":""}]);
-
-// exports
-
-
-/***/ }),
-/* 46 */
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__(0)(true);
-// imports
-
-
-// module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
-
-// exports
-
-
-/***/ }),
-/* 47 */
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__(0)(true);
-// imports
-
-
-// module
-exports.push([module.i, "\n.game-clock .more-info {\r\n  font-size: 20px;\n}\n.game-clock .time {\r\n  font-size: 50px;\r\n  line-height: 50px;\n}\r\n", "", {"version":3,"sources":["d:/Coding/ieemgameview/src/components/game-clock.vue?19ee63b2"],"names":[],"mappings":";AAiCA;EACA,gBAAA;CACA;AAEA;EACA,gBAAA;EACA,kBAAA;CACA","file":"game-clock.vue","sourcesContent":["<template>\r\n  <div class=\"game-clock\">\r\n    <v-card>\r\n      <v-card-text>\r\n        <span class=\"more-info\">{{ readableDay }}</span><br>\r\n        <span class=\"time\">{{ readableTime }}</span>\r\n      </v-card-text>\r\n    </v-card>\r\n  </div>\r\n</template>\r\n\r\n<script>\r\nimport * as api from '../lib/api'\r\nimport * as readable from '../lib/readable'\r\n\r\nexport default {\r\n  data () {\r\n    return {\r\n      state: api.nowUser.getDayTime()\r\n    }\r\n  },\r\n  computed: {\r\n    readableTime: function () {\r\n      return readable.toReadableTime(this.state.time)\r\n    },\r\n    readableDay: function () {\r\n      return readable.toReadableDay(this.state.day)\r\n    }\r\n  }\r\n}\r\n</script>\r\n\r\n<style>\r\n.game-clock .more-info {\r\n  font-size: 20px;\r\n}\r\n\r\n.game-clock .time {\r\n  font-size: 50px;\r\n  line-height: 50px;\r\n}\r\n</style>\r\n"],"sourceRoot":""}]);
-
-// exports
-
-
-/***/ }),
-/* 48 */
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__(0)(true);
-// imports
-
-
-// module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"team-storage-list.vue","sourceRoot":""}]);
-
-// exports
-
-
-/***/ }),
-/* 49 */
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__(0)(true);
-// imports
-
-
-// module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"deliver-dialog.vue","sourceRoot":""}]);
-
-// exports
-
-
-/***/ }),
 /* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -4257,7 +4673,7 @@ exports = module.exports = __webpack_require__(0)(true);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"storage-register-dialog.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"storage-list.vue","sourceRoot":""}]);
 
 // exports
 
@@ -4271,7 +4687,7 @@ exports = module.exports = __webpack_require__(0)(true);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
 
 // exports
 
@@ -4285,7 +4701,7 @@ exports = module.exports = __webpack_require__(0)(true);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
+exports.push([module.i, "\n.scoreboard .score {\n  padding-top: 30vh;\n  height: 100vh !important;\n}\n.scoreboard .clock {\n  padding-top: 30vh;\n  height: 100vh !important;\n}\n.scoreboard .ranking {\n  text-align: center;\n  font-size: 30px;\n  color: rgba(0, 0, 0, 0.6);\n}\n.scoreboard .ranking .top-ranking {\n  font-size: 40px;\n  color: rgba(0, 0, 0, 1);\n}\n.progress-circular__info {\n  font-size: 30px;\n}\n", "", {"version":3,"sources":["d:/Coding/ieemgameview/src/page/boardcast/scoreboard/index.vue?35bf82fb"],"names":[],"mappings":";AAwFA;EACA,kBAAA;EACA,yBAAA;CACA;AAEA;EACA,kBAAA;EACA,yBAAA;CACA;AAEA;EACA,mBAAA;EACA,gBAAA;EACA,0BAAA;CACA;AAEA;EACA,gBAAA;EACA,wBAAA;CACA;AAEA;EACA,gBAAA;CACA","file":"index.vue","sourcesContent":["<template>\n  <div id=\"scoreboard\" class=\"scoreboard\">\n    <main>\n      <v-layout row-sm column child-flex-sm>\n        <v-card class=\"clock elevation-0\">\n          <v-card-text>\n            <game-clock></game-clock>\n          </v-card-text>\n        </v-card>\n        <v-card class=\"score elevation-0\">\n          <v-card-text>\n            <div class=\"ranking\">\n              <h5>排行榜</h5>\n              <div\n                v-for=\"t in rankingList\"\n              >\n                <div :class=\"t.isTop ? 'top-ranking primary--text' : ''\">{{ t.readableTeam }}　{{ t.readableBalance }}</div>\n              </div>\n            </div>\n          </v-card-text>\n        </v-card>\n      </v-layout>\n    </main>\n  </div>\n</template>\n\n<script>\nimport * as api from '../../../lib/api'\nimport * as readable from '../../../lib/readable'\nimport * as dataApi from '../../../lib/api/data'\nimport * as constant from '../../../lib/constant'\nimport * as enterApi from '../../../lib/api/enter'\nimport {router} from '../../../router'\n\nexport default {\n  data () {\n    return {\n      state: api.nowUser.getState(),\n      rankingList: [],\n      timer: null\n    }\n  },\n  methods: {\n    updateRanking () {\n      dataApi.getBalanceByGame(api.nowUser.getGameId())\n        .then((function (res) {\n          let list = res.data.list\n          let result = []\n\n          list.forEach((function (i, k) {\n            result.push({\n              teamIndex: k + 1,\n              readableTeam: readable.toReadableTeam(k + 1),\n              isTop: false,\n              balance: i,\n              readableBalance: readable.toReadableDollar(i),\n            })\n          }).bind(this))\n\n          result.sort((a, b) => {\n            return a.balance < b.balance\n          })\n\n          let m = result[0].balance\n          for (let i of result) {\n            if (i.balance === m) {\n              i.isTop = true\n            }\n          }\n\n          this.rankingList.splice(0, this.rankingList.length)\n          result.forEach((function (i) {\n            this.rankingList.push(i)\n          }).bind(this))\n        }).bind(this))\n\n      if (this.state.stage === constant.GAME_STAGE.END) {\n        router.push('/boardcast/endpage')\n      }\n    }\n  },\n  mounted () {\n    this.timer = setInterval(this.updateRanking.bind(this), 1000)\n  }\n}\n</script>\n\n<style>\n.scoreboard .score {\n  padding-top: 30vh;\n  height: 100vh !important;\n}\n\n.scoreboard .clock {\n  padding-top: 30vh;\n  height: 100vh !important;\n}\n\n.scoreboard .ranking {\n  text-align: center;\n  font-size: 30px;\n  color: rgba(0, 0, 0, 0.6);\n}\n\n.scoreboard .ranking .top-ranking {\n  font-size: 40px;\n  color: rgba(0, 0, 0, 1);\n}\n\n.progress-circular__info {\n  font-size: 30px;\n}\n</style>\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -4299,7 +4715,7 @@ exports = module.exports = __webpack_require__(0)(true);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
+exports.push([module.i, "\n.game-clock {  \r\n  text-align: center;\n}\n.game-clock .time {\r\n  font-size: 50px;\r\n  line-height: 50px;\n}\r\n", "", {"version":3,"sources":["d:/Coding/ieemgameview/src/components/game-clock.vue?21dba7b4"],"names":[],"mappings":";AA8CA;EACA,mBAAA;CACA;AAEA;EACA,gBAAA;EACA,kBAAA;CACA","file":"game-clock.vue","sourcesContent":["<template>\r\n  <div class=\"game-clock\">\r\n    <h5 class=\"more-info\">{{ readableDay }}</h5>\r\n    <v-progress-circular\r\n      :size=\"200\"\r\n      :width=\"15\"\r\n      :rotate=\"-90\"\r\n      :value=\"timeValue\"\r\n      class=\"primary--text\"\r\n    >\r\n      {{ readableTime }}\r\n    </v-progress-circular>\r\n  </div>\r\n</template>\r\n\r\n<script>\r\nimport * as api from '../lib/api'\r\nimport * as constant from '../lib/constant'\r\nimport * as readable from '../lib/readable'\r\n\r\nexport default {\r\n  data () {\r\n    return {\r\n      state: api.nowUser.getDayTime()\r\n    }\r\n  },\r\n  computed: {\r\n    timeValue () {\r\n      // full round is 100\r\n      if (this.state.isWorking) {\r\n        return 100 - (this.state.time / api.nowUser.getGameConfig().dayLong) / 10\r\n      } else {\r\n        return 0\r\n      }\r\n    },\r\n    readableTime () {\r\n      return readable.toReadableTime(this.state.time, this.state.isWorking, true)\r\n    },\r\n    readableDay () {\r\n      return readable.toReadableDay(this.state.day)\r\n    }\r\n  }\r\n}\r\n</script>\r\n\r\n<style>\r\n.game-clock {  \r\n  text-align: center;\r\n}\r\n\r\n.game-clock .time {\r\n  font-size: 50px;\r\n  line-height: 50px;\r\n}\r\n</style>\r\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -4313,7 +4729,7 @@ exports = module.exports = __webpack_require__(0)(true);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"news-list.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"team-storage-list.vue","sourceRoot":""}]);
 
 // exports
 
@@ -4327,7 +4743,7 @@ exports = module.exports = __webpack_require__(0)(true);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"deliver-dialog.vue","sourceRoot":""}]);
 
 // exports
 
@@ -4341,7 +4757,7 @@ exports = module.exports = __webpack_require__(0)(true);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"order-dialog.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"storage-register-dialog.vue","sourceRoot":""}]);
 
 // exports
 
@@ -4369,7 +4785,7 @@ exports = module.exports = __webpack_require__(0)(true);
 
 
 // module
-exports.push([module.i, "\n.home {\r\n  min-height: 100%;\n}\n.home .head {\r\n  padding-top: 60px;\r\n  padding-bottom: 60px;\n}\n.home .layout {\r\n  padding-left: 14px;\r\n  padding-right: 14px;\n}\n.home .card {\r\n  height: 100% !important;\n}\n.home .headline {\r\n  display: block;\r\n  width: 100%;\n}\n.home .card__text {\r\n  padding-right: 0;\r\n  padding-left: 0;\n}\n.home .list__tile__title {\r\n  color: rgba(0, 0, 0, 0.87);\n}\n.home .flex {\r\n  margin-bottom: 8px;\n}\r\n", "", {"version":3,"sources":["d:/Coding/ieemgameview/src/page/home/index.vue?2818ebef"],"names":[],"mappings":";AAmEA;EACA,iBAAA;CACA;AAEA;EACA,kBAAA;EACA,qBAAA;CACA;AAEA;EACA,mBAAA;EACA,oBAAA;CACA;AAEA;EACA,wBAAA;CACA;AAEA;EACA,eAAA;EACA,YAAA;CACA;AAEA;EACA,iBAAA;EACA,gBAAA;CACA;AAEA;EACA,2BAAA;CACA;AAEA;EACA,mBAAA;CACA","file":"index.vue","sourcesContent":["<template>\r\n  <div id=\"home\" class=\"home\">\r\n    <v-card>\r\n      <v-card-text class=\"text-xs-center head\">\r\n        <div class=\"logo\"></div>\r\n        <!--<h3>REDRO產銷遊戲</h3>-->\r\n        <h5>2017 工工營 BETA</h5>\r\n      </v-card-text>\r\n      <v-layout row wrap>\r\n        <v-flex v-for=\"(item, index) in gameList\" :key=\"index\" xs12>\r\n          <v-card class=\"cyan darken-2 white--text\">\r\n            <v-card-title primary-title>\r\n              <div class=\"headline\">{{ item.text }}</div>\r\n              <div>{{ item.describe }}</div>\r\n            </v-card-title>\r\n            <v-card-actions>\r\n              <v-spacer></v-spacer>\r\n              <v-btn flat dark v-on:click.native=\"intoGame(item.index, item.gameConfig)\">進入遊戲</v-btn>\r\n            </v-card-actions>\r\n          </v-card>\r\n        </v-flex>\r\n      </v-layout>\r\n    </v-card>\r\n  </div>\r\n</template>\r\n\r\n<script>\r\nimport * as api from '../../lib/api'\r\nimport * as enterApi from '../../lib/api/enter'\r\nimport {router} from '../../router'\r\n\r\nexport default {\r\n  data () {\r\n    return {\r\n      gameList: []\r\n    }\r\n  },\r\n  methods: {\r\n    intoGame (gameId, gameConfig) {\r\n      console.log('User Game:', gameId)\r\n      api.nowUser.setGameId(gameId)\r\n      api.nowUser.setGameConfig(gameConfig)\r\n      router.push('/choose')\r\n    }\r\n  },\r\n  created: function () {\r\n    // load gameList and use promise to change the gameList\r\n    api.nowUser.resetState()\r\n    enterApi.getGameIdList()\r\n      .then((function (res) {\r\n        for (let game of res.data.gameList) {\r\n          this.gameList.unshift({\r\n            index: game.gameId,\r\n            text: game.gameConfig.title,\r\n            describe: game.gameConfig.describe,\r\n            gameConfig: game.gameConfig\r\n          })\r\n        }\r\n      }).bind(this))\r\n      .catch(function (err) {\r\n        console.error(err)\r\n      })\r\n  }\r\n}\r\n</script>\r\n\r\n<style>\r\n.home {\r\n  min-height: 100%;\r\n}\r\n\r\n.home .head {\r\n  padding-top: 60px;\r\n  padding-bottom: 60px;\r\n}\r\n\r\n.home .layout {\r\n  padding-left: 14px;\r\n  padding-right: 14px;\r\n}\r\n\r\n.home .card {\r\n  height: 100% !important;\r\n}\r\n\r\n.home .headline {\r\n  display: block;\r\n  width: 100%;\r\n}\r\n\r\n.home .card__text {\r\n  padding-right: 0;\r\n  padding-left: 0;\r\n}\r\n\r\n.home .list__tile__title {\r\n  color: rgba(0, 0, 0, 0.87);\r\n}\r\n\r\n.home .flex {\r\n  margin-bottom: 8px;\r\n}\r\n</style>\r\n"],"sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
 
 // exports
 
@@ -4383,7 +4799,7 @@ exports = module.exports = __webpack_require__(0)(true);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
 
 // exports
 
@@ -4397,7 +4813,7 @@ exports = module.exports = __webpack_require__(0)(true);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"deliver-history.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"news-list.vue","sourceRoot":""}]);
 
 // exports
 
@@ -4411,7 +4827,7 @@ exports = module.exports = __webpack_require__(0)(true);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
 
 // exports
 
@@ -4425,7 +4841,7 @@ exports = module.exports = __webpack_require__(0)(true);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"order-history.vue","sourceRoot":""}]);
+exports.push([module.i, "\n.regist .code-text {\r\n  width: 100%;\r\n  margin-top: 10px;\r\n  font-size: 50px;\r\n  line-height: 80px;\r\n  text-align: center;\r\n  background-color: rgba(0, 0, 0, 0.02);\r\n  border: 1px solid #ddd;\n}\r\n", "", {"version":3,"sources":["d:/Coding/ieemgameview/src/page/regist/new/index.vue?bc0b6be8"],"names":[],"mappings":";AAqDA;EACA,YAAA;EACA,iBAAA;EACA,gBAAA;EACA,kBAAA;EACA,mBAAA;EACA,sCAAA;EACA,uBAAA;CACA","file":"index.vue","sourcesContent":["<template>\r\n  <div class=\"regist\">\r\n    <v-toolbar class=\"green\">\r\n      <v-toolbar-title class=\"white--text\">{{ title }}</v-toolbar-title>\r\n    </v-toolbar>\r\n    <main>\r\n      <v-card>\r\n        <v-card-text>\r\n          <p>這個認證碼代表著你的身分，如果之後想要重新進入遊戲的話，你必須輸入這個認證碼。</p>\r\n          <p><b>請將認證碼記錄下來</b>，以備等一下所需。</p>\r\n          <input :value=\"code\" class=\"code-text\" readonly></input>\r\n        </v-card-text>\r\n        <v-card-actions>\r\n          <v-btn class=\"blue--text darken-1\" flat @click.native=\"intoRegistOld\">我已經有認證碼</v-btn>\r\n          <v-spacer></v-spacer>\r\n          <v-btn primary @click.native=\"intoRegistPlayer\">知道了</v-btn>\r\n        </v-card-actions>\r\n      </v-card>\r\n      <v-layout row>\r\n      </v-layout>\r\n    </main>\r\n  </div>\r\n</template>\r\n\r\n<script>\r\nimport {router} from '../../../router'\r\nimport * as constant from '../../../lib/constant'\r\nimport * as readable from '../../../lib/readable'\r\nimport * as api from '../../../lib/api'\r\n\r\nexport default {\r\n  data () {\r\n    return {\r\n      title: '認證碼',\r\n      code: '1234'\r\n    }\r\n  },\r\n  methods: {\r\n    intoRegistOld () {\r\n      router.push('/regist/old')\r\n    },\r\n    intoRegistPlayer () {\r\n      router.push('/regist/player')\r\n    },\r\n    announce (msg) {\r\n      this.snackbarText = msg\r\n      this.snackbar = true\r\n    }\r\n  }\r\n}\r\n</script>\r\n\r\n<style>\r\n.regist .code-text {\r\n  width: 100%;\r\n  margin-top: 10px;\r\n  font-size: 50px;\r\n  line-height: 80px;\r\n  text-align: center;\r\n  background-color: rgba(0, 0, 0, 0.02);\r\n  border: 1px solid #ddd;\r\n}\r\n</style>\r\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -4439,7 +4855,7 @@ exports = module.exports = __webpack_require__(0)(true);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
 
 // exports
 
@@ -4453,7 +4869,7 @@ exports = module.exports = __webpack_require__(0)(true);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
 
 // exports
 
@@ -4467,7 +4883,7 @@ exports = module.exports = __webpack_require__(0)(true);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"account-dialog.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"order-dialog.vue","sourceRoot":""}]);
 
 // exports
 
@@ -4481,7 +4897,7 @@ exports = module.exports = __webpack_require__(0)(true);
 
 
 // module
-exports.push([module.i, "\n.online-status .status-card {\r\n  color: #fff;\r\n  text-align: center;\r\n  font-size: 24px;\r\n  padding: 0 14px;\n}\n.online-status .status-card .flex {\r\n  padding-bottom: 16px;\n}\r\n", "", {"version":3,"sources":["d:/Coding/ieemgameview/src/components/online-status.vue?1a4daff2"],"names":[],"mappings":";AAgEA;EACA,YAAA;EACA,mBAAA;EACA,gBAAA;EACA,gBAAA;CACA;AAEA;EACA,qBAAA;CACA","file":"online-status.vue","sourcesContent":["<template>\r\n  <div class=\"online-status\">\r\n    <v-expansion-panel expand>\r\n      <v-expansion-panel-content>\r\n        <div slot=\"header\">小隊員</div>\r\n        <v-card class=\"status-card\">\r\n          <v-layout row wrap v-for=\"team in teamList\" :key=\"team.index\">\r\n            <v-flex xs3>\r\n              <v-card dark class=\"secondary\">\r\n                <v-card-text>{{ team.text }}</v-card-text>\r\n              </v-card>\r\n            </v-flex>\r\n            <v-flex xs3 v-for=\"job in jobList\" :key=\"job.index\">\r\n              <v-card dark class=\"secondary\">\r\n                <v-card-text>{{ job.text }}</v-card-text>\r\n              </v-card>\r\n            </v-flex>\r\n          </v-layout>\r\n        </v-card>\r\n      </v-expansion-panel-content>\r\n      <v-expansion-panel-content>\r\n        <div slot=\"header\">工作人員</div>\r\n        <v-card class=\"status-card\">\r\n          <v-layout row wrap>\r\n            <v-flex xs3 v-for=\"job in staffJobList\" :key=\"job.index\">\r\n              <v-card dark class=\"secondary\">\r\n                <v-card-text>{{ job.text }}</v-card-text>\r\n              </v-card>\r\n            </v-flex>\r\n          </v-layout>\r\n        </v-card>\r\n      </v-expansion-panel-content>\r\n    </v-expansion-panel>\r\n  </div>\r\n</template>\r\n\r\n<script>\r\nimport * as api from '../lib/api'\r\nimport * as readable from '../lib/readable'\r\n\r\nexport default {\r\n  props: [\r\n    'list'\r\n  ],\r\n  data () {\r\n    return {\r\n      teamNumber: 4\r\n    }\r\n  },\r\n  computed: {\r\n    jobList () {\r\n      return readable.readableJobList()\r\n    },\r\n    staffJobList () {\r\n      return readable.readableStaffJobList()\r\n    },\r\n    teamList () {\r\n      return readable.toReadableTeamList(this.teamNumber)\r\n    }\r\n  }\r\n}\r\n</script>\r\n\r\n<style>\r\n.online-status .status-card {\r\n  color: #fff;\r\n  text-align: center;\r\n  font-size: 24px;\r\n  padding: 0 14px;\r\n}\r\n\r\n.online-status .status-card .flex {\r\n  padding-bottom: 16px;\r\n}\r\n</style>\r\n"],"sourceRoot":""}]);
+exports.push([module.i, "\n.regist .code-text {\r\n  width: 100%;\r\n  margin-top: 10px;\r\n  font-size: 50px;\r\n  line-height: 80px;\r\n  text-align: center;\r\n  background-color: rgba(0, 0, 0, 0.02);\r\n  border: 1px solid #ddd;\n}\r\n", "", {"version":3,"sources":["d:/Coding/ieemgameview/src/page/regist/old/index.vue?35217dcd"],"names":[],"mappings":";AAiFA;EACA,YAAA;EACA,iBAAA;EACA,gBAAA;EACA,kBAAA;EACA,mBAAA;EACA,sCAAA;EACA,uBAAA;CACA","file":"index.vue","sourcesContent":["<template>\r\n  <div class=\"regist\">\r\n    <v-toolbar class=\"green\">\r\n      <v-btn icon v-on:click.native=\"backToRegistNew\">\r\n        <v-icon>arrow_back</v-icon>\r\n      </v-btn>\r\n      <v-toolbar-title class=\"white--text\">{{ title }}</v-toolbar-title>\r\n    </v-toolbar>\r\n    <main>\r\n      <v-card>\r\n        <v-card-text>\r\n          <p>請輸入你的認證碼。</p>\r\n          <input class=\"code-text\" v-model=\"code\"></input>\r\n        </v-card-text>\r\n        <v-card-actions>\r\n          <v-spacer></v-spacer>\r\n          <v-btn primary @click.native.stop=\"setCode\" :disabled=\"btnDisabled\">確定</v-btn>\r\n        </v-card-actions>\r\n      </v-card>\r\n      <v-layout row>\r\n      </v-layout>\r\n    </main>\r\n    <v-dialog v-model=\"errorDialog\">\r\n      <v-card>\r\n        <v-card-title class=\"headline\">錯誤</v-card-title>\r\n        <v-card-text>{{ errorDialogMsg }}</v-card-text>\r\n        <v-card-actions>\r\n          <v-spacer></v-spacer>\r\n          <v-btn class=\"green--text darken-1\" flat=\"flat\" @click.native=\"errorDialog = false\">知道了</v-btn>\r\n        </v-card-actions>\r\n      </v-card>\r\n    </v-dialog>\r\n  </div>\r\n</template>\r\n\r\n<script>\r\nimport {router} from '../../../router'\r\nimport * as constant from '../../../lib/constant'\r\nimport * as readable from '../../../lib/readable'\r\nimport * as api from '../../../lib/api'\r\n\r\nexport default {\r\n  data () {\r\n    return {\r\n      title: '輸入認證碼',\r\n      code: null,\r\n      btnDisabled: true,\r\n      errorDialog: false,\r\n      errorDialogMsg: ''\r\n    }\r\n  },\r\n  watch: {\r\n    code () {\r\n      this.btnDisabled = !this.code\r\n    }\r\n  },\r\n  methods: {\r\n    backToRegistNew () {\r\n      router.push('/regist/new')\r\n    },\r\n    setCode () {\r\n      let code = parseInt(this.code)\r\n      if (code < 0 || code > 9999) {\r\n        this.errorDialogMsg = '你的認證碼不正確，應該是由四位數字組成。'\r\n        this.errorDialog = true\r\n      } else {\r\n        this.intoChoose()\r\n      }\r\n    },\r\n    intoChoose () {\r\n      router.push('/choose')\r\n    },\r\n    announce (msg) {\r\n      this.snackbarText = msg\r\n      this.snackbar = true\r\n    }\r\n  }\r\n}\r\n</script>\r\n\r\n<style>\r\n.regist .code-text {\r\n  width: 100%;\r\n  margin-top: 10px;\r\n  font-size: 50px;\r\n  line-height: 80px;\r\n  text-align: center;\r\n  background-color: rgba(0, 0, 0, 0.02);\r\n  border: 1px solid #ddd;\r\n}\r\n</style>\r\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -4495,7 +4911,7 @@ exports = module.exports = __webpack_require__(0)(true);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"info-panel.vue","sourceRoot":""}]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
 
 // exports
 
@@ -4509,7 +4925,7 @@ exports = module.exports = __webpack_require__(0)(true);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
+exports.push([module.i, "\n.home {\r\n  min-height: 100%;\n}\n.home .head {\r\n  padding-top: 60px;\r\n  padding-bottom: 60px;\n}\n.home .layout {\r\n  padding-left: 14px;\r\n  padding-right: 14px;\n}\n.home .card {\r\n  height: 100% !important;\n}\n.home .card__text {\r\n  padding-right: 0;\r\n  padding-left: 0;\n}\r\n", "", {"version":3,"sources":["d:/Coding/ieemgameview/src/page/home/index.vue?0605244a"],"names":[],"mappings":";AA6BA;EACA,iBAAA;CACA;AAEA;EACA,kBAAA;EACA,qBAAA;CACA;AAEA;EACA,mBAAA;EACA,oBAAA;CACA;AAEA;EACA,wBAAA;CACA;AAEA;EACA,iBAAA;EACA,gBAAA;CACA","file":"index.vue","sourcesContent":["<template>\r\n  <div id=\"home\" class=\"home\">\r\n    <v-card>\r\n      <v-card-text class=\"text-xs-center head\">\r\n        <div class=\"logo\"></div>\r\n        <!--<h3>REDRO產銷遊戲</h3>-->\r\n        <h5>2017 工工營 BETA</h5>\r\n        <v-btn primary v-on:click.native=\"intoRegist\">進入遊戲</v-btn>\r\n      </v-card-text>\r\n    </v-card>\r\n  </div>\r\n</template>\r\n\r\n<script>\r\nimport * as api from '../../lib/api'\r\nimport * as enterApi from '../../lib/api/enter'\r\nimport {router} from '../../router'\r\n\r\nexport default {\r\n  methods: {\r\n    intoRegist () {\r\n      // router.push('/regist')\r\n      router.push('/choose')\r\n    }\r\n  }\r\n}\r\n</script>\r\n\r\n<style>\r\n.home {\r\n  min-height: 100%;\r\n}\r\n\r\n.home .head {\r\n  padding-top: 60px;\r\n  padding-bottom: 60px;\r\n}\r\n\r\n.home .layout {\r\n  padding-left: 14px;\r\n  padding-right: 14px;\r\n}\r\n\r\n.home .card {\r\n  height: 100% !important;\r\n}\r\n\r\n.home .card__text {\r\n  padding-right: 0;\r\n  padding-left: 0;\r\n}\r\n</style>\r\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -4518,16 +4934,156 @@ exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\
 /* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
+exports = module.exports = __webpack_require__(0)(true);
+// imports
+
+
+// module
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
+
+// exports
+
+
+/***/ }),
+/* 70 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(0)(true);
+// imports
+
+
+// module
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"deliver-history.vue","sourceRoot":""}]);
+
+// exports
+
+
+/***/ }),
+/* 71 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(0)(true);
+// imports
+
+
+// module
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
+
+// exports
+
+
+/***/ }),
+/* 72 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(0)(true);
+// imports
+
+
+// module
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"order-history.vue","sourceRoot":""}]);
+
+// exports
+
+
+/***/ }),
+/* 73 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(0)(true);
+// imports
+
+
+// module
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
+
+// exports
+
+
+/***/ }),
+/* 74 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(0)(true);
+// imports
+
+
+// module
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
+
+// exports
+
+
+/***/ }),
+/* 75 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(0)(true);
+// imports
+
+
+// module
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"account-dialog.vue","sourceRoot":""}]);
+
+// exports
+
+
+/***/ }),
+/* 76 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(0)(true);
+// imports
+
+
+// module
+exports.push([module.i, "\n.online-status .status-card {\r\n  color: #fff;\r\n  text-align: center;\r\n  font-size: 24px;\r\n  padding: 0 14px;\n}\n.online-status .status-card .flex {\r\n  padding-bottom: 16px;\n}\r\n", "", {"version":3,"sources":["d:/Coding/ieemgameview/src/components/online-status.vue?1a4daff2"],"names":[],"mappings":";AAgEA;EACA,YAAA;EACA,mBAAA;EACA,gBAAA;EACA,gBAAA;CACA;AAEA;EACA,qBAAA;CACA","file":"online-status.vue","sourcesContent":["<template>\r\n  <div class=\"online-status\">\r\n    <v-expansion-panel expand>\r\n      <v-expansion-panel-content>\r\n        <div slot=\"header\">小隊員</div>\r\n        <v-card class=\"status-card\">\r\n          <v-layout row wrap v-for=\"team in teamList\" :key=\"team.index\">\r\n            <v-flex xs3>\r\n              <v-card dark class=\"secondary\">\r\n                <v-card-text>{{ team.text }}</v-card-text>\r\n              </v-card>\r\n            </v-flex>\r\n            <v-flex xs3 v-for=\"job in jobList\" :key=\"job.index\">\r\n              <v-card dark class=\"secondary\">\r\n                <v-card-text>{{ job.text }}</v-card-text>\r\n              </v-card>\r\n            </v-flex>\r\n          </v-layout>\r\n        </v-card>\r\n      </v-expansion-panel-content>\r\n      <v-expansion-panel-content>\r\n        <div slot=\"header\">工作人員</div>\r\n        <v-card class=\"status-card\">\r\n          <v-layout row wrap>\r\n            <v-flex xs3 v-for=\"job in staffJobList\" :key=\"job.index\">\r\n              <v-card dark class=\"secondary\">\r\n                <v-card-text>{{ job.text }}</v-card-text>\r\n              </v-card>\r\n            </v-flex>\r\n          </v-layout>\r\n        </v-card>\r\n      </v-expansion-panel-content>\r\n    </v-expansion-panel>\r\n  </div>\r\n</template>\r\n\r\n<script>\r\nimport * as api from '../lib/api'\r\nimport * as readable from '../lib/readable'\r\n\r\nexport default {\r\n  props: [\r\n    'list'\r\n  ],\r\n  data () {\r\n    return {\r\n      teamNumber: 4\r\n    }\r\n  },\r\n  computed: {\r\n    jobList () {\r\n      return readable.readableJobList()\r\n    },\r\n    staffJobList () {\r\n      return readable.readableStaffJobList()\r\n    },\r\n    teamList () {\r\n      return readable.toReadableTeamList(this.teamNumber)\r\n    }\r\n  }\r\n}\r\n</script>\r\n\r\n<style>\r\n.online-status .status-card {\r\n  color: #fff;\r\n  text-align: center;\r\n  font-size: 24px;\r\n  padding: 0 14px;\r\n}\r\n\r\n.online-status .status-card .flex {\r\n  padding-bottom: 16px;\r\n}\r\n</style>\r\n"],"sourceRoot":""}]);
+
+// exports
+
+
+/***/ }),
+/* 77 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(0)(true);
+// imports
+
+
+// module
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"info-panel.vue","sourceRoot":""}]);
+
+// exports
+
+
+/***/ }),
+/* 78 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(0)(true);
+// imports
+
+
+// module
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"index.vue","sourceRoot":""}]);
+
+// exports
+
+
+/***/ }),
+/* 79 */
+/***/ (function(module, exports, __webpack_require__) {
+
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(143)
+  __webpack_require__(168)
 }
 var Component = __webpack_require__(1)(
   /* script */
   __webpack_require__(17),
   /* template */
-  __webpack_require__(117),
+  __webpack_require__(137),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -4559,19 +5115,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 70 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(127)
+  __webpack_require__(148)
 }
 var Component = __webpack_require__(1)(
   /* script */
   __webpack_require__(18),
   /* template */
-  __webpack_require__(101),
+  __webpack_require__(117),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -4603,19 +5159,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 71 */
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(138)
+  __webpack_require__(163)
 }
 var Component = __webpack_require__(1)(
   /* script */
   __webpack_require__(19),
   /* template */
-  __webpack_require__(112),
+  __webpack_require__(132),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -4647,19 +5203,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 72 */
+/* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(125)
+  __webpack_require__(146)
 }
 var Component = __webpack_require__(1)(
   /* script */
   __webpack_require__(20),
   /* template */
-  __webpack_require__(99),
+  __webpack_require__(115),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -4691,19 +5247,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 73 */
+/* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(145)
+  __webpack_require__(170)
 }
 var Component = __webpack_require__(1)(
   /* script */
   __webpack_require__(21),
   /* template */
-  __webpack_require__(119),
+  __webpack_require__(139),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -4735,19 +5291,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 74 */
+/* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(132)
+  __webpack_require__(153)
 }
 var Component = __webpack_require__(1)(
   /* script */
   __webpack_require__(22),
   /* template */
-  __webpack_require__(106),
+  __webpack_require__(122),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -4779,19 +5335,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 75 */
+/* 85 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(144)
+  __webpack_require__(169)
 }
 var Component = __webpack_require__(1)(
   /* script */
   __webpack_require__(23),
   /* template */
-  __webpack_require__(118),
+  __webpack_require__(138),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -4823,19 +5379,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 76 */
+/* 86 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(134)
+  __webpack_require__(158)
 }
 var Component = __webpack_require__(1)(
   /* script */
   __webpack_require__(24),
   /* template */
-  __webpack_require__(108),
+  __webpack_require__(127),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -4867,19 +5423,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 77 */
+/* 87 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(140)
+  __webpack_require__(165)
 }
 var Component = __webpack_require__(1)(
   /* script */
   __webpack_require__(25),
   /* template */
-  __webpack_require__(114),
+  __webpack_require__(134),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -4911,19 +5467,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 78 */
+/* 88 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(123)
+  __webpack_require__(143)
 }
 var Component = __webpack_require__(1)(
   /* script */
   __webpack_require__(26),
   /* template */
-  __webpack_require__(97),
+  __webpack_require__(112),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -4955,19 +5511,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 79 */
+/* 89 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(128)
+  __webpack_require__(149)
 }
 var Component = __webpack_require__(1)(
   /* script */
   __webpack_require__(27),
   /* template */
-  __webpack_require__(102),
+  __webpack_require__(118),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -4999,19 +5555,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 80 */
+/* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(126)
+  __webpack_require__(147)
 }
 var Component = __webpack_require__(1)(
   /* script */
   __webpack_require__(28),
   /* template */
-  __webpack_require__(100),
+  __webpack_require__(116),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -5043,19 +5599,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 81 */
+/* 91 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(137)
+  __webpack_require__(162)
 }
 var Component = __webpack_require__(1)(
   /* script */
   __webpack_require__(29),
   /* template */
-  __webpack_require__(111),
+  __webpack_require__(131),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -5087,19 +5643,107 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 82 */
+/* 92 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(131)
+  __webpack_require__(145)
 }
 var Component = __webpack_require__(1)(
   /* script */
   __webpack_require__(30),
   /* template */
-  __webpack_require__(105),
+  __webpack_require__(114),
+  /* styles */
+  injectStyle,
+  /* scopeId */
+  null,
+  /* moduleIdentifier (server only) */
+  null
+)
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\page\\boardcast\\scoreboard\\index.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key.substr(0, 2) !== "__"})) {console.error("named exports are not supported in *.vue files.")}
+if (Component.options.functional) {console.error("[vue-loader] index.vue: functional components are not supported with templates, they should use render functions.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-33308320", Component.options)
+  } else {
+    hotAPI.reload("data-v-33308320", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 93 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+function injectStyle (ssrContext) {
+  if (disposed) return
+  __webpack_require__(156)
+}
+var Component = __webpack_require__(1)(
+  /* script */
+  __webpack_require__(31),
+  /* template */
+  __webpack_require__(125),
+  /* styles */
+  injectStyle,
+  /* scopeId */
+  null,
+  /* moduleIdentifier (server only) */
+  null
+)
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\page\\choose\\game\\index.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key.substr(0, 2) !== "__"})) {console.error("named exports are not supported in *.vue files.")}
+if (Component.options.functional) {console.error("[vue-loader] index.vue: functional components are not supported with templates, they should use render functions.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-5f9afce4", Component.options)
+  } else {
+    hotAPI.reload("data-v-5f9afce4", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 94 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+function injectStyle (ssrContext) {
+  if (disposed) return
+  __webpack_require__(152)
+}
+var Component = __webpack_require__(1)(
+  /* script */
+  __webpack_require__(32),
+  /* template */
+  __webpack_require__(121),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -5131,19 +5775,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 83 */
+/* 95 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(124)
+  __webpack_require__(144)
 }
 var Component = __webpack_require__(1)(
   /* script */
-  __webpack_require__(31),
+  __webpack_require__(33),
   /* template */
-  __webpack_require__(98),
+  __webpack_require__(113),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -5175,19 +5819,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 84 */
+/* 96 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(129)
+  __webpack_require__(150)
 }
 var Component = __webpack_require__(1)(
   /* script */
-  __webpack_require__(32),
+  __webpack_require__(34),
   /* template */
-  __webpack_require__(103),
+  __webpack_require__(119),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -5219,19 +5863,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 85 */
+/* 97 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(122)
+  __webpack_require__(142)
 }
 var Component = __webpack_require__(1)(
   /* script */
-  __webpack_require__(33),
+  __webpack_require__(35),
   /* template */
-  __webpack_require__(96),
+  __webpack_require__(111),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -5263,19 +5907,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 86 */
+/* 98 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(136)
+  __webpack_require__(161)
 }
 var Component = __webpack_require__(1)(
   /* script */
-  __webpack_require__(34),
+  __webpack_require__(36),
   /* template */
-  __webpack_require__(110),
+  __webpack_require__(130),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -5307,19 +5951,151 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 87 */
+/* 99 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(141)
+  __webpack_require__(155)
 }
 var Component = __webpack_require__(1)(
   /* script */
-  __webpack_require__(35),
+  __webpack_require__(37),
   /* template */
-  __webpack_require__(115),
+  __webpack_require__(124),
+  /* styles */
+  injectStyle,
+  /* scopeId */
+  null,
+  /* moduleIdentifier (server only) */
+  null
+)
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\page\\regist\\new\\index.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key.substr(0, 2) !== "__"})) {console.error("named exports are not supported in *.vue files.")}
+if (Component.options.functional) {console.error("[vue-loader] index.vue: functional components are not supported with templates, they should use render functions.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-5d772eb9", Component.options)
+  } else {
+    hotAPI.reload("data-v-5d772eb9", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 100 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+function injectStyle (ssrContext) {
+  if (disposed) return
+  __webpack_require__(159)
+}
+var Component = __webpack_require__(1)(
+  /* script */
+  __webpack_require__(38),
+  /* template */
+  __webpack_require__(128),
+  /* styles */
+  injectStyle,
+  /* scopeId */
+  null,
+  /* moduleIdentifier (server only) */
+  null
+)
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\page\\regist\\old\\index.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key.substr(0, 2) !== "__"})) {console.error("named exports are not supported in *.vue files.")}
+if (Component.options.functional) {console.error("[vue-loader] index.vue: functional components are not supported with templates, they should use render functions.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-74dc7680", Component.options)
+  } else {
+    hotAPI.reload("data-v-74dc7680", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 101 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+function injectStyle (ssrContext) {
+  if (disposed) return
+  __webpack_require__(157)
+}
+var Component = __webpack_require__(1)(
+  /* script */
+  __webpack_require__(39),
+  /* template */
+  __webpack_require__(126),
+  /* styles */
+  injectStyle,
+  /* scopeId */
+  null,
+  /* moduleIdentifier (server only) */
+  null
+)
+Component.options.__file = "d:\\Coding\\ieemgameview\\src\\page\\regist\\player\\index.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key.substr(0, 2) !== "__"})) {console.error("named exports are not supported in *.vue files.")}
+if (Component.options.functional) {console.error("[vue-loader] index.vue: functional components are not supported with templates, they should use render functions.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-60d94dfe", Component.options)
+  } else {
+    hotAPI.reload("data-v-60d94dfe", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 102 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+function injectStyle (ssrContext) {
+  if (disposed) return
+  __webpack_require__(166)
+}
+var Component = __webpack_require__(1)(
+  /* script */
+  __webpack_require__(40),
+  /* template */
+  __webpack_require__(135),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -5351,19 +6127,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 88 */
+/* 103 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(146)
+  __webpack_require__(171)
 }
 var Component = __webpack_require__(1)(
   /* script */
-  __webpack_require__(36),
+  __webpack_require__(41),
   /* template */
-  __webpack_require__(120),
+  __webpack_require__(140),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -5395,19 +6171,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 89 */
+/* 104 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(142)
+  __webpack_require__(167)
 }
 var Component = __webpack_require__(1)(
   /* script */
-  __webpack_require__(37),
+  __webpack_require__(42),
   /* template */
-  __webpack_require__(116),
+  __webpack_require__(136),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -5439,19 +6215,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 90 */
+/* 105 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(130)
+  __webpack_require__(151)
 }
 var Component = __webpack_require__(1)(
   /* script */
-  __webpack_require__(38),
+  __webpack_require__(43),
   /* template */
-  __webpack_require__(104),
+  __webpack_require__(120),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -5483,19 +6259,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 91 */
+/* 106 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(133)
+  __webpack_require__(154)
 }
 var Component = __webpack_require__(1)(
   /* script */
-  __webpack_require__(39),
+  __webpack_require__(44),
   /* template */
-  __webpack_require__(107),
+  __webpack_require__(123),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -5527,19 +6303,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 92 */
+/* 107 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(139)
+  __webpack_require__(164)
 }
 var Component = __webpack_require__(1)(
   /* script */
-  __webpack_require__(40),
+  __webpack_require__(45),
   /* template */
-  __webpack_require__(113),
+  __webpack_require__(133),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -5571,19 +6347,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 93 */
+/* 108 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(135)
+  __webpack_require__(160)
 }
 var Component = __webpack_require__(1)(
   /* script */
-  __webpack_require__(41),
+  __webpack_require__(46),
   /* template */
-  __webpack_require__(109),
+  __webpack_require__(129),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -5615,19 +6391,19 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 94 */
+/* 109 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(121)
+  __webpack_require__(141)
 }
 var Component = __webpack_require__(1)(
   /* script */
-  __webpack_require__(42),
+  __webpack_require__(47),
   /* template */
-  __webpack_require__(95),
+  __webpack_require__(110),
   /* styles */
   injectStyle,
   /* scopeId */
@@ -5659,7 +6435,7 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 95 */
+/* 110 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -5786,7 +6562,7 @@ if (false) {
 }
 
 /***/ }),
-/* 96 */
+/* 111 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -5881,7 +6657,7 @@ if (false) {
 }
 
 /***/ }),
-/* 97 */
+/* 112 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -5889,7 +6665,8 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     attrs: {
       "headers": _vm.header,
       "items": _vm.readableStorageList,
-      "hide-actions": ""
+      "hide-actions": "",
+      "no-data-text": "還沒有囤貨紀錄"
     },
     scopedSlots: _vm._u([{
       key: "items",
@@ -5910,7 +6687,7 @@ if (false) {
 }
 
 /***/ }),
-/* 98 */
+/* 113 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -5932,7 +6709,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     staticClass: "logo"
   }), _vm._v(" "), _c('h5', {
     staticClass: "headline"
-  }, [_vm._v("請稍後，遊戲即將開始")]), _vm._v("\n      如果剛剛的講解有任何不清楚的地方，你現在可以向旁邊的隊輔們提出疑問，他們會為你解答。"), _c('br'), _vm._v(" "), _c('span', {
+  }, [_vm._v("請稍後，遊戲即將開始")]), _vm._v("\n      如果剛剛的講解有任何不清楚的地方，你現在可以向旁邊的隊輔們提出疑問，他們會為你解答。"), _c('br'), _c('br'), _c('br'), _vm._v(" "), _c('span', {
     staticClass: "gray--text"
   }, [_vm._v(_vm._s(_vm.readableTeam) + " " + _vm._s(_vm.readableJob))])])]), _vm._v("\n  " + _vm._s(_vm.intoBelong) + "\n")], 1)
 },staticRenderFns: []}
@@ -5945,17 +6722,59 @@ if (false) {
 }
 
 /***/ }),
-/* 99 */
+/* 114 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('div', {
+    staticClass: "scoreboard",
+    attrs: {
+      "id": "scoreboard"
+    }
+  }, [_c('main', [_c('v-layout', {
+    attrs: {
+      "row-sm": "",
+      "column": "",
+      "child-flex-sm": ""
+    }
+  }, [_c('v-card', {
+    staticClass: "clock elevation-0"
+  }, [_c('v-card-text', [_c('game-clock')], 1)], 1), _vm._v(" "), _c('v-card', {
+    staticClass: "score elevation-0"
+  }, [_c('v-card-text', [_c('div', {
+    staticClass: "ranking"
+  }, [_c('h5', [_vm._v("排行榜")]), _vm._v(" "), _vm._l((_vm.rankingList), function(t) {
+    return _c('div', [_c('div', {
+      class: t.isTop ? 'top-ranking primary--text' : ''
+    }, [_vm._v(_vm._s(t.readableTeam) + "　" + _vm._s(t.readableBalance))])])
+  })], 2)])], 1)], 1)], 1)])
+},staticRenderFns: []}
+module.exports.render._withStripped = true
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+     require("vue-hot-reload-api").rerender("data-v-33308320", module.exports)
+  }
+}
+
+/***/ }),
+/* 115 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
   return _c('div', {
     staticClass: "game-clock"
-  }, [_c('v-card', [_c('v-card-text', [_c('span', {
+  }, [_c('h5', {
     staticClass: "more-info"
-  }, [_vm._v(_vm._s(_vm.readableDay))]), _c('br'), _vm._v(" "), _c('span', {
-    staticClass: "time"
-  }, [_vm._v(_vm._s(_vm.readableTime))])])], 1)], 1)
+  }, [_vm._v(_vm._s(_vm.readableDay))]), _vm._v(" "), _c('v-progress-circular', {
+    staticClass: "primary--text",
+    attrs: {
+      "size": 200,
+      "width": 15,
+      "rotate": -90,
+      "value": _vm.timeValue
+    }
+  }, [_vm._v("\n    " + _vm._s(_vm.readableTime) + "\n  ")])], 1)
 },staticRenderFns: []}
 module.exports.render._withStripped = true
 if (false) {
@@ -5966,7 +6785,7 @@ if (false) {
 }
 
 /***/ }),
-/* 100 */
+/* 116 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -6019,7 +6838,7 @@ if (false) {
 }
 
 /***/ }),
-/* 101 */
+/* 117 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -6121,7 +6940,7 @@ if (false) {
 }
 
 /***/ }),
-/* 102 */
+/* 118 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -6210,7 +7029,7 @@ if (false) {
 }
 
 /***/ }),
-/* 103 */
+/* 119 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -6218,9 +7037,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     staticClass: "choose"
   }, [_c('v-toolbar', {
     staticClass: "orange"
-  }, [_c('v-toolbar-title', [_vm._v("首頁")])], 1), _vm._v(" "), _c('main', [_c('h5', {
-    staticClass: "headline"
-  }, [_vm._v("請選擇你的小隊")]), _vm._v(" "), _c('v-layout', {
+  }, [_c('v-toolbar-title', [_vm._v("首頁")])], 1), _vm._v(" "), _c('main', [_c('h5', [_vm._v("請選擇你的小隊")]), _vm._v(" "), _c('v-layout', {
     attrs: {
       "row": ""
     }
@@ -6250,7 +7067,7 @@ if (false) {
 }
 
 /***/ }),
-/* 104 */
+/* 120 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -6293,7 +7110,7 @@ if (false) {
 }
 
 /***/ }),
-/* 105 */
+/* 121 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -6301,16 +7118,13 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     staticClass: "choose"
   }, [_c('v-toolbar', {
     staticClass: "orange"
-  }, [_c('v-toolbar-title', [_vm._v("首頁")])], 1), _vm._v(" "), _c('main', [_c('h5', {
-    staticClass: "headline"
-  }, [_vm._v("請選擇你的工作")]), _vm._v(" "), _c('v-subheader', {
+  }, [_c('v-toolbar-title', [_vm._v("首頁")])], 1), _vm._v(" "), _c('main', [_c('h5', [_vm._v("請選擇你的工作")]), _vm._v(" "), _c('v-subheader', {
     directives: [{
       name: "show",
       rawName: "v-show",
       value: (_vm.showSubTitle),
       expression: "showSubTitle"
-    }],
-    staticClass: "subheader"
+    }]
   }, [_vm._v("隊輔請協助小組分配工作")]), _vm._v(" "), _c('v-layout', {
     attrs: {
       "row": ""
@@ -6371,7 +7185,7 @@ if (false) {
 }
 
 /***/ }),
-/* 106 */
+/* 122 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -6417,7 +7231,7 @@ if (false) {
 }
 
 /***/ }),
-/* 107 */
+/* 123 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -6464,7 +7278,202 @@ if (false) {
 }
 
 /***/ }),
-/* 108 */
+/* 124 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('div', {
+    staticClass: "regist"
+  }, [_c('v-toolbar', {
+    staticClass: "green"
+  }, [_c('v-toolbar-title', {
+    staticClass: "white--text"
+  }, [_vm._v(_vm._s(_vm.title))])], 1), _vm._v(" "), _c('main', [_c('v-card', [_c('v-card-text', [_c('p', [_vm._v("這個認證碼代表著你的身分，如果之後想要重新進入遊戲的話，你必須輸入這個認證碼。")]), _vm._v(" "), _c('p', [_c('b', [_vm._v("請將認證碼記錄下來")]), _vm._v("，以備等一下所需。")]), _vm._v(" "), _c('input', {
+    staticClass: "code-text",
+    attrs: {
+      "readonly": ""
+    },
+    domProps: {
+      "value": _vm.code
+    }
+  })]), _vm._v(" "), _c('v-card-actions', [_c('v-btn', {
+    staticClass: "blue--text darken-1",
+    attrs: {
+      "flat": ""
+    },
+    nativeOn: {
+      "click": function($event) {
+        _vm.intoRegistOld($event)
+      }
+    }
+  }, [_vm._v("我已經有認證碼")]), _vm._v(" "), _c('v-spacer'), _vm._v(" "), _c('v-btn', {
+    attrs: {
+      "primary": ""
+    },
+    nativeOn: {
+      "click": function($event) {
+        _vm.intoRegistPlayer($event)
+      }
+    }
+  }, [_vm._v("知道了")])], 1)], 1), _vm._v(" "), _c('v-layout', {
+    attrs: {
+      "row": ""
+    }
+  })], 1)], 1)
+},staticRenderFns: []}
+module.exports.render._withStripped = true
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+     require("vue-hot-reload-api").rerender("data-v-5d772eb9", module.exports)
+  }
+}
+
+/***/ }),
+/* 125 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('div', {
+    staticClass: "choose"
+  }, [_c('v-toolbar', {
+    staticClass: "green"
+  }, [_c('v-toolbar-title', {
+    staticClass: "white--text"
+  }, [_vm._v(_vm._s(_vm.title))])], 1), _vm._v(" "), _c('main', [_c('v-container', {
+    staticStyle: {
+      "min-height": "0"
+    },
+    attrs: {
+      "fluid": "",
+      "grid-list-lg": ""
+    }
+  }, [_c('v-layout', {
+    attrs: {
+      "row": "",
+      "wrap": ""
+    }
+  }, _vm._l((_vm.gameList), function(item, index) {
+    return _c('v-flex', {
+      key: index,
+      attrs: {
+        "xs12": ""
+      }
+    }, [_c('v-card', {
+      staticClass: "cyan darken-2 white--text"
+    }, [_c('v-card-title', {
+      attrs: {
+        "primary-title": ""
+      }
+    }, [_c('div', {
+      staticClass: "headline"
+    }, [_vm._v(_vm._s(item.text))]), _c('br'), _vm._v(" "), _c('div', [_vm._v(_vm._s(item.describe))])]), _vm._v(" "), _c('v-card-actions', [_c('v-spacer'), _vm._v(" "), _c('v-btn', {
+      attrs: {
+        "flat": "",
+        "dark": ""
+      },
+      nativeOn: {
+        "click": function($event) {
+          _vm.intoGame(item.index, item.gameConfig)
+        }
+      }
+    }, [_vm._v("進入遊戲")])], 1)], 1)], 1)
+  }))], 1)], 1)], 1)
+},staticRenderFns: []}
+module.exports.render._withStripped = true
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+     require("vue-hot-reload-api").rerender("data-v-5f9afce4", module.exports)
+  }
+}
+
+/***/ }),
+/* 126 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('div', {
+    staticClass: "regist"
+  }, [_c('v-toolbar', {
+    staticClass: "green"
+  }, [_c('v-btn', {
+    attrs: {
+      "icon": ""
+    },
+    nativeOn: {
+      "click": function($event) {
+        _vm.backToRegistNew($event)
+      }
+    }
+  }, [_c('v-icon', [_vm._v("arrow_back")])], 1), _vm._v(" "), _c('v-toolbar-title', {
+    staticClass: "white--text"
+  }, [_vm._v(_vm._s(_vm.title))])], 1), _vm._v(" "), _c('main', [_c('v-card', [_c('v-card-text', [_c('p', [_vm._v("請輸入你的暱稱。")]), _vm._v(" "), _c('p', [_vm._v("你的暱稱可以是你的名字、你的綽號，或任何你想的到的字詞。")]), _vm._v(" "), _c('v-text-field', {
+    staticStyle: {
+      "margin-top": "70px"
+    },
+    attrs: {
+      "label": "暱稱"
+    },
+    model: {
+      value: (_vm.nickname),
+      callback: function($$v) {
+        _vm.nickname = $$v
+      },
+      expression: "nickname"
+    }
+  })], 1), _vm._v(" "), _c('v-card-actions', [_c('v-btn', {
+    staticClass: "blue--text darken-1",
+    attrs: {
+      "flat": ""
+    },
+    nativeOn: {
+      "click": function($event) {
+        _vm.intoRegistStaff($event)
+      }
+    }
+  }, [_vm._v("我是工作人員")]), _vm._v(" "), _c('v-spacer'), _vm._v(" "), _c('v-btn', {
+    attrs: {
+      "primary": ""
+    },
+    nativeOn: {
+      "click": function($event) {
+        $event.stopPropagation();
+        _vm.setName($event)
+      }
+    }
+  }, [_vm._v("確定")])], 1)], 1)], 1), _vm._v(" "), _c('v-dialog', {
+    model: {
+      value: (_vm.errorDialog),
+      callback: function($$v) {
+        _vm.errorDialog = $$v
+      },
+      expression: "errorDialog"
+    }
+  }, [_c('v-card', [_c('v-card-title', {
+    staticClass: "headline"
+  }, [_vm._v("你的暱稱不適用")]), _vm._v(" "), _c('v-card-text', [_vm._v(_vm._s(_vm.errorDialogMsg))]), _vm._v(" "), _c('v-card-actions', [_c('v-spacer'), _vm._v(" "), _c('v-btn', {
+    staticClass: "green--text darken-1",
+    attrs: {
+      "flat": "flat"
+    },
+    nativeOn: {
+      "click": function($event) {
+        _vm.errorDialog = false
+      }
+    }
+  }, [_vm._v("知道了")])], 1)], 1)], 1)], 1)
+},staticRenderFns: []}
+module.exports.render._withStripped = true
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+     require("vue-hot-reload-api").rerender("data-v-60d94dfe", module.exports)
+  }
+}
+
+/***/ }),
+/* 127 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -6532,7 +7541,89 @@ if (false) {
 }
 
 /***/ }),
-/* 109 */
+/* 128 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('div', {
+    staticClass: "regist"
+  }, [_c('v-toolbar', {
+    staticClass: "green"
+  }, [_c('v-btn', {
+    attrs: {
+      "icon": ""
+    },
+    nativeOn: {
+      "click": function($event) {
+        _vm.backToRegistNew($event)
+      }
+    }
+  }, [_c('v-icon', [_vm._v("arrow_back")])], 1), _vm._v(" "), _c('v-toolbar-title', {
+    staticClass: "white--text"
+  }, [_vm._v(_vm._s(_vm.title))])], 1), _vm._v(" "), _c('main', [_c('v-card', [_c('v-card-text', [_c('p', [_vm._v("請輸入你的認證碼。")]), _vm._v(" "), _c('input', {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: (_vm.code),
+      expression: "code"
+    }],
+    staticClass: "code-text",
+    domProps: {
+      "value": (_vm.code)
+    },
+    on: {
+      "input": function($event) {
+        if ($event.target.composing) { return; }
+        _vm.code = $event.target.value
+      }
+    }
+  })]), _vm._v(" "), _c('v-card-actions', [_c('v-spacer'), _vm._v(" "), _c('v-btn', {
+    attrs: {
+      "primary": "",
+      "disabled": _vm.btnDisabled
+    },
+    nativeOn: {
+      "click": function($event) {
+        $event.stopPropagation();
+        _vm.setCode($event)
+      }
+    }
+  }, [_vm._v("確定")])], 1)], 1), _vm._v(" "), _c('v-layout', {
+    attrs: {
+      "row": ""
+    }
+  })], 1), _vm._v(" "), _c('v-dialog', {
+    model: {
+      value: (_vm.errorDialog),
+      callback: function($$v) {
+        _vm.errorDialog = $$v
+      },
+      expression: "errorDialog"
+    }
+  }, [_c('v-card', [_c('v-card-title', {
+    staticClass: "headline"
+  }, [_vm._v("錯誤")]), _vm._v(" "), _c('v-card-text', [_vm._v(_vm._s(_vm.errorDialogMsg))]), _vm._v(" "), _c('v-card-actions', [_c('v-spacer'), _vm._v(" "), _c('v-btn', {
+    staticClass: "green--text darken-1",
+    attrs: {
+      "flat": "flat"
+    },
+    nativeOn: {
+      "click": function($event) {
+        _vm.errorDialog = false
+      }
+    }
+  }, [_vm._v("知道了")])], 1)], 1)], 1)], 1)
+},staticRenderFns: []}
+module.exports.render._withStripped = true
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+     require("vue-hot-reload-api").rerender("data-v-74dc7680", module.exports)
+  }
+}
+
+/***/ }),
+/* 129 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -6579,7 +7670,7 @@ if (false) {
 }
 
 /***/ }),
-/* 110 */
+/* 130 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -6592,37 +7683,16 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     staticClass: "text-xs-center head"
   }, [_c('div', {
     staticClass: "logo"
-  }), _vm._v(" "), _c('h5', [_vm._v("2017 工工營 BETA")])]), _vm._v(" "), _c('v-layout', {
+  }), _vm._v(" "), _c('h5', [_vm._v("2017 工工營 BETA")]), _vm._v(" "), _c('v-btn', {
     attrs: {
-      "row": "",
-      "wrap": ""
+      "primary": ""
+    },
+    nativeOn: {
+      "click": function($event) {
+        _vm.intoRegist($event)
+      }
     }
-  }, _vm._l((_vm.gameList), function(item, index) {
-    return _c('v-flex', {
-      key: index,
-      attrs: {
-        "xs12": ""
-      }
-    }, [_c('v-card', {
-      staticClass: "cyan darken-2 white--text"
-    }, [_c('v-card-title', {
-      attrs: {
-        "primary-title": ""
-      }
-    }, [_c('div', {
-      staticClass: "headline"
-    }, [_vm._v(_vm._s(item.text))]), _vm._v(" "), _c('div', [_vm._v(_vm._s(item.describe))])]), _vm._v(" "), _c('v-card-actions', [_c('v-spacer'), _vm._v(" "), _c('v-btn', {
-      attrs: {
-        "flat": "",
-        "dark": ""
-      },
-      nativeOn: {
-        "click": function($event) {
-          _vm.intoGame(item.index, item.gameConfig)
-        }
-      }
-    }, [_vm._v("進入遊戲")])], 1)], 1)], 1)
-  }))], 1)], 1)
+  }, [_vm._v("進入遊戲")])], 1)], 1)], 1)
 },staticRenderFns: []}
 module.exports.render._withStripped = true
 if (false) {
@@ -6633,7 +7703,7 @@ if (false) {
 }
 
 /***/ }),
-/* 111 */
+/* 131 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -6702,7 +7772,7 @@ if (false) {
 }
 
 /***/ }),
-/* 112 */
+/* 132 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -6710,7 +7780,8 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     attrs: {
       "headers": _vm.header,
       "items": _vm.readableDeliverList,
-      "hide-actions": ""
+      "hide-actions": "",
+      "no-data-text": "還沒有物流紀錄"
     },
     scopedSlots: _vm._u([{
       key: "items",
@@ -6731,7 +7802,7 @@ if (false) {
 }
 
 /***/ }),
-/* 113 */
+/* 133 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -6858,7 +7929,7 @@ if (false) {
 }
 
 /***/ }),
-/* 114 */
+/* 134 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -6866,16 +7937,15 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     attrs: {
       "headers": _vm.header,
       "items": _vm.readableOrderList,
-      "hide-actions": ""
+      "hide-actions": "",
+      "no-data-text": "還沒有訂貨紀錄"
     },
     scopedSlots: _vm._u([{
-      key: "items",
+      key: "default",
       fn: function(props) {
         return [_c('td', [_vm._v(_vm._s(props.item.readableGameTime))]), _vm._v(" "), _c('td', {
           staticClass: "text-xs-right"
-        }, [_vm._v(_vm._s(props.item.amount))]), _vm._v(" "), _c('td', {
-          staticClass: "text-xs-right"
-        }, [_vm._v(_vm._s(props.item.delivered))])]
+        }, [_vm._v(_vm._s(props.item.amount))])]
       }
     }])
   })
@@ -6889,7 +7959,7 @@ if (false) {
 }
 
 /***/ }),
-/* 115 */
+/* 135 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -7006,7 +8076,7 @@ if (false) {
 }
 
 /***/ }),
-/* 116 */
+/* 136 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -7070,7 +8140,8 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     }
   }, [_c('order-history', {
     attrs: {
-      "list": _vm.state.receivedOrder
+      "list": _vm.state.receivedOrder,
+      "get-list": _vm.state.deliverHistory
     }
   })], 1), _vm._v(" "), _c('v-tabs-content', {
     key: 2,
@@ -7114,7 +8185,7 @@ if (false) {
 }
 
 /***/ }),
-/* 117 */
+/* 137 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -7210,7 +8281,7 @@ if (false) {
 }
 
 /***/ }),
-/* 118 */
+/* 138 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -7285,7 +8356,7 @@ if (false) {
 }
 
 /***/ }),
-/* 119 */
+/* 139 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -7306,7 +8377,7 @@ if (false) {
 }
 
 /***/ }),
-/* 120 */
+/* 140 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -7353,13 +8424,13 @@ if (false) {
 }
 
 /***/ }),
-/* 121 */
+/* 141 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(43);
+var content = __webpack_require__(48);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7379,13 +8450,13 @@ if(false) {
 }
 
 /***/ }),
-/* 122 */
+/* 142 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(44);
+var content = __webpack_require__(49);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7405,13 +8476,13 @@ if(false) {
 }
 
 /***/ }),
-/* 123 */
+/* 143 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(45);
+var content = __webpack_require__(50);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7431,13 +8502,13 @@ if(false) {
 }
 
 /***/ }),
-/* 124 */
+/* 144 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(46);
+var content = __webpack_require__(51);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7457,13 +8528,39 @@ if(false) {
 }
 
 /***/ }),
-/* 125 */
+/* 145 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(47);
+var content = __webpack_require__(52);
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var update = __webpack_require__(2)("a39d7e20", content, false);
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../../../node_modules/css-loader/index.js?sourceMap!../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-33308320\",\"scoped\":false,\"hasInlineConfig\":false}!../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue", function() {
+     var newContent = require("!!../../../../../node_modules/css-loader/index.js?sourceMap!../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-33308320\",\"scoped\":false,\"hasInlineConfig\":false}!../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 146 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(53);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7483,13 +8580,13 @@ if(false) {
 }
 
 /***/ }),
-/* 126 */
+/* 147 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(48);
+var content = __webpack_require__(54);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7509,13 +8606,13 @@ if(false) {
 }
 
 /***/ }),
-/* 127 */
+/* 148 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(49);
+var content = __webpack_require__(55);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7535,13 +8632,13 @@ if(false) {
 }
 
 /***/ }),
-/* 128 */
+/* 149 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(50);
+var content = __webpack_require__(56);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7561,13 +8658,13 @@ if(false) {
 }
 
 /***/ }),
-/* 129 */
+/* 150 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(51);
+var content = __webpack_require__(57);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7587,13 +8684,13 @@ if(false) {
 }
 
 /***/ }),
-/* 130 */
+/* 151 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(52);
+var content = __webpack_require__(58);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7613,13 +8710,13 @@ if(false) {
 }
 
 /***/ }),
-/* 131 */
+/* 152 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(53);
+var content = __webpack_require__(59);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7639,13 +8736,13 @@ if(false) {
 }
 
 /***/ }),
-/* 132 */
+/* 153 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(54);
+var content = __webpack_require__(60);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7665,13 +8762,13 @@ if(false) {
 }
 
 /***/ }),
-/* 133 */
+/* 154 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(55);
+var content = __webpack_require__(61);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7691,13 +8788,91 @@ if(false) {
 }
 
 /***/ }),
-/* 134 */
+/* 155 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(56);
+var content = __webpack_require__(62);
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var update = __webpack_require__(2)("ce323b9a", content, false);
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../../../node_modules/css-loader/index.js?sourceMap!../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-5d772eb9\",\"scoped\":false,\"hasInlineConfig\":false}!../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue", function() {
+     var newContent = require("!!../../../../../node_modules/css-loader/index.js?sourceMap!../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-5d772eb9\",\"scoped\":false,\"hasInlineConfig\":false}!../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 156 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(63);
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var update = __webpack_require__(2)("4cef483f", content, false);
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../../../node_modules/css-loader/index.js?sourceMap!../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-5f9afce4\",\"scoped\":false,\"hasInlineConfig\":false}!../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue", function() {
+     var newContent = require("!!../../../../../node_modules/css-loader/index.js?sourceMap!../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-5f9afce4\",\"scoped\":false,\"hasInlineConfig\":false}!../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 157 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(64);
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var update = __webpack_require__(2)("1182d6b8", content, false);
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../../../node_modules/css-loader/index.js?sourceMap!../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-60d94dfe\",\"scoped\":false,\"hasInlineConfig\":false}!../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue", function() {
+     var newContent = require("!!../../../../../node_modules/css-loader/index.js?sourceMap!../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-60d94dfe\",\"scoped\":false,\"hasInlineConfig\":false}!../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 158 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(65);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7717,13 +8892,39 @@ if(false) {
 }
 
 /***/ }),
-/* 135 */
+/* 159 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(57);
+var content = __webpack_require__(66);
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var update = __webpack_require__(2)("98246aa6", content, false);
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../../../node_modules/css-loader/index.js?sourceMap!../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-74dc7680\",\"scoped\":false,\"hasInlineConfig\":false}!../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue", function() {
+     var newContent = require("!!../../../../../node_modules/css-loader/index.js?sourceMap!../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-74dc7680\",\"scoped\":false,\"hasInlineConfig\":false}!../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./index.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 160 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(67);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7743,13 +8944,13 @@ if(false) {
 }
 
 /***/ }),
-/* 136 */
+/* 161 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(58);
+var content = __webpack_require__(68);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7769,13 +8970,13 @@ if(false) {
 }
 
 /***/ }),
-/* 137 */
+/* 162 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(59);
+var content = __webpack_require__(69);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7795,13 +8996,13 @@ if(false) {
 }
 
 /***/ }),
-/* 138 */
+/* 163 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(60);
+var content = __webpack_require__(70);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7821,13 +9022,13 @@ if(false) {
 }
 
 /***/ }),
-/* 139 */
+/* 164 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(61);
+var content = __webpack_require__(71);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7847,13 +9048,13 @@ if(false) {
 }
 
 /***/ }),
-/* 140 */
+/* 165 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(62);
+var content = __webpack_require__(72);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7873,13 +9074,13 @@ if(false) {
 }
 
 /***/ }),
-/* 141 */
+/* 166 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(63);
+var content = __webpack_require__(73);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7899,13 +9100,13 @@ if(false) {
 }
 
 /***/ }),
-/* 142 */
+/* 167 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(64);
+var content = __webpack_require__(74);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7925,13 +9126,13 @@ if(false) {
 }
 
 /***/ }),
-/* 143 */
+/* 168 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(65);
+var content = __webpack_require__(75);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7951,13 +9152,13 @@ if(false) {
 }
 
 /***/ }),
-/* 144 */
+/* 169 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(66);
+var content = __webpack_require__(76);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -7977,13 +9178,13 @@ if(false) {
 }
 
 /***/ }),
-/* 145 */
+/* 170 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(67);
+var content = __webpack_require__(77);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -8003,13 +9204,13 @@ if(false) {
 }
 
 /***/ }),
-/* 146 */
+/* 171 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(68);
+var content = __webpack_require__(78);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
@@ -8029,7 +9230,7 @@ if(false) {
 }
 
 /***/ }),
-/* 147 */
+/* 172 */
 /***/ (function(module, exports) {
 
 /**
@@ -8062,10 +9263,10 @@ module.exports = function listToStyles (parentId, list) {
 
 
 /***/ }),
-/* 148 */
+/* 173 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(13);
+module.exports = __webpack_require__(14);
 
 
 /***/ })
