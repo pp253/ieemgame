@@ -42,6 +42,11 @@ export default class News {
     return this.newsList
   }
 
+  setNewsList (list) {
+    this.newsList = _.cloneDeep(list)
+    return this.newList
+  }
+
   getAvailableNewsList (day, time) {
     this._update(day, time)
     return this.avaliableNewsList

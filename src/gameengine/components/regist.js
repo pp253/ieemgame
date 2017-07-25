@@ -17,43 +17,42 @@ export default class Regist {
     this.lastCode = this.code.initial
   }
 
+  nicknameIsExist (nickname) {
+    for (let i of this.registList) {
+      if (i.nickname === nickname) {
+        return true
+      }
+    }
+    return false
+  }
+
   getCode () {
     this.lastCode = (this.lastCode + this.code.interval) % this.code.module
     return this.lastCode
   }
 
-  getUserIdByCode (code) {
-    return new Promise(function (resolve, reject) {
-      if (code < 0 || code >= this.code.module) {
-        // code is invalid
-        return reject(false)
+  getUserByCode (code) {
+    for (let i of this.registList) {
+      if (i.code === code) {
+        return _.cloneDeep(i)
       }
-      odm.Regist.findOne({ code: code }).exec((function (err, regist) {
-        if (err) {
-          reject(err)
-          return
-        }
-        resolve(regist)
-      }).bind(this))
-    })
+    }
+    return null
   }
 
   getUser (userId) {
-    return new Promise(function (resolve, reject) {
-      odm.Regist.findOne({ userId: userId }).exec((function (err, regist) {
-        if (err) {
-          reject(err)
-          return
-        }
-        resolve(regist)
-      }).bind(this))
-    })
+    for (let i of this.registList) {
+      if (i.userId === userId) {
+        return _.cloneDeep(i)
+      }
+    }
+    return null
   }
 
-  setUser (playerItem) {
+  setUser (UserItem) {
     let registOdm = new odm.Regist({
-      nickname: playerItem.nickname,
-      code: code
+      nickname: UserItem.nickname,
+      code: UserItem.code
     })
 
     return new Promise((function (resolve, reject) {
@@ -63,7 +62,7 @@ export default class Regist {
           return
         }
         
-        this.registList.push(regist)
+        this.registList.push(_.cloneDeep(regist))
         resolve(regist)
       }).bind(this))
     }).bind(this))

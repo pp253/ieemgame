@@ -45,13 +45,13 @@ export const ResponseErrorMsg = {
   GameNotExist (gameId) {
     return ResponseErrorJSON({
       id: 22,
-      msg: `GameId='${gameId}'遊戲不存在，請重新整理`
+      msg: `GameId='${gameId}'遊戲不存在，請重新整理。`
     })
   },
   NicknameAlreadyExist (nickname) {
     return ResponseErrorJSON({
       id: 23,
-      msg: `名字 '${nickname}' 已經被使用了，請使用其他名字`
+      msg: `名字 '${nickname}' 已經被使用了，請使用其他名字。`
     })
   },
   NotRegisted () {
@@ -70,28 +70,28 @@ export const ResponseErrorMsg = {
     return ResponseErrorJSON({
       id: 31,
       msg: `GameId='${gameId}'的第${teamIndex}組${job}庫存不足`,
-      readableMsg: `第${teamIndex}組${job}庫存不足`
+      readableMsg: `第${teamIndex}組${job}庫存不足。`
     })
   },
   AccountNotEnough (gameId, teamIndex) {
     return ResponseErrorJSON({
       id: 32,
       msg: `GameId='${gameId}'的第${teamIndex}組帳戶餘額不足`,
-      readableMsg: `第${teamIndex}組帳戶餘額不足`
+      readableMsg: `第${teamIndex}組帳戶餘額不足。`
     })
   },
   OrderNotEnough (gameId, teamIndex, job) {
     return ResponseErrorJSON({
       id: 33,
       msg: `此次行動超出GameId='${gameId}'的第${teamIndex}組的${job}收到的訂單`,
-      readableMsg: `此次行動超出第${teamIndex}組${job}收到的訂單`
+      readableMsg: `此次行動超出第${teamIndex}組${job}收到的訂單。請確定小隊員收到的訂單數量和已經運輸的數量。`
     })
   },
   MarketNotEnough (gameId) {
     return ResponseErrorJSON({
       id: 34,
       msg: `此次行動超出GameId='${gameId}'的市場需求量`,
-      readableMsg: `此次行動超出市場需求量`
+      readableMsg: `市場需求已達飽和，不可再販賣。`
     })
   }
 }

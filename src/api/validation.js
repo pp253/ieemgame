@@ -27,6 +27,14 @@ export default {
     },
     errorMessage: 'Invalid GameId'
   },
+  'userId': {
+    in: 'body',
+    notEmpty: true,
+    isObjectId: {
+      errorMessage: 'UserId is not a valid ObjectId'
+    },
+    errorMessage: 'Invalid UserId'
+  },
   'teamId': {
     in: 'body',
     notEmpty: true,

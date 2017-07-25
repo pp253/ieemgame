@@ -10,7 +10,8 @@ export function getRegist (req, res, next) {
     res.json(response.ResponseSuccessJSON({
       userId: sess.userId,
       nickname: sess.nickname,
-      code: sess.code
+      code: sess.code,
+      enrolled: GameEngine.getEnroll().getUserEnrolledGames(sess.userId)
     }))
   } else {
     res.json(response.ResponseErrorMsg.NotRegisted())
@@ -36,7 +37,10 @@ export function regist (req, res, next) {
       .then(function (result) {
         if (!result) {
           // return a promise
-          return GameEngine.getRegist().regist(nickname, code)
+          return GameEngine.getRegist().setUser(constant.PlayerItem({
+            nickname: nickname,
+            code: code
+          }))
         } else {
           // return nothing
           res.json(response.ResponseErrorMsg.NicknameAlreadyExist(nickname))
@@ -59,7 +63,7 @@ export function regist (req, res, next) {
   })
 }
 
-export function setRegist (req, res, next) {
+export function setRegistByCode (req, res, next) {
   req.check({
     code: validation.code
   })
@@ -72,36 +76,33 @@ export function setRegist (req, res, next) {
 
     let code = parseInt(req.body.code)
 
-    GameEngine.getRegist().isRegisted(nickname)
-      .then(function (result) {
-        if (!result) {
-          // return a promise
-          return GameEngine.getRegist().regist(nickname, code)
-        } else {
-          // return nothing
-          res.json(response.ResponseErrorMsg.NicknameAlreadyExist(nickname))
-          return
-        }
-      })
-      .then(function (result) {
-        let sess = res.session
-        sess.userId = result.userId
-        sess.nickname = result.nickname
-        sess.code = result.code
+    let user = GameEngine.getRegist().getUserByCode(code)
 
-        res.json(response.ResponseSuccessJSON({
-          userId: result.userId,
-          nickname: result.nickname,
-          code: result.code
-        }))
-      })
-      .catch((err) => { debug.error(err) })
+    if (user) {
+      let sess = res.session
+      sess.userId = result.userId
+      sess.nickname = result.nickname
+      sess.code = result.code
+      res.json(response.ResponseSuccessJSON({
+        userId: result.userId,
+        nickname: result.nickname,
+        code: result.code
+      }))
+    } else {
+      res.json(response.ResponseErrorMsg.NotRegisted())
+    }
   })
+}
+
+export function getCode (req, res, next) {
+  res.json(response.ResponseSuccessJSON({
+    code: GameEngine.getRegist().getCode()
+  }))
 }
 
 export function enroll (req, res, next) {
   req.check({
-    nickname: validation.nickname,
+    userId: validation.userId,
     gameId: validation.gameId,
     teamIndex: validation.teamIndex,
     job: validation.job
@@ -113,28 +114,27 @@ export function enroll (req, res, next) {
       return
     }
 
+    let userId = req.body.userId
     let gameId = req.body.gameId
     let teamIndex = parseInt(req.body.teamIndex)
     let job = req.body.job
-    let nickname = req.body.nickname
 
     let game = GameEngine.selectGame(gameId)
     let team = game.selectTeam(teamIndex)
 
-    GameEngine.isRegisted(nickname)
-      .then(function (result) {
-        if (result) {
-          res.json(response.ResponseSuccessJSON({
-            gameId: gameId,
-            teamIndex: teamIndex,
-            job: job,
-            nickname: nickname
-          }))
-        } else {
-          res.json(response.NicknameAlreadyExist(nickname))
-        }
-      })
-      .catch((err) => { debug.error(err) })
+    GameEngine.getEnroll().set(constant.EnrollItem({
+      userId: userId,
+      gameId: gameId,
+      teamIndex: teamIndex,
+      job: job
+    }))
+
+    res.json(response.ResponseSuccessJSON({
+      userId: userId,
+      gameId: gameId,
+      teamIndex: teamIndex,
+      job: job
+    }))
   })
 }
 
@@ -177,7 +177,10 @@ export function getOnlineStatus (req, res, next) {
 }
 
 export default {
+  'get_regist': getRegist,
   'regist': regist,
+  'set_regist_by_code': setRegistByCode,
+  'get_code': getCode,
   'enroll': enroll,
   'new_game': newGame,
   'get_game_list': getGameList,

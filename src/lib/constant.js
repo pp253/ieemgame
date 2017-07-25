@@ -41,7 +41,16 @@ export const PlayerItem = (obj) => {
     userId: obj.userId || -1,
     nickname: obj.nickname || '',
     code: obj.code || -1,
-    level: obj.level || constant.LEVEL.PLAYER
+    level: obj.level || LEVEL.PLAYER
+  }
+}
+
+export const EnrollItem = (obj) => {
+  return {
+    userId: obj.userId || -1,
+    gameId: obj.gameId,
+    teamIndex: obj.team || TEAMS.UNKNOWN,
+    job: obj.job || JOBS.UNKNOWN
   }
 }
 
@@ -200,5 +209,6 @@ export default {
   ProductItem: ProductItem,
   AccountItem: AccountItem,
   NewsItem: NewsItem,
-  PlayerItem: PlayerItem
+  PlayerItem: PlayerItem,
+  EnrollItem: EnrollItem
 }

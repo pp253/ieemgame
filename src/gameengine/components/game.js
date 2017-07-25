@@ -185,13 +185,12 @@ export default class Game {
   }
 
   nextDay () {
-    console.log('nextDay')
     if (this.isOffWork()) {
       this.settle()
       this.day += 1
       this.dayStartTime = Date.now()
 
-      debug.log(`GameId='${this.getGameId()}' day has benn set to ${this.getDay()}`)
+      debug.log(`GameId='${this.getGameId()}' day has been set to ${this.getDay()}`)
     }
     return this
   }
@@ -307,7 +306,6 @@ export default class Game {
     if (!this.isOffWork()) {
       return false
     }
-    console.log(this.isOffWork())
     
     for (let team of this.getTeamList()) {
       let cost = 0

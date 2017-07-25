@@ -95,7 +95,10 @@ export function getUpdate (req, res, next) {
       stage: game.getGameStage()
     }
 
-    if (teamIndex !== constant.TEAMS.STAFF) {
+    let mapping = { 'RETAILER': 'WHOLESALER', 'WHOLESALER': 'FACTORY' }
+
+    if (teamIndex !== 0) {
+      let list = []
       switch (game.getGameStage()) {
         case constant.GAME_STAGE.START:
         case constant.GAME_STAGE.FINAL:
@@ -113,6 +116,8 @@ export function getUpdate (req, res, next) {
               msg.deliverHistory = team.selectJob(job).deliver.getHistory()
               msg.receivedOrder = team.selectJob(job).order.getHistory()
               msg.orderHistory = team.selectJob(constant.JOBS.FACTORY).order.getHistory()
+              list = team.selectJob(constant.JOBS.FACTORY).deliver.getHistory()
+              msg.deliveredNumber = list.length > 0 ? list[list.length - 1].amount : 0
               break
 
             case constant.JOBS.RETAILER:
@@ -122,6 +127,25 @@ export function getUpdate (req, res, next) {
               msg.receivedOrder = team.selectJob(job).order.getHistory()
               msg.orderHistory = team.selectJob(constant.JOBS.WHOLESALER).order.getHistory()
               msg.news = game.getNews().getAvailableNewsList()
+              list = team.selectJob(constant.JOBS.WHOLESALER).deliver.getHistory()
+              msg.deliveredNumber = list.length > 0 ? list[list.length - 1].amount : 0
+              break
+          }
+          break
+          
+        case constant.GAME_STAGE.UNKNOWN:
+        case constant.GAME_STAGE.PREPARE:
+        case constant.GAME_STAGE.READY:
+        case constant.GAME_STAGE.END:
+          break
+      }
+    } else {
+      switch (game.getGameStage()) {
+        case constant.GAME_STAGE.START:
+        case constant.GAME_STAGE.FINAL:
+          switch (job) {
+            case constant.STAFF_JOBS.CONSOLER:
+              msg.market = game.getMarket()
               break
           }
           break
@@ -138,8 +162,81 @@ export function getUpdate (req, res, next) {
   })
 }
 
+export function getMarketInfo (req, res, next) {
+  req.check({
+    gameId: validation.gameId
+  })
+
+  req.getValidationResult().then(function (result) {
+    if (!result.isEmpty()) {
+      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result.array()))
+      return
+    }
+
+    let gameId = req.body.gameId
+
+    let game = GameEngine.selectGame(gameId)
+
+    res.json(response.ResponseSuccessJSON({
+      gameId: gameId,
+      day: game.getDay(),
+      time: game.getTime(),
+      orderAmount: game.getMarket().orderAmount,
+      storageAmount: game.getMarket().storageAmount,
+      price: game.getMarket().price
+    }))
+  })
+}
+
+export function getData (req, res, next) {
+  req.check({
+    gameId: validation.gameId
+  })
+
+  req.getValidationResult().then(function (result) {
+    if (!result.isEmpty()) {
+      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result.array()))
+      return
+    }
+
+    let gameId = req.body.gameId
+
+    let game = GameEngine.selectGame(gameId)
+
+    let teamDataList = []
+    for (let team of game.getTeamList()) {
+      let data = {}
+      data.account = team.getAccount().getHistory()
+      data.[constant.JOBS.FACTORY] = {
+        storage: team.getJob(constant.JOBS.FACTORY).storage.getHistory(),
+        order: team.getJob(constant.JOBS.FACTORY).order.getHistory(),
+        deliver: team.getJob(constant.JOBS.WHOLESALER).deliver.getHistory()
+      }
+      data.[constant.JOBS.WHOLESALER] = {
+        storage: team.getJob(constant.JOBS.WHOLESALER).storage.getHistory(),
+        order: team.getJob(constant.JOBS.WHOLESALER).order.getHistory(),
+        deliver: team.getJob(constant.JOBS.WHOLESALER).deliver.getHistory()
+      }
+      data.[constant.JOBS.RETAILER] = {
+        storage: team.getJob(constant.JOBS.RETAILER).storage.getHistory(),
+        deliver: team.getJob(constant.JOBS.RETAILER).deliver.getHistory()
+      }
+      teamDataList.push(data)
+    }
+
+    res.json(response.ResponseSuccessJSON({
+      gameId: gameId,
+      news: game.getNews().getNewsList(),
+      gameConfig: game.getConfig(),
+      teamDataList: teamDataList
+    }))
+  })
+}
+
 export default {
   'get_balance_by_game': getBalanceByGame,
   'get_storage_history_by_team': getStorageHistoryByTeam,
-  'get_update': getUpdate
+  'get_update': getUpdate,
+  'get_market_info': getMarketInfo,
+  'get_data': getData
 }
