@@ -207,17 +207,17 @@ export function getData (req, res, next) {
     for (let team of game.getTeamList()) {
       let data = {}
       data.account = team.getAccount().getHistory()
-      data.[constant.JOBS.FACTORY] = {
+      data[constant.JOBS.FACTORY] = {
         storage: team.getJob(constant.JOBS.FACTORY).storage.getHistory(),
         order: team.getJob(constant.JOBS.FACTORY).order.getHistory(),
-        deliver: team.getJob(constant.JOBS.WHOLESALER).deliver.getHistory()
+        deliver: team.getJob(constant.JOBS.FACTORY).deliver.getHistory()
       }
-      data.[constant.JOBS.WHOLESALER] = {
+      data[constant.JOBS.WHOLESALER] = {
         storage: team.getJob(constant.JOBS.WHOLESALER).storage.getHistory(),
         order: team.getJob(constant.JOBS.WHOLESALER).order.getHistory(),
         deliver: team.getJob(constant.JOBS.WHOLESALER).deliver.getHistory()
       }
-      data.[constant.JOBS.RETAILER] = {
+      data[constant.JOBS.RETAILER] = {
         storage: team.getJob(constant.JOBS.RETAILER).storage.getHistory(),
         deliver: team.getJob(constant.JOBS.RETAILER).deliver.getHistory()
       }
