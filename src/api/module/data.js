@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import response from '../response'
 import validation from '../validation'
 import GameEngine from '../../gameengine'
@@ -207,19 +208,34 @@ export function getData (req, res, next) {
     for (let team of game.getTeamList()) {
       let data = {}
       data.account = team.getAccount().getHistory()
+      data.cost = {
+        storage: 0
+      }
+      let storageCost = game.getConfig().cost.storage
+      for (let day = 1; day <= game.getConfig().days; day++) {
+        for (let job of _.values(constant.JOBS)) {
+          if (job === 'UNKNOWN') {
+            continue
+          }
+          for (let productItem of team.selectJob(job).storage.getStorageListAtTime(day + 1, 0)) {
+            data.cost.storage += Math.ceil(productItem.amount / storageCost.patchSize) * storageCost[job][productItem.product]
+          }
+        }
+      }
+
       data[constant.JOBS.FACTORY] = {
-        storage: team.getJob(constant.JOBS.FACTORY).storage.getHistory(),
-        order: team.getJob(constant.JOBS.FACTORY).order.getHistory(),
-        deliver: team.getJob(constant.JOBS.FACTORY).deliver.getHistory()
+        storage: team.selectJob(constant.JOBS.FACTORY).storage.getHistory(),
+        order: team.selectJob(constant.JOBS.FACTORY).order.getHistory(),
+        deliver: team.selectJob(constant.JOBS.FACTORY).deliver.getHistory()
       }
       data[constant.JOBS.WHOLESALER] = {
-        storage: team.getJob(constant.JOBS.WHOLESALER).storage.getHistory(),
-        order: team.getJob(constant.JOBS.WHOLESALER).order.getHistory(),
-        deliver: team.getJob(constant.JOBS.WHOLESALER).deliver.getHistory()
+        storage: team.selectJob(constant.JOBS.WHOLESALER).storage.getHistory(),
+        order: team.selectJob(constant.JOBS.WHOLESALER).order.getHistory(),
+        deliver: team.selectJob(constant.JOBS.WHOLESALER).deliver.getHistory()
       }
       data[constant.JOBS.RETAILER] = {
-        storage: team.getJob(constant.JOBS.RETAILER).storage.getHistory(),
-        deliver: team.getJob(constant.JOBS.RETAILER).deliver.getHistory()
+        storage: team.selectJob(constant.JOBS.RETAILER).storage.getHistory(),
+        deliver: team.selectJob(constant.JOBS.RETAILER).deliver.getHistory()
       }
       teamDataList.push(data)
     }

@@ -40,6 +40,28 @@ export default class Storage {
     return this.storageItemList
   }
 
+  getStorageListAtTime (day, time) {
+    let list = []
+    for (let item of this.history) {
+      if (item.day < day || (item.day === day && item.time <= time)) {
+        let found = false
+        for (let i of list) {
+          if (i.product === item.product) {
+            found = true
+            i.amount = item.amount
+            break
+          }
+        }
+        if (!found) {
+          list.push(item)
+        }
+      } else {
+        break
+      }
+    }
+    return list
+  }
+
   getStorage (product) {
     for (let item of this.getStorageList()) {
       if (item.product === product) {

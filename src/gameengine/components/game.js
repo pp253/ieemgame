@@ -320,7 +320,7 @@ export default class Game {
           continue
         }
         for (let productItem of team.selectJob(job).storage.getStorageList()) {
-          cost += Math.ceil(productItem.amount / this.getConfig().cost.storage.patchSize) * storageCost[job][productItem.product]
+          cost += Math.ceil(productItem.amount / storageCost.patchSize) * storageCost[job][productItem.product]
         }
       }
 
