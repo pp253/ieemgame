@@ -244,7 +244,8 @@ export function getData (req, res, next) {
       gameId: gameId,
       news: game.getNews().getNewsList(),
       gameConfig: game.getConfig(),
-      teamDataList: teamDataList
+      teamDataList: teamDataList,
+      stage: game.getGameStage()
     }))
   })
 }
