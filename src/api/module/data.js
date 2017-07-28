@@ -141,12 +141,82 @@ export function getUpdate (req, res, next) {
           break
       }
     } else {
+      let getTeamStorageList = () => {
+        let result = {
+          [constant.JOBS.FACTORY]: [],
+          [constant.JOBS.WHOLESALER]: [],
+          [constant.JOBS.RETAILER]: []
+        }
+        for (let teamIndex = 1; teamIndex <= game.getTeamNumber(); teamIndex++) {
+          for (let j in constant.JOBS) {
+            if (j === constant.JOBS.UNKNOWN) {
+              continue
+            }
+            let team = game.selectTeam(teamIndex)
+            result[j].push(_.cloneDeep(team.selectJob(j).storage.getStorageList()))
+          }
+        }
+        return result
+      }
+
+      let getOrderVsStorage = () => {
+        let result = {
+          [constant.JOBS.FACTORY]: [],
+          [constant.JOBS.WHOLESALER]: [],
+          [constant.JOBS.RETAILER]: []
+        }
+        for (let teamIndex = 1; teamIndex <= game.getTeamNumber(); teamIndex++) {
+          for (let j in constant.JOBS) {
+            if (j === constant.JOBS.UNKNOWN) {
+              continue
+            }
+            let team = game.selectTeam(teamIndex)
+            if (j === constant.JOBS.RETAILER) {
+              let orderAmount = game.getMarket().orderAmount
+              let deliveredAmount = game.getMarket().storageAmount
+              let storageAmount = team.selectJob(j).storage.getStorage(constant.PRODUCTS.CAR)
+              result[j].push({
+                teamIndex: teamIndex,
+                orderAmount: orderAmount,
+                deliveredAmount: deliveredAmount,
+                storageAmount: storageAmount
+              })
+            } else {
+              let orderHistory = team.selectJob(j).order.getHistory()
+              let deliverHistory = team.selectJob(j).deliver.getHistory()
+              let storageAmount = team.selectJob(j).storage.getStorage(constant.PRODUCTS.CAR)
+              result[j].push({
+                teamIndex: teamIndex,
+                orderAmount: orderHistory.length ? orderHistory[orderHistory.length - 1].amount : 0,
+                deliveredAmount: deliverHistory.length ? deliverHistory[deliverHistory.length - 1].amount : 0,
+                storageAmount: storageAmount
+              })
+            }
+          }
+        }
+        return result
+      }
       switch (game.getGameStage()) {
         case constant.GAME_STAGE.START:
         case constant.GAME_STAGE.FINAL:
           switch (job) {
             case constant.STAFF_JOBS.CONSOLER:
+              msg.teamStorageList = getTeamStorageList()
+              msg.orderVsStorage = getOrderVsStorage()
               msg.market = game.getMarket()
+              break
+
+            case constant.STAFF_JOBS.MARKET:
+              msg.orderVsStorage = getOrderVsStorage()
+              msg.market = game.getMarket()
+              break
+              
+            case constant.STAFF_JOBS.TRANSPORTER:
+              msg.orderVsStorage = getOrderVsStorage()
+              break
+              
+            case constant.STAFF_JOBS.EXCHANGER:
+              msg.teamStorageList = getTeamStorageList()
               break
           }
           break
