@@ -113,6 +113,7 @@ export function setDeliver (req, res, next) {
       amount: amount
     })
     team.selectJob(job).storage.remove(productItem)
+    console.log(team.selectJob(job).storage.getHistory())
     
     if (job === 'RETAILER') {
       game.getMarket().storageAmount += amount

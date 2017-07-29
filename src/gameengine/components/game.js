@@ -180,7 +180,7 @@ export default class Game {
     this.setGameStage(list[list.indexOf(this.getGameStage()) + 1])
     this._update()
 
-    debug.log(`GameId='${this.getGameId()}' Stage has benn set to ${this.getGameStage()}`)
+    debug.log(`GameId='${this.getGameId()}' Stage has been set to ${this.getGameStage()}`)
     return this
   }
 
@@ -250,6 +250,7 @@ export default class Game {
         if (this.getTime() >= this.getConfig().dayLong * 1000) {
           this.dayStartTime = constant.UNKNOWN_TIME
           if (this.day === this.gameConfig.days) {
+            this.settle()
             this.stage = constant.GAME_STAGE.FINAL
 
             // clear the timer

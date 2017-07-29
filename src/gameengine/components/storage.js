@@ -3,13 +3,6 @@ import odm from '../../lib/db/odm'
 import constant from '../../lib/constant'
 import debug from '../../lib/debug'
 
-export const StorageItem = (product, amount) => {
-  return {
-    product: product,
-    amount: amount
-  }
-}
-
 export default class Storage {
   constructor (gameId, teamId, job) {
     if (!gameId || !teamId || !job) {
@@ -42,7 +35,7 @@ export default class Storage {
 
   getStorageListAtTime (day, time) {
     let list = []
-    for (let item of this.history) {
+    for (let item of this.getHistory()) {
       if (item.day < day || (item.day === day && item.time <= time)) {
         let found = false
         for (let i of list) {
