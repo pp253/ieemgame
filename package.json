@@ -1,12 +1,18 @@
 {
-  "name": "server",
+  "name": "ieemgame",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+<<<<<<< HEAD
     "dev": "set NODE_ENV=develop&&babel-node server.js --presets es2015,stage-2",
     "start": "set NODE_ENV=production&&babel-node server.js --presets es2015,stage-2"
+=======
+    "dev": "set NODE_ENV=develop && babel-node server.js --presets es2015,stage-2",
+    "start": "set NODE_ENV=production && babel-node server.js --presets es2015,stage-2",
+    "start-db": "mongod --dbpath \"./db\" --port 16622"
+>>>>>>> master
   },
   "author": "pp253",
   "license": "Apache-2.0",
