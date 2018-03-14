@@ -1,6 +1,3 @@
-import odm from '../lib/db/odm'
-import constant from '../lib/constant'
-import debug from '../lib/debug'
 import Game from './components/game'
 import Enroll from './components/enroll'
 import Regist from './components/regist'
@@ -8,7 +5,7 @@ import Regist from './components/regist'
 export class GameEngine {
   constructor () {
     this.gameList = []
-    
+
     this.enroll = new Enroll()
     this.regist = new Regist()
   }

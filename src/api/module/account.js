@@ -1,7 +1,6 @@
 import response from '../response'
 import validation from '../validation'
 import constant from '../../lib/constant'
-import debug from '../../lib/debug'
 import GameEngine from '../../gameengine'
 
 export function getBalance (req, res, next) {

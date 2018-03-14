@@ -2,7 +2,6 @@ import response from '../response'
 import validation from '../validation'
 import GameEngine from '../../gameengine'
 import constant from '../../lib/constant'
-import debug from '../../lib/debug'
 
 export function getReceived (req, res, next) {
   req.check({

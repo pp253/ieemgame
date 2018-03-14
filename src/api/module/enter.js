@@ -5,7 +5,7 @@ import constant from '../../lib/constant'
 import debug from '../../lib/debug'
 
 export function getRegist (req, res, next) {
-  let sess = ress.session
+  let sess = res.session
   if (sess.userId) {
     res.json(response.ResponseSuccessJSON({
       userId: sess.userId,
@@ -44,7 +44,6 @@ export function regist (req, res, next) {
         } else {
           // return nothing
           res.json(response.ResponseErrorMsg.NicknameAlreadyExist(nickname))
-          return
         }
       })
       .then(function (result) {
@@ -118,9 +117,6 @@ export function enroll (req, res, next) {
     let gameId = req.body.gameId
     let teamIndex = parseInt(req.body.teamIndex)
     let job = req.body.job
-
-    let game = GameEngine.selectGame(gameId)
-    let team = game.selectTeam(teamIndex)
 
     GameEngine.getEnroll().set(constant.EnrollItem({
       userId: userId,
