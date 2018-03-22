@@ -3,16 +3,20 @@ import validation from '../validation'
 import GameEngine from '../../gameengine'
 import constant from '../../lib/constant'
 
-export function getReceived (req, res, next) {
+export function getReceived(req, res, next) {
   req.check({
     gameId: validation.gameId,
     teamIndex: validation.teamIndex,
     job: validation.job
   })
 
-  req.getValidationResult().then(function (result) {
+  req.getValidationResult().then(function(result) {
     if (!result.isEmpty()) {
-      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result.array()))
+      res
+        .status(400)
+        .json(
+          response.ResponseErrorMsg.ApiArgumentValidationError(result.array())
+        )
       return
     }
 
@@ -23,27 +27,33 @@ export function getReceived (req, res, next) {
     let game = GameEngine.selectGame(gameId)
     let team = game.selectTeam(teamIndex)
 
-    res.json(response.ResponseSuccessJSON({
-      gameId: gameId,
-      teamIndex: teamIndex,
-      job: job,
-      day: game.getDay(),
-      time: game.getTime(),
-      list: team.selectJob(job).order.getHistory()
-    }))
+    res.json(
+      response.ResponseSuccessJSON({
+        gameId: gameId,
+        teamIndex: teamIndex,
+        job: job,
+        day: game.getDay(),
+        time: game.getTime(),
+        list: team.selectJob(job).order.getHistory()
+      })
+    )
   })
 }
 
-export function getHistory (req, res, next) {
+export function getHistory(req, res, next) {
   req.check({
     gameId: validation.gameId,
     teamIndex: validation.teamIndex,
     job: validation.job
   })
 
-  req.getValidationResult().then(function (result) {
+  req.getValidationResult().then(function(result) {
     if (!result.isEmpty()) {
-      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result.array()))
+      res
+        .status(400)
+        .json(
+          response.ResponseErrorMsg.ApiArgumentValidationError(result.array())
+        )
       return
     }
 
@@ -54,19 +64,21 @@ export function getHistory (req, res, next) {
     let game = GameEngine.selectGame(gameId)
     let team = game.selectTeam(teamIndex)
 
-    let mapping = { 'RETAILER': 'WHOLESALER', 'WHOLESALER': 'FACTORY' }
-    res.json(response.ResponseSuccessJSON({
-      gameId: gameId,
-      teamIndex: teamIndex,
-      job: job,
-      day: game.getDay(),
-      time: game.getTime(),
-      list: team.selectJob(mapping[job]).order.getHistory()
-    }))
+    let mapping = { RETAILER: 'WHOLESALER', WHOLESALER: 'FACTORY' }
+    res.json(
+      response.ResponseSuccessJSON({
+        gameId: gameId,
+        teamIndex: teamIndex,
+        job: job,
+        day: game.getDay(),
+        time: game.getTime(),
+        list: team.selectJob(mapping[job]).order.getHistory()
+      })
+    )
   })
 }
 
-export function setOrder (req, res, next) {
+export function setOrder(req, res, next) {
   req.check({
     gameId: validation.gameId,
     teamIndex: validation.teamIndex,
@@ -75,9 +87,13 @@ export function setOrder (req, res, next) {
     amount: validation.amount
   })
 
-  req.getValidationResult().then(function (result) {
+  req.getValidationResult().then(function(result) {
     if (!result.isEmpty()) {
-      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result.array()))
+      res
+        .status(400)
+        .json(
+          response.ResponseErrorMsg.ApiArgumentValidationError(result.array())
+        )
       return
     }
 
@@ -90,28 +106,32 @@ export function setOrder (req, res, next) {
     let game = GameEngine.selectGame(gameId)
     let team = game.selectTeam(teamIndex)
 
-    let mapping = { 'RETAILER': 'WHOLESALER', 'WHOLESALER': 'FACTORY' }
-    team.selectJob(mapping[job]).order.add(constant.ProductItem({
-      day: game.getDay(),
-      time: game.getTime(),
-      product: product,
-      amount: amount
-    }))
+    let mapping = { RETAILER: 'WHOLESALER', WHOLESALER: 'FACTORY' }
+    team.selectJob(mapping[job]).order.add(
+      constant.ProductItem({
+        day: game.getDay(),
+        time: game.getTime(),
+        product: product,
+        amount: amount
+      })
+    )
 
-    res.json(response.ResponseSuccessJSON({
-      gameId: gameId,
-      teamIndex: teamIndex,
-      job: job,
-      day: game.getDay(),
-      time: game.getTime(),
-      product: product,
-      amount: amount
-    }))
+    res.json(
+      response.ResponseSuccessJSON({
+        gameId: gameId,
+        teamIndex: teamIndex,
+        job: job,
+        day: game.getDay(),
+        time: game.getTime(),
+        product: product,
+        amount: amount
+      })
+    )
   })
 }
 
 export default {
-  'get_history': getHistory,
-  'get_received': getReceived,
-  'set_order': setOrder
+  get_history: getHistory,
+  get_received: getReceived,
+  set_order: setOrder
 }

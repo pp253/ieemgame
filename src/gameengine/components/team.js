@@ -35,7 +35,7 @@ export default class Team {
         config: this.getConfig()
       })
 
-      this.teamOdm.save((function (err, team) {
+      this.teamOdm.save((err, team) => {
         if (err) {
           debug.error(err)
           return
@@ -45,7 +45,7 @@ export default class Team {
         this.account = new Account(this.gameId, this.teamId)
 
         for (let job in constant.JOBS) {
-          if (job === 'UNKNOWN') {
+          if (job === constant.JOBS.UNKNOWN) {
             continue
           }
           this[job] = {
@@ -54,7 +54,7 @@ export default class Team {
             storage: new Storage(this.gameId, this.teamId, job)
           }
         }
-      }).bind(this))
+      })
     } else {
       // load an existed team
     }

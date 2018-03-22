@@ -3,38 +3,40 @@ import Enroll from './components/enroll'
 import Regist from './components/regist'
 
 export class GameEngine {
-  constructor () {
+  constructor() {
     this.gameList = []
 
     this.enroll = new Enroll()
     this.regist = new Regist()
   }
 
-  getRegist () {
+  getRegist() {
     return this.regist
   }
 
-  getEnroll () {
+  getEnroll() {
     return this.enroll
   }
 
   // config {Object}
-  newGame (config) {
-    return new Promise((function (resolve, reject) {
-      (new Game(config))
-        .then((function (res) {
+  newGame(config) {
+    return new Promise((resolve, reject) => {
+      new Game(config)
+        .then(res => {
           this.gameList.push(res.this)
 
           resolve({
             gameId: res.gameId,
             gameConfig: res.gameConfig
           })
-        }).bind(this))
-        .catch((err) => { reject(err) })
-    }).bind(this))
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
   }
 
-  getGameList () {
+  getGameList() {
     let list = []
     for (let game of this.gameList) {
       list.push({
@@ -45,11 +47,11 @@ export class GameEngine {
     return list
   }
 
-  getOnlineStatus (gameId) {
+  getOnlineStatus(gameId) {
     return this.getEnroll().getEnrolledUsers(gameId)
   }
 
-  gameIsExist (gameId) {
+  gameIsExist(gameId) {
     for (let game of this.gameList) {
       if (game.getGameId().equals(gameId)) {
         return true
@@ -58,7 +60,7 @@ export class GameEngine {
     return false
   }
 
-  selectGame (gameId) {
+  selectGame(gameId) {
     for (let game of this.gameList) {
       if (game.getGameId().equals(gameId)) {
         return game

@@ -13,7 +13,7 @@ import * as validation from './src/api/validation'
 
 debug.log('Server initializing ...')
 
-let app = express()
+const app = express()
 
 // Security
 app.use(helmet())

@@ -5,14 +5,18 @@ import GameEngine from '../../gameengine'
 import constant from '../../lib/constant'
 import debug from '../../lib/debug'
 
-export function getBalanceByGame (req, res, next) {
+export function getBalanceByGame(req, res, next) {
   req.check({
     gameId: validation.gameId
   })
 
-  req.getValidationResult().then(function (result) {
+  req.getValidationResult().then(function(result) {
     if (!result.isEmpty()) {
-      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result.array()))
+      res
+        .status(400)
+        .json(
+          response.ResponseErrorMsg.ApiArgumentValidationError(result.array())
+        )
       return
     }
 
@@ -25,24 +29,30 @@ export function getBalanceByGame (req, res, next) {
       balanceList.push(team.getAccount().getBalance())
     }
 
-    res.json(response.ResponseSuccessJSON({
-      gameId: gameId,
-      day: game.getDay(),
-      time: game.getTime(),
-      list: balanceList
-    }))
+    res.json(
+      response.ResponseSuccessJSON({
+        gameId: gameId,
+        day: game.getDay(),
+        time: game.getTime(),
+        list: balanceList
+      })
+    )
   })
 }
 
-export function getStorageHistoryByTeam (req, res, next) {
+export function getStorageHistoryByTeam(req, res, next) {
   req.check({
     gameId: validation.gameId,
     teamIndex: validation.teamIndex
   })
 
-  req.getValidationResult().then(function (result) {
+  req.getValidationResult().then(function(result) {
     if (!result.isEmpty()) {
-      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result.array()))
+      res
+        .status(400)
+        .json(
+          response.ResponseErrorMsg.ApiArgumentValidationError(result.array())
+        )
       return
     }
 
@@ -52,29 +62,41 @@ export function getStorageHistoryByTeam (req, res, next) {
     let game = GameEngine.selectGame(gameId)
     let team = game.selectTeam(teamIndex)
 
-    res.json(response.ResponseSuccessJSON({
-      gameId: gameId,
-      teamIndex: teamIndex,
-      job: job,
-      day: game.getDay(),
-      time: game.getTime(),
-      [constant.JOBS.FACTORY]: team.selectJob(constant.JOBS.FACTORY).storage.getHistory(),
-      [constant.JOBS.WHOLESALER]: team.selectJob(constant.JOBS.WHOLESALER).storage.getHistory(),
-      [constant.JOBS.RETAILER]: team.selectJob(constant.JOBS.RETAILER).storage.getHistory()
-    }))
+    res.json(
+      response.ResponseSuccessJSON({
+        gameId: gameId,
+        teamIndex: teamIndex,
+        job: job,
+        day: game.getDay(),
+        time: game.getTime(),
+        [constant.JOBS.FACTORY]: team
+          .selectJob(constant.JOBS.FACTORY)
+          .storage.getHistory(),
+        [constant.JOBS.WHOLESALER]: team
+          .selectJob(constant.JOBS.WHOLESALER)
+          .storage.getHistory(),
+        [constant.JOBS.RETAILER]: team
+          .selectJob(constant.JOBS.RETAILER)
+          .storage.getHistory()
+      })
+    )
   })
 }
 
-export function getUpdate (req, res, next) {
+export function getUpdate(req, res, next) {
   req.check({
     gameId: validation.gameId,
     teamIndex: validation.teamIndex,
     job: validation.job
   })
 
-  req.getValidationResult().then(function (result) {
+  req.getValidationResult().then(function(result) {
     if (!result.isEmpty()) {
-      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result.array()))
+      res
+        .status(400)
+        .json(
+          response.ResponseErrorMsg.ApiArgumentValidationError(result.array())
+        )
       return
     }
 
@@ -96,7 +118,7 @@ export function getUpdate (req, res, next) {
       stage: game.getGameStage()
     }
 
-    let mapping = { 'RETAILER': 'WHOLESALER', 'WHOLESALER': 'FACTORY' }
+    let mapping = { RETAILER: 'WHOLESALER', WHOLESALER: 'FACTORY' }
 
     if (teamIndex !== 0) {
       let list = []
@@ -116,9 +138,12 @@ export function getUpdate (req, res, next) {
               msg.storage = team.selectJob(job).storage.getStorageList()
               msg.deliverHistory = team.selectJob(job).deliver.getHistory()
               msg.receivedOrder = team.selectJob(job).order.getHistory()
-              msg.orderHistory = team.selectJob(constant.JOBS.FACTORY).order.getHistory()
+              msg.orderHistory = team
+                .selectJob(constant.JOBS.FACTORY)
+                .order.getHistory()
               list = team.selectJob(constant.JOBS.FACTORY).deliver.getHistory()
-              msg.deliveredNumber = list.length > 0 ? list[list.length - 1].amount : 0
+              msg.deliveredNumber =
+                list.length > 0 ? list[list.length - 1].amount : 0
               break
 
             case constant.JOBS.RETAILER:
@@ -126,14 +151,19 @@ export function getUpdate (req, res, next) {
               msg.storage = team.selectJob(job).storage.getStorageList()
               msg.deliverHistory = team.selectJob(job).deliver.getHistory()
               msg.receivedOrder = team.selectJob(job).order.getHistory()
-              msg.orderHistory = team.selectJob(constant.JOBS.WHOLESALER).order.getHistory()
+              msg.orderHistory = team
+                .selectJob(constant.JOBS.WHOLESALER)
+                .order.getHistory()
               msg.news = game.getNews().getAvailableNewsList()
-              list = team.selectJob(constant.JOBS.WHOLESALER).deliver.getHistory()
-              msg.deliveredNumber = list.length > 0 ? list[list.length - 1].amount : 0
+              list = team
+                .selectJob(constant.JOBS.WHOLESALER)
+                .deliver.getHistory()
+              msg.deliveredNumber =
+                list.length > 0 ? list[list.length - 1].amount : 0
               break
           }
           break
-          
+
         case constant.GAME_STAGE.UNKNOWN:
         case constant.GAME_STAGE.PREPARE:
         case constant.GAME_STAGE.READY:
@@ -147,13 +177,19 @@ export function getUpdate (req, res, next) {
           [constant.JOBS.WHOLESALER]: [],
           [constant.JOBS.RETAILER]: []
         }
-        for (let teamIndex = 1; teamIndex <= game.getTeamNumber(); teamIndex++) {
+        for (
+          let teamIndex = 1;
+          teamIndex <= game.getTeamNumber();
+          teamIndex++
+        ) {
           for (let j in constant.JOBS) {
             if (j === constant.JOBS.UNKNOWN) {
               continue
             }
             let team = game.selectTeam(teamIndex)
-            result[j].push(_.cloneDeep(team.selectJob(j).storage.getStorageList()))
+            result[j].push(
+              _.cloneDeep(team.selectJob(j).storage.getStorageList())
+            )
           }
         }
         return result
@@ -165,7 +201,11 @@ export function getUpdate (req, res, next) {
           [constant.JOBS.WHOLESALER]: [],
           [constant.JOBS.RETAILER]: []
         }
-        for (let teamIndex = 1; teamIndex <= game.getTeamNumber(); teamIndex++) {
+        for (
+          let teamIndex = 1;
+          teamIndex <= game.getTeamNumber();
+          teamIndex++
+        ) {
           for (let j in constant.JOBS) {
             if (j === constant.JOBS.UNKNOWN) {
               continue
@@ -174,7 +214,9 @@ export function getUpdate (req, res, next) {
             if (j === constant.JOBS.RETAILER) {
               let orderAmount = game.getMarket().orderAmount
               let deliveredAmount = game.getMarket().storageAmount
-              let storageAmount = team.selectJob(j).storage.getStorage(constant.PRODUCTS.CAR)
+              let storageAmount = team
+                .selectJob(j)
+                .storage.getStorage(constant.PRODUCTS.CAR)
               result[j].push({
                 teamIndex: teamIndex,
                 orderAmount: orderAmount,
@@ -184,11 +226,17 @@ export function getUpdate (req, res, next) {
             } else {
               let orderHistory = team.selectJob(j).order.getHistory()
               let deliverHistory = team.selectJob(j).deliver.getHistory()
-              let storageAmount = team.selectJob(j).storage.getStorage(constant.PRODUCTS.CAR)
+              let storageAmount = team
+                .selectJob(j)
+                .storage.getStorage(constant.PRODUCTS.CAR)
               result[j].push({
                 teamIndex: teamIndex,
-                orderAmount: orderHistory.length ? orderHistory[orderHistory.length - 1].amount : 0,
-                deliveredAmount: deliverHistory.length ? deliverHistory[deliverHistory.length - 1].amount : 0,
+                orderAmount: orderHistory.length
+                  ? orderHistory[orderHistory.length - 1].amount
+                  : 0,
+                deliveredAmount: deliverHistory.length
+                  ? deliverHistory[deliverHistory.length - 1].amount
+                  : 0,
                 storageAmount: storageAmount
               })
             }
@@ -210,17 +258,17 @@ export function getUpdate (req, res, next) {
               msg.orderVsStorage = getOrderVsStorage()
               msg.market = game.getMarket()
               break
-              
+
             case constant.STAFF_JOBS.TRANSPORTER:
               msg.orderVsStorage = getOrderVsStorage()
               break
-              
+
             case constant.STAFF_JOBS.EXCHANGER:
               msg.teamStorageList = getTeamStorageList()
               break
           }
           break
-          
+
         case constant.GAME_STAGE.UNKNOWN:
         case constant.GAME_STAGE.PREPARE:
         case constant.GAME_STAGE.READY:
@@ -233,14 +281,18 @@ export function getUpdate (req, res, next) {
   })
 }
 
-export function getMarketInfo (req, res, next) {
+export function getMarketInfo(req, res, next) {
   req.check({
     gameId: validation.gameId
   })
 
-  req.getValidationResult().then(function (result) {
+  req.getValidationResult().then(function(result) {
     if (!result.isEmpty()) {
-      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result.array()))
+      res
+        .status(400)
+        .json(
+          response.ResponseErrorMsg.ApiArgumentValidationError(result.array())
+        )
       return
     }
 
@@ -248,25 +300,31 @@ export function getMarketInfo (req, res, next) {
 
     let game = GameEngine.selectGame(gameId)
 
-    res.json(response.ResponseSuccessJSON({
-      gameId: gameId,
-      day: game.getDay(),
-      time: game.getTime(),
-      orderAmount: game.getMarket().orderAmount,
-      storageAmount: game.getMarket().storageAmount,
-      price: game.getMarket().price
-    }))
+    res.json(
+      response.ResponseSuccessJSON({
+        gameId: gameId,
+        day: game.getDay(),
+        time: game.getTime(),
+        orderAmount: game.getMarket().orderAmount,
+        storageAmount: game.getMarket().storageAmount,
+        price: game.getMarket().price
+      })
+    )
   })
 }
 
-export function getData (req, res, next) {
+export function getData(req, res, next) {
   req.check({
     gameId: validation.gameId
   })
 
-  req.getValidationResult().then(function (result) {
+  req.getValidationResult().then(function(result) {
     if (!result.isEmpty()) {
-      res.status(400).json(response.ResponseErrorMsg.ApiArgumentValidationError(result.array()))
+      res
+        .status(400)
+        .json(
+          response.ResponseErrorMsg.ApiArgumentValidationError(result.array())
+        )
       return
     }
 
@@ -287,8 +345,12 @@ export function getData (req, res, next) {
           if (job === 'UNKNOWN') {
             continue
           }
-          for (let productItem of team.selectJob(job).storage.getStorageListAtTime(day + 1, 0)) {
-            data.cost.storage += Math.ceil(productItem.amount / storageCost.patchSize) * storageCost[job][productItem.product]
+          for (let productItem of team
+            .selectJob(job)
+            .storage.getStorageListAtTime(day + 1, 0)) {
+            data.cost.storage +=
+              Math.ceil(productItem.amount / storageCost.patchSize) *
+              storageCost[job][productItem.product]
           }
         }
       }
@@ -310,20 +372,22 @@ export function getData (req, res, next) {
       teamDataList.push(data)
     }
 
-    res.json(response.ResponseSuccessJSON({
-      gameId: gameId,
-      news: game.getNews().getNewsList(),
-      gameConfig: game.getConfig(),
-      teamDataList: teamDataList,
-      stage: game.getGameStage()
-    }))
+    res.json(
+      response.ResponseSuccessJSON({
+        gameId: gameId,
+        news: game.getNews().getNewsList(),
+        gameConfig: game.getConfig(),
+        teamDataList: teamDataList,
+        stage: game.getGameStage()
+      })
+    )
   })
 }
 
 export default {
-  'get_balance_by_game': getBalanceByGame,
-  'get_storage_history_by_team': getStorageHistoryByTeam,
-  'get_update': getUpdate,
-  'get_market_info': getMarketInfo,
-  'get_data': getData
+  get_balance_by_game: getBalanceByGame,
+  get_storage_history_by_team: getStorageHistoryByTeam,
+  get_update: getUpdate,
+  get_market_info: getMarketInfo,
+  get_data: getData
 }
