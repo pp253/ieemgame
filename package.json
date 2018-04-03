@@ -5,14 +5,9 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-<<<<<<< HEAD
-    "dev": "set NODE_ENV=develop&&babel-node server.js --presets es2015,stage-2",
-    "start": "set NODE_ENV=production&&babel-node server.js --presets es2015,stage-2"
-=======
     "dev": "set NODE_ENV=develop && babel-node server.js --presets es2015,stage-2",
     "start": "set NODE_ENV=production && babel-node server.js --presets es2015,stage-2",
     "start-db": "mongod --dbpath \"./db\" --port 16622"
->>>>>>> master
   },
   "author": "pp253",
   "license": "Apache-2.0",
@@ -25,6 +20,7 @@
   "dependencies": {
     "body-parser": "^1.17.2",
     "compression": "^1.7.0",
+    "cors": "^2.8.4",
     "express": "^4.15.3",
     "express-session": "^1.15.3",
     "express-validator": "^3.2.1",

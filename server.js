@@ -6,7 +6,7 @@ import helmet from 'helmet'
 import bodyParser from 'body-parser'
 import expressValidator from 'express-validator'
 import compression from 'compression'
-
+import cors from 'cors'
 import debug from './src/lib/debug'
 import routes from './routes'
 import * as validation from './src/api/validation'
@@ -17,9 +17,12 @@ let app = express()
 
 // Security
 app.use(helmet())
- 
+
+// Allow CORS
+app.use(cors())
+
 // Compression
-app.use(compression())
+app.use(compression({ credentials: true, origin: true }))
 
 // Body parser and Validator
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -45,7 +48,7 @@ app.use(session({
 
 // Setting
 app.set('port', process.env.PORT || 80)
-app.set('title', '2017 工工營 產銷遊戲')
+app.set('title', '2018 工工營 產銷遊戲')
 
 if (process.env.NODE_ENV !== 'production') {
   app.use('/test', express.static('test'))
